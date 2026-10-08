@@ -253,6 +253,11 @@ import { withBase } from '../scripts/url';
     flex: 0 0 70px;
     border-radius: 50%;
   }
+  /* The round crop zooms in on the face: its centre lands at ~34% / 37% of the circle. */
+  .aside:is([data-stage='2'], [data-stage='3']) .portrait-media :global(img) {
+    transform-origin: 34% 37%;
+    transform: translate(16%, 13%) scale(1.8);
+  }
   .aside:is([data-stage='2'], [data-stage='3']) .lvl {
     left: auto;
     right: -8px;

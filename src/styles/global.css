@@ -1,28 +1,62 @@
-:root {
-  --color-bg: #ffffff;
-  --color-text: #111111;
-  --color-muted: #666666;
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #111111;
-    --color-text: #f2f2f2;
-    --color-muted: #a0a0a0;
-  }
-}
+/* Tyncherov Portfolio DS — global entry. Fira Sans / Fira Mono are linked in BaseLayout. */
+@import './tokens/colors.css';
+@import './tokens/typography.css';
+@import './tokens/spacing.css';
+@import './tokens/radius.css';
+@import './tokens/effects.css';
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
-
+html,
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--surface-page);
+  color: var(--text-primary);
   font-family: var(--font-sans);
-  line-height: 1.5;
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+a {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--text-accent);
+  text-decoration: none;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+::selection {
+  background: var(--selection-bg);
+  color: var(--text-primary);
+}
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Mobile / tablet portrait type scale */
+@media (max-width: 960px) {
+  :root {
+    --t-card-title: 28px;
+    --t-card-sub: 15px;
+    --t-body: 16px;
+  }
 }

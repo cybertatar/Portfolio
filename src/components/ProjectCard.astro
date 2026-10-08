@@ -1,0 +1,134 @@
+---
+import { ui, type CaseItem } from '../content/site';
+import ArrowRightIcon from './ui/ArrowRightIcon.astro';
+import Badge from './ui/Badge.astro';
+import GlassTag from './ui/GlassTag.astro';
+import IconButton from './ui/IconButton.astro';
+import Media from './ui/Media.astro';
+
+interface Props {
+  item: CaseItem;
+}
+
+/** Home-feed card for one case: 16:9 cover, glass tags, title + description, round arrow or "Soon". */
+const { item } = Astro.props;
+const soon = item.status === 'soon';
+const Tag = soon ? 'div' : 'a';
+const linkProps = soon
+  ? {}
+  : {
+      href: item.href ?? '#',
+      'aria-label': `${ui.openCase.ru}: ${item.title}`,
+      'data-en-label': `${ui.openCase.en}: ${item.title}`,
+    };
+---
+
+<Tag class="card" {...linkProps}>
+  <div class="cover">
+    <div class="cover-media">
+      <Media src={item.cover} label={item.coverLabel} />
+    </div>
+    {item.tags.length > 0 && (
+      <div class="tags">
+        {item.tags.map((tag) => (
+          <GlassTag>{tag}</GlassTag>
+        ))}
+      </div>
+    )}
+  </div>
+  <div class="body">
+    <div class="text">
+      <h2 class="title">{item.title}</h2>
+      <p class="description" data-en={item.description.en}>
+        {item.description.ru}
+      </p>
+    </div>
+    {soon ? (
+      <span class="soon">
+        <Badge data-en={ui.soon.en}>{ui.soon.ru}</Badge>
+      </span>
+    ) : (
+      <IconButton shape="circle" tone={item.status === 'featured' ? 'inverse' : 'raised'}>
+        <ArrowRightIcon />
+      </IconButton>
+    )}
+  </div>
+</Tag>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+    background: var(--surface-card);
+    border-radius: var(--r-shell);
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:hover {
+    color: inherit;
+  }
+  .cover {
+    position: relative;
+    flex: none;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--r-control);
+    overflow: hidden;
+    color: var(--text-tertiary);
+  }
+  .cover-media {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    transform: scale(1);
+    transition: transform var(--dur-slower) var(--ease-standard);
+    will-change: transform;
+  }
+  .card:hover .cover-media {
+    transform: scale(var(--cover-zoom));
+  }
+  .tags {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .body {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 0.6vw, 14px);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .title {
+    margin: 0;
+    font-size: var(--t-card-title);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tighter);
+    color: var(--text-primary);
+  }
+  .description {
+    margin: 0;
+    font-size: var(--t-card-sub);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+  }
+  .soon {
+    flex: none;
+    align-self: center;
+    display: flex;
+  }
+</style>

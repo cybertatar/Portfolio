@@ -1,0 +1,42 @@
+---
+interface Props {
+  href: string;
+  full?: boolean;
+}
+const { href, full = false } = Astro.props;
+---
+
+<a href={href} class:list={['button', { full }]}>
+  <slot />
+</a>
+
+<style>
+  .button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: none;
+    min-width: 0;
+    height: var(--control-h);
+    padding: 0 20px;
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    border: 0;
+    border-radius: var(--r-control);
+    font-family: var(--font-sans);
+    font-size: var(--t-button);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-tight);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .button:hover {
+    background: var(--fg-2);
+    color: var(--text-inverse);
+  }
+  .full {
+    flex: 1 1 auto;
+  }
+</style>

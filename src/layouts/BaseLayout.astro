@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { withBase } from '../scripts/url';
 
 interface Props {
   title: string;
@@ -15,10 +16,21 @@ const { title, description = 'Портфолио' } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#08080A" />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Fira+Mono:wght@400;500&display=swap"
+    />
     <title>{title}</title>
   </head>
   <body>
     <slot />
+    <script>
+      import { applyLang } from '../scripts/lang';
+      applyLang();
+    </script>
   </body>
 </html>

@@ -1,0 +1,52 @@
+---
+interface Props {
+  href: string;
+  value: string;
+  label: string;
+  divider?: boolean;
+  external?: boolean;
+}
+const { href, value, label, divider = true, external = false } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={['contact-row', { divider }]}
+  {...(external ? { target: '_blank', rel: 'noopener' } : {})}
+>
+  <span class="value">{value}</span>
+  <span class="label">{label}</span>
+</a>
+
+<style>
+  .contact-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: var(--control-h);
+    font-size: var(--t-body-sm);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-standard);
+  }
+  .contact-row:hover {
+    color: var(--text-primary);
+  }
+  .divider {
+    border-bottom: var(--border-width-hair) solid var(--border-subtle);
+  }
+  .value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .label {
+    flex: none;
+    font-size: var(--t-chip);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+</style>

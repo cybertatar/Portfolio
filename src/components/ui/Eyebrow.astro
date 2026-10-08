@@ -1,0 +1,26 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+const TONE = {
+  accent: 'var(--text-accent)',
+  primary: 'var(--text-primary)',
+  secondary: 'var(--text-secondary)',
+  tertiary: 'var(--text-tertiary)',
+};
+
+type Props = HTMLAttributes<'span'> & { tone?: keyof typeof TONE };
+const { tone = 'accent', ...rest } = Astro.props;
+---
+
+<span class="eyebrow" style={{ color: TONE[tone] }} {...rest}>
+  <slot />
+</span>
+
+<style>
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--t-eyebrow);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+  }
+</style>

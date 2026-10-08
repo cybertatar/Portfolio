@@ -1,0 +1,11 @@
+:root {
+  --r-shell: 16px; /* @kind radius */ /* sidebar, project card */
+  --r-phone: 14px; /* phone-screen frames, compare slider */
+  --r-media: 10px; /* 16:9 frames, small phone thumbs */
+  --r-control: 8px; /* buttons, chips, tags, covers inside cards */
+  --r-tile: 6px; /* info tiles, notes, tables, segmented */
+  --r-inner: 4px; /* segmented option */
+  --r-xs: 2px; /* status badge */
+  --r-circle: 50%;
+  --r-pill: 999px;
+}

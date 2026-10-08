@@ -8,6 +8,7 @@ import Eyebrow from '../components/ui/Eyebrow.astro';
 import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
 import { cases, profile, ui } from '../content/site';
+import { withBase } from '../scripts/url';
 ---
 
 <BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
@@ -56,7 +57,7 @@ import { cases, profile, ui } from '../content/site';
           CV
         </Button>
         <IconButton href={profile.telegramHref} label="Telegram" target="_blank" rel="noopener">
-          <img src="/assets/telegram.png" alt="" class="telegram" />
+          <img src={withBase('assets/telegram.png')} alt="" class="telegram" />
         </IconButton>
       </div>
     </aside>

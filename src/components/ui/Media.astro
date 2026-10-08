@@ -1,5 +1,6 @@
 ---
 import type { Localized } from '../../content/site';
+import { withBase } from '../../scripts/url';
 
 interface Props {
   src?: string;
@@ -10,7 +11,7 @@ const { src, label } = Astro.props;
 ---
 
 {src ? (
-  <img src={src} alt="" class="media" />
+  <img src={withBase(src)} alt="" class="media" />
 ) : (
   <div class="placeholder">
     <svg

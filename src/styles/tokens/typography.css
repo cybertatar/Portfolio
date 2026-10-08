@@ -1,0 +1,40 @@
+:root {
+  --font-sans: 'Fira Sans', system-ui, sans-serif;
+  --font-mono: 'Fira Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --fw-regular: 400; /* @kind font */
+  --fw-medium: 500; /* @kind font */
+  --fw-semibold: 600; /* @kind font */
+  --fw-bold: 700; /* @kind font */
+
+  --lh-tight: 1.05; /* @kind font */
+  --lh-snug: 1.2; /* @kind font */
+  --lh-normal: 1.45; /* @kind font */
+  --ls-tighter: -0.03em; /* @kind font */
+  --ls-tight: -0.015em; /* @kind font */
+  --ls-caps: 0.09em; /* @kind font */
+
+  /* Fluid size roles — min at ~1100px, max at ~2400px viewport */
+  --t-display: clamp(34px, 2.9vw, 68px); /* case hero title */
+  --t-card-title: clamp(28px, 2.7vw, 64px); /* project card title */
+  --t-h2: clamp(26px, 2vw, 48px); /* section title */
+  --t-stat: clamp(26px, 2vw, 48px); /* big numeric */
+  --t-h3: clamp(21px, 1.45vw, 34px); /* sub-section / statement */
+  --t-name: clamp(26px, 1.35vw, 34px); /* profile name */
+  --t-list: clamp(18px, 1.25vw, 28px); /* numbered list item */
+  --t-list-num: clamp(18px, 1.3vw, 28px); /* mono numeral in lists */
+  --t-lead: clamp(18px, 1.1vw, 26px); /* lead, tile titles, accordion */
+  --t-card-sub: clamp(14px, 0.85vw, 22px); /* project card description */
+  --t-body: clamp(15px, 0.86vw, 20px); /* case body copy */
+  --t-button: clamp(15px, 0.8vw, 20px); /* primary CTA, role line */
+  --t-body-sm: clamp(14px, 0.74vw, 19px); /* sidebar bio, contacts */
+  --t-caption: clamp(13px, 0.7vw, 16px); /* captions, nav, hints */
+  --t-tag: clamp(12px, 0.68vw, 17px); /* glass tags on covers */
+  --t-chip: clamp(12px, 0.62vw, 15px); /* skill chips, contact labels */
+  --t-eyebrow: clamp(11px, 0.6vw, 14px); /* mono caps labels */
+
+  --measure-title: 20ch;
+  --measure-lead: 56ch;
+  --measure-body: 68ch;
+  --measure-note: 72ch;
+}

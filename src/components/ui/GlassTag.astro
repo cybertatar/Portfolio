@@ -1,0 +1,19 @@
+<span class="glass-tag">
+  <slot />
+</span>
+
+<style>
+  .glass-tag {
+    display: flex;
+    align-items: center;
+    height: var(--tag-h);
+    padding: 0 clamp(10px, 0.6vw, 14px);
+    background: var(--surface-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-radius: var(--r-control);
+    font-family: var(--font-mono);
+    font-size: var(--t-tag);
+    color: var(--text-on-glass);
+  }
+</style>

@@ -1,0 +1,17 @@
+<span class="chip">
+  <slot />
+</span>
+
+<style>
+  .chip {
+    display: flex;
+    align-items: center;
+    height: var(--chip-h);
+    padding: 0 clamp(12px, 0.7vw, 16px);
+    background: var(--surface-raised);
+    border-radius: var(--r-control);
+    font-family: var(--font-mono);
+    font-size: var(--t-chip);
+    color: var(--text-primary);
+  }
+</style>

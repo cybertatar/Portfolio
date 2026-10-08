@@ -1,0 +1,45 @@
+:root {
+  --sp-2: 2px; /* @kind spacing */
+  --sp-4: 4px;
+  --sp-6: 6px;
+  --sp-8: 8px;
+  --sp-10: 10px;
+  --sp-12: 12px;
+  --sp-14: 14px;
+  --sp-16: 16px;
+  --sp-20: 20px;
+  --sp-24: 24px;
+  --sp-40: 40px;
+  --sp-48: 48px;
+
+  /* Fluid rhythm */
+  --space-section: clamp(72px, 6vw, 128px); /* vertical padding of a case section */
+  --space-section-lg: clamp(96px, 8vw, 160px); /* closing section */
+  --space-article: clamp(56px, 4.6vw, 96px); /* between sub-articles inside a section */
+  --space-stack: clamp(24px, 2.2vw, 44px); /* heading → content */
+  --space-paragraph: clamp(18px, 1.3vw, 28px); /* between paragraphs */
+  --space-grid: clamp(16px, 1.4vw, 28px); /* tile grids */
+  --space-media-grid: clamp(14px, 1.6vw, 36px); /* phone-screen rows */
+  --space-split: clamp(32px, 4vw, 80px); /* media | text split */
+  --space-zone: clamp(40px, 2.6vw, 56px); /* between sidebar zones */
+  --space-tile: clamp(20px, 1.4vw, 30px); /* tile padding */
+  --space-note-y: clamp(18px, 1.2vw, 26px);
+  --space-note-x: clamp(20px, 1.4vw, 30px);
+  --space-shell: 24px; /* card / panel padding */
+
+  /* Layout */
+  --layout-gutter: 24px;
+  --layout-sidebar-min: 280px;
+  --layout-sidebar-max: 360px;
+  --layout-feed-max: 1600px;
+  --layout-case-max: 1200px;
+  --layout-feed-gap: 48px;
+
+  /* Control heights */
+  --control-h: clamp(44px, 2.6vw, 60px);
+  --control-h-md: clamp(44px, 2.4vw, 54px);
+  --chip-h: clamp(34px, 1.9vw, 44px);
+  --tag-h: clamp(26px, 1.6vw, 38px);
+  --arrow-btn: clamp(56px, 3.4vw, 76px);
+  --tap-min: 44px; /* @kind spacing */
+}

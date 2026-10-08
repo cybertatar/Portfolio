@@ -21,7 +21,7 @@ export const profile = {
   role: 'Product designer',
   level: '25 lvl',
   /** Portrait in /public (5:4). Placeholder is shown while it is missing. */
-  portrait: undefined as string | undefined,
+  portrait: 'assets/portrait.jpg' as string | undefined,
   bio: {
     ru: 'Проектирую мобильные приложения и веб-сервисы. Веду задачу от исследования до передачи в разработку.',
     en: 'I design mobile apps and web services. I take a task from research through to developer handoff.',

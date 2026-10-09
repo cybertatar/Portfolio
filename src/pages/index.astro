@@ -100,6 +100,8 @@ import { withBase } from '../scripts/url';
 
 <style>
   .root {
+    /* Empty space on each side once the screen is wider than the content */
+    --side: max(0px, (100vw - var(--layout-content-max)) / 2);
     display: flex;
     align-items: flex-start;
     height: 100vh;
@@ -117,7 +119,7 @@ import { withBase } from '../scripts/url';
     max-height: calc(100vh - 48px);
     overflow-y: auto;
     overflow-x: hidden;
-    margin: 24px 0 24px 24px;
+    margin: 24px 0 24px calc(var(--side) + 24px);
     display: flex;
     flex-direction: column;
     padding: clamp(24px, 1.2vw, 28px);
@@ -292,6 +294,9 @@ import { withBase } from '../scripts/url';
     flex: 1 1 auto;
     min-width: 0;
     height: 100vh;
+    /* Padding, not margin: the feed scrolls, so its scrollbar and wheel area
+       stay at the screen edge */
+    padding-right: var(--side);
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -347,6 +352,7 @@ import { withBase } from '../scripts/url';
     }
     .feed {
       height: auto;
+      padding-right: 0;
       overflow: visible;
     }
     .inner {

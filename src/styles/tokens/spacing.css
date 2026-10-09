@@ -29,6 +29,7 @@
 
   /* Layout */
   --layout-gutter: 24px;
+  --layout-content-max: 1600px; /* sidebar + feed, centred on wide screens */
   --layout-sidebar-min: 280px;
   --layout-sidebar-max: 360px;
   --layout-feed-max: 1600px;

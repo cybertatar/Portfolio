@@ -292,17 +292,12 @@ import { levelOn } from '../scripts/level';
     --cta-gap: 16px;
   }
 
-  /* Stage 2+: compact header in a row with a small square portrait */
-  .aside:is([data-stage='2'], [data-stage='3']) .head {
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-  }
+  /* Stage 2+: a small square portrait on its own row; the name block keeps the full width
+     below it, so the name, class and status never wrap in a narrow sidebar */
   .aside:is([data-stage='2'], [data-stage='3']) .portrait {
-    width: 72px;
-    height: 72px;
+    width: 64px;
+    height: 64px;
     aspect-ratio: auto;
-    flex: 0 0 72px;
   }
   /* The square crop zooms in on the face: its centre lands at ~34% / 37% of the frame. */
   .aside:is([data-stage='2'], [data-stage='3']) .portrait-media :global(img) {
@@ -310,28 +305,11 @@ import { levelOn } from '../scripts/level';
     transform: translate(16%, 13%) scale(1.8);
   }
   .aside:is([data-stage='2'], [data-stage='3']) .lvl {
-    left: auto;
-    right: -10px;
-    bottom: -8px;
-    height: 24px;
-    padding: 0 6px;
-    line-height: 24px;
-    gap: 3px;
-  }
-  .aside:is([data-stage='2'], [data-stage='3']) .lvl-num {
-    font-size: 19px;
-  }
-  .aside:is([data-stage='2'], [data-stage='3']) .lvl-label {
-    font-size: 11px;
+    left: calc(100% + 12px);
+    bottom: 0;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .name {
-    margin-top: 0;
-  }
-  .aside:is([data-stage='2'], [data-stage='3']) h1 {
-    font-size: 27px;
-  }
-  .aside:is([data-stage='2'], [data-stage='3']) .role {
-    font-size: 14px;
+    margin-top: 16px;
   }
 
   /* Stage 3: drop the bio */

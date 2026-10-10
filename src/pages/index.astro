@@ -368,6 +368,15 @@ import { levelOn } from '../scripts/level';
     min-height: 0;
     overflow: hidden;
   }
+  /* Over the field the sword gives way to a staff: here the visitor casts flowers, not fights.
+     The hotspot is the gem. */
+  @media (pointer: fine) {
+    .footer {
+      cursor:
+        url('../assets/cursors/staff.png') 9 9,
+        auto;
+    }
+  }
   .meadow :global(.plant) {
     position: absolute;
     line-height: 0;

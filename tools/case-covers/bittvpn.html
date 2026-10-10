@@ -7,13 +7,13 @@
   Germany next to the app. Big codes and the logo are dot-matrix, drawn from the 5×7 glyphs in
   bittvpn/glyphs.js (the app's own dotted display face is Nothing Font, which we can't ship; Ы is six dots wide);
   small text is Martian Mono, a sibling of the app's Martian Grotesk. Details on the pass come
-  from the app's mock data; the QR code holds the portfolio URL.
+  from the app's mock data; the QR code is a rickroll.
   Background: parchment like the PSB cover, with a faint pattern of dotted globes and planes.
   Screen: the main screen ("t-main") of the BittVPN Figma file, exported at 3x, cropped to
   the first 874pt, with the floating tab bar and home indicator from the end of the frame
   pasted over the bottom; saved at 2x (bittvpn/main.png). The iPhone 17 Pro body is shared
   with the PSB cover (iphone-17-pro.png, 450×920pt, screen inset 24/23pt).
-  App colours: background #0A0C0F, online green #72D769. Parchment colours mirror
+  App background: #0A0C0F. Parchment colours mirror
   src/styles/tokens/colors.css. The card zooms the cover on hover, so keep the key content
   away from the edges.
 -->
@@ -32,7 +32,6 @@
         --ink-3: #847c6c;
         --ticket: #fbf8f1;
         --app-bg: #0a0c0f;
-        --app-green: #72d769;
       }
       * {
         box-sizing: border-box;
@@ -169,23 +168,6 @@
         gap: 28px;
         border-left: 3px dotted var(--line-2);
       }
-      .online {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 8px 16px;
-        border-radius: 999px;
-        background: var(--app-bg);
-        color: #fff;
-        font-size: 15px;
-      }
-      .online::before {
-        content: '';
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--app-green);
-      }
 
       .phone {
         --k: 0.96; /* scale from Figma points */
@@ -251,7 +233,6 @@
         </div>
         <div class="stub">
           <canvas data-qr></canvas>
-          <span class="online">Онлайн</span>
         </div>
       </div>
     </div>
@@ -264,37 +245,37 @@
     <script>
       const PLANE = ['...#...', '...##..', '#..###.', '#######', '#..###.', '...##..', '...#...'];
       const GLOBE = ['..###..', '.#.#.#.', '#..#..#', '#######', '#..#..#', '.#.#.#.', '..###..'];
-      // https://cybertatar.github.io/Portfolio/
+      // Rickroll: https://www.youtube.com/watch?v=dQw4w9WgXcQ
       const QR = [
-        '#######...#..###.###..#######',
-        '#.....#..#...#.#.#.#..#.....#',
-        '#.###.#.#..#......#...#.###.#',
-        '#.###.#..#..#.#...###.#.###.#',
-        '#.###.#..#..####...#..#.###.#',
-        '#.....#...###.#######.#.....#',
+        '#######...#....#.###..#######',
+        '#.....#.###..######.#.#.....#',
+        '#.###.#.#.....#..#.##.#.###.#',
+        '#.###.#..#..#..##.....#.###.#',
+        '#.###.#.###.#..#.##...#.###.#',
+        '#.....#.#.#.########..#.....#',
         '#######.#.#.#.#.#.#.#.#######',
-        '........#..#.##.####.........',
-        '###.#####...######.####...#..',
-        '##..##.###.##...##..#.#..#..#',
-        '...#..#.#.####..###...###.###',
-        '.#...#.####.###.##..###....#.',
-        '.##...#.#.##..#.###.###..#.##',
-        '.#.##.....##....#...#.#..#..#',
-        '....#.#.##...#..##..###..#.##',
-        '#.#..#....##...###..##.#.#.#.',
-        '#.#####...#.#....#.####..#.##',
-        '..###..##.####..#....##..##.#',
-        '#.##.##.#.###.#.#.#.#.###..##',
-        '.#.......#..###..##....###.#.',
-        '#...######.#..#..#..#####....',
-        '........####..#.#...#...#.###',
-        '#######.###..#...#.##.#.##.##',
-        '#.....#.####....###.#...##..#',
-        '#.###.#.##..#..####.#####..##',
-        '#.###.#...####..#.......#.###',
-        '#.###.#.#####.#.##..##.###..#',
-        '#.....#.#.#.####.####...#..#.',
-        '#######.##.#..#....##.#.#..##',
+        '........#.##..#..###.........',
+        '##.#..##...##.#.......###.##.',
+        '###.#....#.####.###.#.#..#..#',
+        '..#######..##...##.##.#..###.',
+        '.##....#######.#..#....##.##.',
+        '.#..###.#.##.#...#.####..#.##',
+        '###..#...#.#...#.#.#.#.#.....',
+        '.##.#.##.###.##.###.##...####',
+        '...###.##..#.########.#..#.#.',
+        '.#######..#.##...#.###.#...#.',
+        '.#.#...#..#.#...#.#...##.#..#',
+        '#.#.#.#....##.#.....####...##',
+        '.....#..###.#..#.#.#..#....##',
+        '#..#.##.###..###....#####.#..',
+        '........####.#...#.##...#.###',
+        '#######.###...#..##.#.#.#..#.',
+        '#.....#...#..#..#.#.#...###.#',
+        '#.###.#..#..#....#..#####....',
+        '#.###.#.#####.#....#..#.####.',
+        '#.###.#...#.#....###.#..###.#',
+        '#.....#.#...###.##..#...#..#.',
+        '#######.#..########.#..##..#.',
       ];
       const css = getComputedStyle(document.documentElement);
       const INK = css.getPropertyValue('--ink-1').trim();

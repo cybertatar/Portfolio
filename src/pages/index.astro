@@ -46,7 +46,7 @@ const done = cases.length - upcoming;
       <div class="zone zone-gear">
         <Eyebrow data-en={ui.tools.en}>{ui.tools.ru}</Eyebrow>
         <ul class="gear">
-          {profile.tools.map((tool, i) => (
+          {profile.tools.map((tool) => (
             <li
               class="gear-item"
               tabindex="0"
@@ -55,9 +55,6 @@ const done = cases.length - upcoming;
               data-tip-text-en={tool.kind.en}
             >
               <span class="gear-slot px-clip">
-                <span class="gear-key" aria-hidden="true">
-                  {i + 1}
-                </span>
                 <PixelIcon name={tool.icon} />
               </span>
               <span class="gear-name">{tool.name}</span>
@@ -269,53 +266,41 @@ const done = cases.length - upcoming;
     gap: 2px;
   }
 
-  /* Tools as an MMO action bar: one row of square slots with hotkey numbers */
+  /* Tools: small square inventory slots with the name beside them, three per row */
   .gear {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 64px));
-    justify-content: space-between;
-    gap: 6px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 16px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .gear-item {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
     min-width: 0;
     cursor: default;
     outline: none;
   }
   .gear-slot {
     --px-step: 2px;
-    position: relative;
     display: grid;
     place-items: center;
-    width: 100%;
-    aspect-ratio: 1;
+    flex: none;
+    width: 40px;
+    height: 40px;
     background: var(--surface-raised);
     color: var(--text-primary);
     transition: background var(--dur-fast) var(--ease-standard);
   }
-  .gear-key {
-    position: absolute;
-    left: 6px;
-    top: 4px;
-    font-family: var(--font-pixel);
-    font-size: 13px;
-    line-height: 1;
-    color: var(--text-tertiary);
-  }
   .gear-name {
-    max-width: 100%;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-family: var(--font-pixel);
     font-size: var(--t-pixel-label);
-    line-height: 1;
     color: var(--text-secondary);
     transition: color var(--dur-fast) var(--ease-standard);
   }

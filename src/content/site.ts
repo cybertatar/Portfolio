@@ -3,7 +3,8 @@ export type Localized = Record<Lang, string>;
 
 import type { PixelIconName } from './pixel-icons';
 
-export type CaseStatus = 'default' | 'soon';
+/** soon: locked until the case is ready; nda: never opens, the card is marked NDA. */
+export type CaseStatus = 'default' | 'soon' | 'nda';
 
 export interface CaseItem {
   id: string;
@@ -11,7 +12,7 @@ export interface CaseItem {
   description: Localized;
   tags: string[];
   status: CaseStatus;
-  /** Case page URL; omitted for "soon" cases. */
+  /** Case page URL; omitted for locked (soon, nda) cases. */
   href?: string;
   /** Cover image in /public (16:9). Placeholder is shown while it is missing. */
   cover?: string;
@@ -122,6 +123,18 @@ export const cases: CaseItem[] = [
     cover: 'assets/cases/wb-cover.webp',
     coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
   },
+  {
+    id: 'mouette',
+    title: 'Mouette online clothing store',
+    description: {
+      ru: 'Интернет-магазин одежды для ателье',
+      en: 'An online clothing store for a tailoring studio',
+    },
+    tags: ['B2C', '2025'],
+    status: 'nda',
+    cover: 'assets/cases/mouette-cover.webp',
+    coverLabel: { ru: 'Обложка — Mouette', en: 'Cover — Mouette' },
+  },
 ];
 
 export const ui = {
@@ -130,6 +143,10 @@ export const ui = {
   noMana: {
     ru: 'Не хватает маны. Этот кейс откроется позже.',
     en: 'Not enough mana. This case unlocks later.',
+  },
+  noWay: {
+    ru: 'В эти края пути нет. Кейс под NDA.',
+    en: 'There is no road to these lands. This case is under NDA.',
   },
   levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now {n} lvl.' },
   portrait: { ru: 'Портрет', en: 'Portrait' },

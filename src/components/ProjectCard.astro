@@ -12,17 +12,22 @@ interface Props {
 /** Home-feed card for one case: 16:9 cover, title + description, arrow or lock. */
 const { item } = Astro.props;
 const soon = item.status === 'soon';
-const Tag = soon ? 'div' : 'a';
-// A locked case is a button that answers with a "not enough mana" dialog (initLocked in home.ts).
-const linkProps = soon
+const nda = item.status === 'nda';
+const locked = soon || nda;
+const Tag = locked ? 'div' : 'a';
+const msg = nda ? ui.noWay : ui.noMana;
+const lockLabel = nda ? { ru: 'NDA', en: 'NDA' } : ui.locked;
+// A locked case is a button that answers with a dialog (initLocked in home.ts): "not enough
+// mana" while it is coming, "no road to these lands" for a case under NDA.
+const linkProps = locked
   ? ({
       role: 'button',
       tabindex: 0,
       'data-locked': '',
-      'data-msg': ui.noMana.ru,
-      'data-msg-en': ui.noMana.en,
-      'aria-label': `${item.title}: ${ui.locked.ru}`,
-      'data-en-label': `${item.title}: ${ui.locked.en}`,
+      'data-msg': msg.ru,
+      'data-msg-en': msg.en,
+      'aria-label': `${item.title}: ${lockLabel.ru}`,
+      'data-en-label': `${item.title}: ${lockLabel.en}`,
     } as const)
   : {
       href: item.href ?? '#',
@@ -31,7 +36,7 @@ const linkProps = soon
     };
 ---
 
-<Tag class:list={['card', 'px-clip', { soon }]} {...linkProps}>
+<Tag class:list={['card', 'px-clip', { closed: locked }]} {...linkProps}>
   <div class="cover px-clip">
     <div class="cover-media">
       <Media src={item.cover} label={item.coverLabel} />
@@ -44,8 +49,19 @@ const linkProps = soon
         <span data-en={ui.locked.en}>{ui.locked.ru}</span>
       </div>
     )}
-    {item.tags.length > 0 && (
+    {/* An NDA case keeps its cover clear: the lock sits in an "NDA" tag instead */}
+    {(item.tags.length > 0 || nda) && (
       <div class="tags">
+        {nda && (
+          <GlassTag>
+            <span class="nda">
+              <span class="lock" data-lock>
+                <PixelIcon name="lock" size={16} />
+              </span>
+              NDA
+            </span>
+          </GlassTag>
+        )}
         {item.tags.map((tag) => (
           <GlassTag>{tag}</GlassTag>
         ))}
@@ -59,7 +75,7 @@ const linkProps = soon
         {item.description.ru}
       </p>
     </div>
-    {!soon && (
+    {!locked && (
       <IconButton shape="large">
         <PixelIcon name="arrow" />
       </IconButton>
@@ -168,8 +184,13 @@ const linkProps = soon
     letter-spacing: var(--ls-tighter);
     color: var(--text-primary);
   }
-  .soon .title,
-  .soon .description {
+  .nda {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .closed .title,
+  .closed .description {
     color: var(--text-tertiary);
   }
   .description {

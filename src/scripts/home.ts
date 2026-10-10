@@ -81,8 +81,7 @@ export function initCardStack(feed: HTMLElement, slots: HTMLElement[], spacer: H
 }
 
 /**
- * Item tooltip for elements with `data-tip` (title), `data-tip-type` and `data-tip-text`
- * (plus `-en` variants). One fixed element, so the sidebar's overflow doesn't clip it.
+ * Item tooltip for elements with `data-tip` (title) and `data-tip-text` (plus `data-tip-text-en`). One fixed element, so the sidebar's overflow doesn't clip it.
  */
 export function initTooltips() {
   const items = [...document.querySelectorAll<HTMLElement>('[data-tip]')];
@@ -100,7 +99,6 @@ export function initTooltips() {
     tip.replaceChildren(
       ...[
         ['px-tip-title', d.tip],
-        ['px-tip-type', en ? d.tipTypeEn : d.tipType],
         ['px-tip-text', en ? d.tipTextEn : d.tipText],
       ]
         .filter(([, text]) => text)

@@ -8,6 +8,7 @@ interface Props {
   label: string;
   divider?: boolean;
   external?: boolean;
+  /** When set, the icon stands in for the visible label. */
   icon?: PixelIconName;
 }
 const { href, value, label, divider = true, external = false, icon } = Astro.props;
@@ -16,11 +17,12 @@ const { href, value, label, divider = true, external = false, icon } = Astro.pro
 <a
   href={href}
   class:list={['contact-row', { divider }]}
+  aria-label={icon ? `${label}: ${value}` : undefined}
   {...(external ? { target: '_blank', rel: 'noopener' } : {})}
 >
   {icon && <PixelIcon name={icon} />}
   <span class="value">{value}</span>
-  <span class="label">{label}</span>
+  {!icon && <span class="label">{label}</span>}
 </a>
 
 <style>

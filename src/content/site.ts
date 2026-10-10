@@ -115,8 +115,7 @@ export const cases: CaseItem[] = [
 export const ui = {
   level: { ru: 'Ур.', en: 'Lvl' },
   class: { ru: 'Класс', en: 'Class' },
-  equipment: { ru: 'Снаряжение', en: 'Equipment' },
-  tool: { ru: 'Инструмент', en: 'Tool' },
+  tools: { ru: 'Инструменты', en: 'Tools' },
   questLog: { ru: 'Журнал квестов', en: 'Quest log' },
   quest: { ru: 'Квест', en: 'Quest' },
   mainQuest: { ru: 'Главный', en: 'Main' },

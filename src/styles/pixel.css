@@ -51,13 +51,6 @@
   font-weight: var(--fw-semibold);
   color: var(--text-primary);
 }
-.px-tip-type {
-  font-family: var(--font-pixel);
-  font-size: 14px;
-  letter-spacing: var(--ls-caps);
-  text-transform: uppercase;
-  color: var(--text-accent);
-}
 .px-tip-text {
   margin-top: 4px;
   font-size: 13px;

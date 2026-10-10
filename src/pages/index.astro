@@ -44,19 +44,22 @@ const done = cases.length - upcoming;
       </div>
 
       <div class="zone zone-gear">
-        <Eyebrow data-en={ui.equipment.en}>{ui.equipment.ru}</Eyebrow>
+        <Eyebrow data-en={ui.tools.en}>{ui.tools.ru}</Eyebrow>
         <ul class="gear">
-          {profile.tools.map((tool) => (
+          {profile.tools.map((tool, i) => (
             <li
-              class="gear-item px-clip"
+              class="gear-item"
               tabindex="0"
               data-tip={tool.name}
-              data-tip-type={ui.tool.ru}
-              data-tip-type-en={ui.tool.en}
               data-tip-text={tool.kind.ru}
               data-tip-text-en={tool.kind.en}
             >
-              <PixelIcon name={tool.icon} />
+              <span class="gear-slot px-clip">
+                <span class="gear-key" aria-hidden="true">
+                  {i + 1}
+                </span>
+                <PixelIcon name={tool.icon} />
+              </span>
               <span class="gear-name">{tool.name}</span>
             </li>
           ))}
@@ -266,40 +269,67 @@ const done = cases.length - upcoming;
     gap: 2px;
   }
 
-  /* Equipment: tools as inventory slots */
+  /* Tools as an MMO action bar: one row of square slots with hotkey numbers */
   .gear {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 64px));
+    justify-content: space-between;
     gap: 6px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .gear-item {
-    --px-step: 2px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
-    height: var(--chip-h);
-    padding: 0 10px;
-    background: var(--surface-raised);
-    color: var(--text-primary);
     cursor: default;
-    transition: background var(--dur-fast) var(--ease-standard);
-  }
-  .gear-item:hover,
-  .gear-item:focus-visible {
-    background: var(--surface-active);
     outline: none;
   }
+  .gear-slot {
+    --px-step: 2px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .gear-key {
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    font-family: var(--font-pixel);
+    font-size: 13px;
+    line-height: 1;
+    color: var(--text-tertiary);
+  }
   .gear-name {
-    min-width: 0;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: var(--font-mono);
-    font-size: var(--t-chip);
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    line-height: 1;
+    color: var(--text-secondary);
+    transition: color var(--dur-fast) var(--ease-standard);
+  }
+  .gear-item:hover .gear-slot,
+  .gear-item:focus-visible .gear-slot {
+    background: var(--surface-active);
+  }
+  .gear-item:hover .gear-name,
+  .gear-item:focus-visible .gear-name {
+    color: var(--text-primary);
+  }
+  .gear-item:focus-visible .gear-slot {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
   }
 
   .cta {

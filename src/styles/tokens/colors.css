@@ -1,23 +1,25 @@
 :root {
-  /* Neutral ramp — near-black, cool-neutral */
-  --ink-0: #08080a;
-  --ink-1: #0e0e12;
-  --ink-2: #14141a;
-  --ink-3: #1c1c23;
-  --ink-4: #24242d;
-  --line-1: #26262f;
-  --line-2: #33333f;
-  --line-3: #484857;
-  --fg-1: #f6f6f8;
-  --fg-2: #ababb8;
-  --fg-3: #71717f;
-  --fg-4: #4b4b57;
+  /* Neutral ramp — warm charcoal; text is parchment, not white.
+     Every text step clears WCAG AA (4.5:1) on card and raised surfaces. */
+  --ink-0: #0f0f0e;
+  --ink-1: #171715;
+  --ink-2: #1f1e1c;
+  --ink-3: #2a2926;
+  --ink-4: #34322e;
+  --line-1: #2a2926;
+  --line-2: #393732;
+  --line-3: #4e4b44;
+  --fg-1: #efe7d2;
+  --fg-2: #c8c0aa;
+  --fg-3: #9a927f;
+  --fg-4: #6b665a;
 
-  /* Accent — coral, the only chromatic colour in the system (besides the status dot) */
-  --coral-300: #ff8ca6;
-  --coral-400: #ff6a85;
-  --coral-500: #ff4d6d;
-  --coral-600: #e23458;
+  /* Accent — muted terracotta, the only chromatic colour (besides the status dot).
+     400 is for text (5.9:1 on cards), 500 for fills; 600 is the reference #AF5B3C. */
+  --rust-300: #e0a184;
+  --rust-400: #d4876a;
+  --rust-500: #c2714f;
+  --rust-600: #af5b3c;
 
   /* Surfaces */
   --surface-page: var(--ink-0);
@@ -26,7 +28,7 @@
   --surface-hover: var(--ink-3);
   --surface-active: var(--ink-4);
   --surface-inverse: var(--fg-1);
-  --surface-glass: rgba(8, 8, 10, 0.55);
+  --surface-glass: rgba(15, 15, 14, 0.6);
 
   /* Text */
   --text-primary: var(--fg-1);
@@ -34,22 +36,22 @@
   --text-tertiary: var(--fg-3);
   --text-disabled: var(--fg-4);
   --text-inverse: var(--ink-0);
-  --text-on-glass: #f6f6f8;
-  --text-accent: var(--coral-500);
-  --text-accent-hover: var(--coral-400);
-  --accent: var(--coral-500);
-  --accent-soft: var(--coral-500);
-  --status-online: #3ddc84; /* availability dot only */
+  --text-on-glass: #efe7d2;
+  --text-accent: var(--rust-400);
+  --text-accent-hover: var(--rust-300);
+  --accent: var(--rust-500);
+  --accent-soft: var(--rust-500);
+  --status-online: #5bb39a; /* availability dot only */
 
   /* Borders */
   --border-subtle: var(--line-1);
   --border-default: var(--line-2);
   --border-strong: var(--line-3);
-  --border-accent: var(--coral-500);
+  --border-accent: var(--rust-500);
   --border-width-hair: 1px;
   --border-width-frame: 2px;
   --border-width-keyline: 2px;
 
-  --focus-ring: var(--coral-500);
-  --selection-bg: rgba(255, 255, 255, 0.16);
+  --focus-ring: var(--rust-400);
+  --selection-bg: rgba(239, 231, 210, 0.18);
 }

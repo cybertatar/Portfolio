@@ -38,7 +38,7 @@
   z-index: 100;
   width: min(560px, calc(100vw - 32px));
   padding: 18px 24px 20px;
-  background: rgba(8, 8, 10, 0.88);
+  background: rgba(15, 15, 14, 0.92);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   opacity: 0;

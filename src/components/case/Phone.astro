@@ -1,0 +1,47 @@
+---
+import { withBase } from '../../scripts/url';
+
+interface Props {
+  /** Screen in /public, 402×874pt (exported at 2x). */
+  src: string;
+  alt: string;
+}
+
+/**
+ * A screen inside the iPhone 17 Pro body (the hidden "bezel" layer of the PSB Figma file:
+ * 450×920pt, screen inset 24/23pt, 60pt corners). Scales with the width of its parent.
+ */
+const { src, alt } = Astro.props;
+---
+
+<div class="phone">
+  <img class="screen" src={withBase(src)} alt={alt} loading="lazy" decoding="async" />
+  <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
+</div>
+
+<style>
+  .phone {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 450 / 920;
+    container-type: inline-size;
+  }
+  .screen {
+    position: absolute;
+    left: calc(24 / 450 * 100%);
+    top: calc(23 / 920 * 100%);
+    width: calc(402 / 450 * 100%);
+    height: calc(874 / 920 * 100%);
+    border-radius: calc(60 / 450 * 100cqi);
+    object-fit: cover;
+    object-position: top;
+    background: #0e1116;
+  }
+  .body {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>

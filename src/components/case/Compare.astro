@@ -1,0 +1,118 @@
+---
+import { withBase } from '../../scripts/url';
+
+interface Props {
+  before: string;
+  after: string;
+  /** What the screens show, for alt text and the slider label. */
+  label: string;
+}
+
+/**
+ * Before/after slider inside one iPhone body: the old screen on the left of the handle,
+ * the new one on the right. A native range input drives it, so keys and screen readers work.
+ */
+const { before, after, label } = Astro.props;
+---
+
+<div class="compare" data-compare style="--pos: 50%">
+  <div class="phone">
+    <img class="screen" src={withBase(after)} alt={`${label}: после`} loading="lazy" />
+    <img class="screen before" src={withBase(before)} alt={`${label}: до`} loading="lazy" />
+    <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
+    <span class="line" aria-hidden="true"></span>
+    <span class="handle px-clip" aria-hidden="true">
+      <svg viewBox="0 0 12 12" width="18" height="18" shape-rendering="crispEdges">
+        <path
+          fill="currentColor"
+          d="M3 3h1v1H3zM2 4h1v1H2zM1 5h1v2H1zM2 7h1v1H2zM3 8h1v1H3zM8 3h1v1H8zM9 4h1v1H9zM10 5h1v2h-1zM9 7h1v1H9zM8 8h1v1H8zM2 5h8v2H2z"
+        ></path>
+      </svg>
+    </span>
+  </div>
+  <input
+    class="range"
+    type="range"
+    min="0"
+    max="100"
+    value="50"
+    aria-label={`${label}: до и после`}
+    data-compare-range
+  />
+</div>
+
+<style>
+  .compare {
+    position: relative;
+    width: 100%;
+    touch-action: pan-y;
+  }
+  .phone {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 450 / 920;
+    container-type: inline-size;
+  }
+  .screen {
+    position: absolute;
+    left: calc(24 / 450 * 100%);
+    top: calc(23 / 920 * 100%);
+    width: calc(402 / 450 * 100%);
+    height: calc(874 / 920 * 100%);
+    border-radius: calc(60 / 450 * 100cqi);
+    object-fit: cover;
+    object-position: top;
+    background: #0e1116;
+  }
+  /* The handle sits at --pos of the whole body; the screen starts 24/450 in */
+  .before {
+    clip-path: inset(0 calc(100% - (var(--pos) * 450 / 402 - 24 / 402 * 100%)) 0 0);
+  }
+  .body {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .handle {
+    --px-step: 3px;
+    position: absolute;
+    left: var(--pos);
+    top: 50%;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    transform: translate(-50%, -50%);
+    background: var(--surface-card);
+    color: var(--text-primary);
+    pointer-events: none;
+  }
+  .line {
+    position: absolute;
+    left: var(--pos);
+    top: calc(23 / 920 * 100%);
+    bottom: calc(23 / 920 * 100%);
+    width: 2px;
+    transform: translateX(-50%);
+    background: var(--surface-card);
+    pointer-events: none;
+  }
+  /* The input covers the phone and is invisible: dragging anywhere moves the handle */
+  .range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .compare:has(.range:focus-visible) .handle {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+</style>

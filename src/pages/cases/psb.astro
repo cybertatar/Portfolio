@@ -1,0 +1,1372 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Footer from '../../components/Footer.astro';
+import CaseVideo from '../../components/case/CaseVideo.astro';
+import Compare from '../../components/case/Compare.astro';
+import Phone from '../../components/case/Phone.astro';
+import IconButton from '../../components/ui/IconButton.astro';
+import Media from '../../components/ui/Media.astro';
+import PixelIcon from '../../components/ui/PixelIcon.astro';
+import { withBase } from '../../scripts/url';
+
+/** Contents: the sidebar on desktop, the drop-down list on mobile. `sub` items are indented. */
+const toc = [
+  { id: 'overview', title: 'Обзор' },
+  { id: 'screens', title: 'Финальные экраны' },
+  { id: 'process', title: 'Как мы работали' },
+  { id: 'interviews', title: 'Интервью' },
+  { id: 'home', title: 'Главная', group: 'Решения' },
+  { id: 'card-data', title: 'Данные карты', sub: true },
+  { id: 'cashback', title: 'Подключение кешбэка', sub: true },
+  { id: 'categories', title: 'Кешбэк после подключения', sub: true },
+  { id: 'kit', title: 'UI-кит' },
+  { id: 'testing', title: 'Тестирование' },
+  { id: 'outcome', title: 'Выводы' },
+];
+
+const screens = [
+  { src: 'assets/cases/psb/main.webp', caption: 'Главная' },
+  { src: 'assets/cases/psb/account.webp', caption: 'Счёт и его карты' },
+  { src: 'assets/cases/psb/cb-off.webp', caption: 'Кешбэк до подключения' },
+  { src: 'assets/cases/psb/cb-connect.webp', caption: 'Выбор категорий' },
+  { src: 'assets/cases/psb/success.webp', caption: 'Кешбэк подключён' },
+  { src: 'assets/cases/psb/cb-on.webp', caption: 'Кешбэк после подключения' },
+];
+
+const stats = [
+  { label: 'Шаги подключения кешбэка', from: '12', to: '5' },
+  { label: 'Время подключения кешбэка', from: '105', to: '23', unit: 'с' },
+  { label: 'Шаги к данным карты', from: '7', to: '4' },
+  { label: 'Время до данных карты', from: '42', to: '17', unit: 'с' },
+  { label: 'First click success', to: '89%' },
+  { label: 'SEQ, оценка лёгкости', to: '6,4', unit: 'из 7' },
+];
+
+const steps = [
+  {
+    title: 'Дизайнили вдвоём, проверяли у сеньора',
+    text: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
+    video: { src: 'assets/cases/psb/team.mp4', poster: 'assets/cases/psb/team-poster.webp' },
+  },
+  {
+    title: 'Выбрали четыре направления',
+    text: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
+    video: { src: 'assets/cases/psb/bench.mp4', poster: 'assets/cases/psb/bench-poster.webp' },
+  },
+  {
+    title: 'Не только макеты',
+    text: 'Завайбкодили прототип для быстрого тестирования: в нём можно пройти сценарии на телефоне — подключить кешбэк, выбрать категории и открыть данные карты.',
+  },
+  {
+    title: 'Видели путь, а не только финал',
+    text: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
+    video: { src: 'assets/cases/psb/testing.mp4', poster: 'assets/cases/psb/testing-poster.webp' },
+  },
+];
+
+const findings = [
+  {
+    title: 'Похожие названия сбивали с толку',
+    text: 'Кешбэк подключался через «Бонусный счёт», а «Кешбэк и скидки» открывал список партнёров.',
+  },
+  {
+    title: 'Данные карты искали вне приложения',
+    text: 'Лояльный клиент искал данные своей карты не в приложении: он достал её из кошелька.',
+  },
+  {
+    title: 'Не сразу верилось, что это банк',
+    text: 'Экраны выглядели собранными по шаблону, и один участник при первом знакомстве засомневался, что перед ним настоящее приложение банка.',
+  },
+];
+
+const directions = [
+  {
+    id: 'home',
+    title: 'Главная страница',
+    lead: 'Повседневные задачи и предложения банка должны быть заметны одновременно, но не конкурировать между собой.',
+    compare: { before: 'assets/cases/psb/main-before.webp', after: 'assets/cases/psb/main.webp' },
+    problem:
+      'Повседневные операции, промо и другие продукты имели близкий визуальный вес. Историю и кешбэк было трудно найти.',
+    solution:
+      'Сгруппировали баланс, действия и историю; показали карты внутри счетов. Сначала на главной был ещё и отдельный блок кешбэка, но вместе с вкладкой и бейджем получалось три входа. Блок убрали и оставили бейдж, чтобы проверить, заметят ли его.',
+    result:
+      'Кешбэк нашли все 30 участников: 63% — через «Выгоду», 37% — через бейдж у суммы, так что второй вход не остался незамеченным.',
+  },
+  {
+    id: 'card-data',
+    title: 'Данные карты',
+    lead: 'Посмотреть и скопировать данные карты должно быть простым и понятным действием сразу после входа в приложение.',
+    after: ['assets/cases/psb/account.webp'],
+    problem:
+      'Данные лежали на третьей вкладке и защищались пушами и кодами: CVV открывался только по коду из СМС, даже после входа по биометрии. Один участник из-за сложного поиска доставал физическую карту.',
+    solution:
+      'Показали связь счёта и карты и собрали просмотр и копирование на одном экране. Код из СМС перед показом CVV убрали: клиент уже вошёл по ПИН-коду или биометрии, и во многих банках этого достаточно, пока активен токен. Короткий toast подтверждает, что данные скопированы.',
+    result:
+      'Большинство нашли данные сразу: first click success — 83%. Но клиентам, у которых ПСБ — единственный банк, было непривычно видеть карты внутри счёта, а переворот карты оказался не самым явным способом показать данные. Это отразилось на SEQ — 6,0 из 7.',
+  },
+  {
+    id: 'cashback',
+    title: 'Подключение кешбэка',
+    lead: 'Выгоду было видно на странице предложения, но путь к подключению проходил через почту, браузер и повторные подтверждения.',
+    after: [
+      'assets/cases/psb/cb-off.webp',
+      'assets/cases/psb/cb-connect.webp',
+      'assets/cases/psb/success.webp',
+    ],
+    problem:
+      'Путь был длинным и заканчивался тупиком: из-за ошибки подключённый кешбэк не появлялся, пока не обновишь экран или не перезайдёшь в приложение. Вероятно, это снижало долю клиентов, которые начинали им пользоваться.',
+    solution:
+      'Логику программы не трогали, убрали только лишние танцы: почту, браузер, повторный ввод данных и экраны согласий. Осталась одна кнопка «Подключить кешбэк» рядом с условиями. Подключение объединили с выбором категорий, поэтому кешбэк начинает работать сразу.',
+    result:
+      'Все участники подключили кешбэк, и большинство сразу начали с правильного действия: first click success — 83%. Обычно уходило около 23 секунд. Без ошибок прошли 63%: по пути часто отвлекались на условия и плитки предложений, это стоит проработать дальше. SEQ — 6,5 из 7.',
+  },
+  {
+    id: 'categories',
+    title: 'Кешбэк после подключения',
+    lead: 'Кешбэк должен приносить выгоду каждый месяц, а не только после первого подключения.',
+    after: ['assets/cases/psb/cb-on.webp'],
+    problem:
+      'Категории нужно было выбирать каждый месяц, но приложение об этом не напоминало, а кнопка выбора на экране кешбэка была не очень заметной.',
+    solution:
+      'Категории на следующий месяц можно выбрать заранее, чтобы не вспоминать о кешбэке в начале месяца. Выбор можно изменить до начала периода.',
+    result:
+      'Выбор на следующий месяц устроен так же, как при первом подключении, поэтому разбираться заново не пришлось: first click success вырос до 100%. На выбор уходило около 14 секунд, без ошибок справились 90%, а SEQ 6,7 из 7 оказался самым высоким в тесте.',
+  },
+];
+
+const tests = [
+  { task: 'Подключить кешбэк', done: '30/30', fcs: '83%', seq: '6,5/7' },
+  { task: 'Выбрать категории', done: '30/30', fcs: '100%', seq: '6,7/7' },
+  { task: 'Скопировать данные карты', done: '30/30', fcs: '83%', seq: '6,0/7' },
+];
+
+const next = [
+  {
+    title: 'Вход в кешбэк',
+    text: 'В тесте кешбэк искали по заданию, а в жизни на него натыкаются случайно. Стоит проверить, заметят ли его самостоятельно, и, если подключение в приоритете, попробовать на главной баннер с выгодой.',
+  },
+  {
+    title: 'Данные карты',
+    text: 'Сравнить переворот карты с блоком данных под ней. Участникам старшей возрастной группы переворот, похоже, давался сложнее, особенно тем, у кого ПСБ — единственный банк.',
+  },
+  {
+    title: 'Подключение кешбэка',
+    text: 'Часть участников по пути первым делом цепляла плитки предложений. Можно ослабить их визуальный вес и проверить это в следующих итерациях.',
+  },
+];
+
+const title = 'PSB-Bank Redesign concept';
+const home = withBase('/');
+---
+
+<BaseLayout
+  title={`${title} — Даниил Тынчеров`}
+  description="Переосмысление ключевых сценариев в мобильном приложении банка"
+>
+  <div class="root">
+    <!-- Desktop: the sidebar keeps its place from the home page and turns into the contents -->
+    <aside class="aside px-clip">
+      <a class="back" href={home}>
+        <span class="back-icon">
+          <PixelIcon name="arrow" />
+        </span>
+        <span>Все кейсы</span>
+      </a>
+      <div class="case-id">
+        <div class="thumb px-clip">
+          <img src={withBase('assets/cases/psb-cover.webp')} alt="" />
+        </div>
+        <p class="case-name">{title}</p>
+      </div>
+      <nav class="toc" aria-label="Разделы кейса">
+        <ol>
+          {toc.map((item) => (
+            <li class:list={{ sub: item.sub, grouped: item.group }}>
+              {item.group && <span class="toc-group">{item.group}</span>}
+              <a href={`#${item.id}`} data-toc>
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </aside>
+
+    <!-- Mobile: a bar pinned to the top — back home, and the current section that opens the list -->
+    <header class="bar" data-case-bar>
+      <div class="bar-row px-clip">
+        <IconButton href={home} label="Все кейсы">
+          <span class="back-icon">
+            <PixelIcon name="arrow" />
+          </span>
+        </IconButton>
+        <button
+          class="toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="case-menu"
+          data-case-toggle
+        >
+          <span class="toggle-text">
+            <span class="toggle-label">Раздел</span>
+            <span class="toggle-current" data-case-current>
+              Обзор
+            </span>
+          </span>
+          <span class="toggle-icon">
+            <PixelIcon name="chevron" />
+          </span>
+        </button>
+      </div>
+      <nav class="menu px-clip" id="case-menu" aria-label="Разделы кейса" hidden data-case-menu>
+        <ol>
+          {toc.map((item) => (
+            <li class:list={{ sub: item.sub, grouped: item.group }}>
+              {item.group && <span class="toc-group">{item.group}</span>}
+              <a href={`#${item.id}`} data-toc data-title={item.title}>
+                {item.title}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </header>
+
+    <main class="main">
+      <div class="sheets">
+        <!-- ---------- Overview ---------- -->
+        <section id="overview" class="sheet px-clip">
+          <p class="eyebrow">ПСБ Mobile — концепт-редизайн</p>
+          <h1 class="title">
+            Упростил ежедневные действия, которые в приложении ощущались как поход в отделение
+          </h1>
+          <div class="hero px-clip">
+            <img src={withBase('assets/cases/psb-cover.webp')} alt="Экраны нового ПСБ Mobile" />
+          </div>
+
+          <div class="intro">
+            <div class="prose">
+              <p>
+                Я клиент ПСБ пять лет, но о кешбэке с неплохими процентами{' '}
+                <strong>узнал не из приложения, а от друга</strong>. Он бросил подключение на
+                середине. Мне же кешбэк не помешал бы, и я захотел попробовать.
+              </p>
+              <p>
+                Предложение хорошее, но подключение <strong>растянулось на 12 шагов</strong> с
+                переходами в почту и браузер, подтверждением почты и несколькими согласиями, а в
+                конце было непонятно, получилось ли.
+              </p>
+              <p>
+                <strong>Трудности нашлись и в других действиях</strong>: счёт спрятан глубоко,
+                история операций разбита по картам, для CVV нужен код из СМС даже после биометрии.
+              </p>
+              <p>
+                По отдельности каждое из этих решений объяснимо, но вместе они{' '}
+                <strong>делают простые действия сложнее, чем могли бы быть</strong>. Я решил
+                разобраться, так ли это и можно ли сделать удобнее.
+              </p>
+            </div>
+            <dl class="facts">
+              <div>
+                <dt>Роль</dt>
+                <dd>Продуктовый дизайнер, в паре</dd>
+              </div>
+              <div>
+                <dt>Формат</dt>
+                <dd>Концепт, 2026</dd>
+              </div>
+              <div>
+                <dt>Сфера</dt>
+                <dd>Банк, B2C, мобильное приложение</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="pair">
+            <div class="tile px-clip">
+              <span class="tile-icon px-clip">
+                <PixelIcon name="alert" />
+              </span>
+              <h2 class="tile-title">Проблемы</h2>
+              <ul class="list">
+                <li>На главной продукты банка отвлекали от повседневных действий.</li>
+                <li>
+                  Связь карт и счёта не была обозначена, история операций была разбита по картам.
+                </li>
+                <li>
+                  Данные карты лежали на третьей вкладке «О карте», CVV открывался только по коду из
+                  СМС.
+                </li>
+                <li>
+                  Кешбэк подключался через почту и браузер и после этого не открывался до обновления
+                  экрана.
+                </li>
+              </ul>
+            </div>
+            <div class="tile px-clip">
+              <span class="tile-icon px-clip">
+                <PixelIcon name="spark" />
+              </span>
+              <h2 class="tile-title">Решения</h2>
+              <ul class="list">
+                <li>
+                  Пересобрал иерархию главной вокруг баланса и повседневных действий, а предложения
+                  банка оставил заметными, но их можно закрыть.
+                </li>
+                <li>Перенёс карты внутрь их счетов и добавил копирование данных карты.</li>
+                <li>
+                  Объединил подключение кешбэка с выбором категорий, чтобы он сразу заработал.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="results">
+            <h2 class="results-title">
+              <span class="tile-icon px-clip">
+                <PixelIcon name="trend" />
+              </span>
+              Результаты
+            </h2>
+            <ul class="stats">
+              {stats.map((s) => (
+                <li class="stat px-clip">
+                  <span class="stat-value">
+                    {s.from && (
+                      <>
+                        <span class="stat-from">{s.from}</span>
+                        <span class="stat-arrow" aria-label="→">
+                          <PixelIcon name="arrow" size={24} />
+                        </span>
+                      </>
+                    )}
+                    <span>{s.to}</span>
+                    {s.unit && <span class="stat-unit">{s.unit}</span>}
+                  </span>
+                  <span class="stat-label">{s.label}</span>
+                </li>
+              ))}
+            </ul>
+            <p class="note">
+              Юзабилити-тест с 30 клиентами банка: все дошли до конца каждой задачи.
+            </p>
+          </div>
+        </section>
+
+        <!-- ---------- Final screens ---------- -->
+        <section id="screens" class="sheet px-clip">
+          <p class="eyebrow">Итог</p>
+          <h2 class="h2">Финальные экраны</h2>
+          <div class="gallery" tabindex="0" aria-label="Финальные экраны, прокручиваются вбок">
+            {screens.map((s) => (
+              <figure class="shot">
+                <Phone src={s.src} alt={s.caption} />
+                <figcaption>{s.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+
+        <!-- ---------- Process ---------- -->
+        <section id="process" class="sheet px-clip">
+          <p class="eyebrow">Процесс</p>
+          <h2 class="h2">Как мы работали</h2>
+          <ol class="steps">
+            {steps.map((s, i) => (
+              <li class="step">
+                <div class="step-text">
+                  <span class="step-num">{String(i + 1).padStart(2, '0')}</span>
+                  <h3 class="h3">{s.title}</h3>
+                  <p class="body">{s.text}</p>
+                </div>
+                <div class="step-media">
+                  {s.video ? (
+                    <CaseVideo
+                      src={s.video.src}
+                      poster={s.video.poster}
+                      ratio="4 / 3"
+                      label={s.title}
+                    />
+                  ) : (
+                    <div class="slot px-clip">
+                      <Media label={{ ru: 'Видео прототипа', en: 'Prototype video' }} />
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <!-- ---------- Interviews ---------- -->
+        <section id="interviews" class="sheet px-clip">
+          <p class="eyebrow">Исследование</p>
+          <h2 class="h2">Что показали интервью</h2>
+          <p class="lead">
+            Когда масштаб был выбран, мы поговорили с тремя клиентами ПСБ, чтобы сопоставить свои
+            предположения с их опытом.
+          </p>
+          <div class="wide">
+            <CaseVideo
+              src="assets/cases/psb/interviews.mp4"
+              poster="assets/cases/psb/interviews-poster.webp"
+              ratio="16 / 9"
+              label="Фрагменты интервью"
+              mode="player"
+            />
+          </div>
+          <ol class="findings">
+            {findings.map((f, i) => (
+              <li>
+                <span class="step-num">{String(i + 1).padStart(2, '0')}</span>
+                <h3 class="finding-title">{f.title}</h3>
+                <p class="body">{f.text}</p>
+              </li>
+            ))}
+          </ol>
+          <p class="quote px-clip">
+            Одного сокращения пути было недостаточно. Нужно было сделать понятным весь процесс: где
+            найти нужное, как выполнить действие и увидеть результат.
+          </p>
+        </section>
+
+        <!-- ---------- Directions ---------- -->
+        {directions.map((d, i) => (
+          <section id={d.id} class="sheet px-clip">
+            <p class="eyebrow">
+              Решение {i + 1} из {directions.length}
+            </p>
+            <h2 class="h2">{d.title}</h2>
+            <p class="lead">{d.lead}</p>
+            <div class="stage px-clip">
+              {d.compare ? (
+                <>
+                  <span class="stage-tag left px-clip">До</span>
+                  <span class="stage-tag right px-clip">После</span>
+                  <div class="stage-phone">
+                    <Compare before={d.compare.before} after={d.compare.after} label={d.title} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span class="stage-tag left px-clip">После</span>
+                  <div class="stage-phones">
+                    {d.after?.map((src) => (
+                      <div class="stage-phone">
+                        <Phone src={src} alt={`${d.title}: новый экран`} />
+                      </div>
+                    ))}
+                  </div>
+                  <span class="stage-note">Экраны «до» добавим</span>
+                </>
+              )}
+            </div>
+            <div class="psr">
+              <div>
+                <h3 class="psr-title">Проблема</h3>
+                <p class="body">{d.problem}</p>
+              </div>
+              <div>
+                <h3 class="psr-title">Решение</h3>
+                <p class="body">{d.solution}</p>
+              </div>
+              <div>
+                <h3 class="psr-title">Результат</h3>
+                <p class="body">{d.result}</p>
+              </div>
+            </div>
+          </section>
+        ))}
+
+        <!-- ---------- UI kit ---------- -->
+        <section id="kit" class="sheet px-clip">
+          <p class="eyebrow">Система</p>
+          <h2 class="h2">Спеки и UI-кит</h2>
+          <p class="lead">
+            Хоть это и концепт, на каждый компонент я написал спецификацию и разложил компоненты
+            так, чтобы с ними было удобно работать.
+          </p>
+          <div class="slot wide-slot px-clip">
+            <Media label={{ ru: 'Место для UI-кита', en: 'UI kit goes here' }} />
+          </div>
+        </section>
+
+        <!-- ---------- Testing ---------- -->
+        <section id="testing" class="sheet px-clip">
+          <p class="eyebrow">Проверка</p>
+          <h2 class="h2">Тестирование с 30 клиентами</h2>
+          <p class="lead">
+            На телефонах участники проходили три задачи в рабочем прототипе. Мы смотрели на
+            достижение цели, первое действие и субъективную лёгкость.
+          </p>
+          <div class="table-wrap px-clip">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Сценарий</th>
+                  <th scope="col">Завершили</th>
+                  <th scope="col">First click success</th>
+                  <th scope="col">SEQ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {tests.map((t) => (
+                  <tr>
+                    <th scope="row">{t.task}</th>
+                    <td>{t.done}</td>
+                    <td>{t.fcs}</td>
+                    <td>{t.seq}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="note">
+            Средняя оценка лёгкости — 6,4 из 7. Для сравнения пять клиентов банка прошли подключение
+            кешбэка и путь к данным карты на кликабельной копии исходных экранов. Время «было» —
+            медиана выполнивших.
+          </p>
+        </section>
+
+        <!-- ---------- Outcome ---------- -->
+        <section id="outcome" class="sheet px-clip">
+          <p class="eyebrow">Выводы</p>
+          <h2 class="h2">Что я вынес из этого концепта</h2>
+          <p class="lead">
+            Иногда мало убрать барьеры и ускорить задачу. Нужно ещё сопровождать человека на всём
+            пути, помогать ему выстроить верные ментальные модели и мягко балансировать между
+            интересами бизнеса и пользователя, чтобы в продукт хотелось возвращаться.
+          </p>
+          <h3 class="h3 sub-title">Что бы я ещё протестировал</h3>
+          <div class="trio">
+            {next.map((n) => (
+              <div class="tile px-clip">
+                <h4 class="tile-title">{n.title}</h4>
+                <p class="body">{n.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <Footer />
+    </main>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initCaseMenu, initCompare, initLoopVideos, initScrollSpy } from '../../scripts/case';
+
+  initScrollSpy(
+    [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')],
+    document.querySelector<HTMLElement>('[data-case-current]'),
+  );
+  const bar = document.querySelector<HTMLElement>('[data-case-bar]');
+  if (bar) initCaseMenu(bar);
+  document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
+  initLoopVideos([...document.querySelectorAll<HTMLVideoElement>('[data-loop-video]')]);
+</script>
+
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  .root {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    max-width: var(--layout-content-max);
+    margin: 0 auto;
+    padding: 24px 24px 0;
+  }
+
+  /* ---------- Sidebar: contents ---------- */
+
+  .aside {
+    /* One clamped basis, as on the home page (Safari, see CLAUDE.md) */
+    flex: 0 0 clamp(var(--layout-sidebar-min), 25vw, var(--layout-sidebar-max));
+    position: sticky;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding: 24px;
+    background: var(--surface-card);
+  }
+  .back {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    align-self: flex-start;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .back-icon {
+    display: flex;
+    transform: scaleX(-1);
+  }
+  .back:hover .back-icon {
+    transform: scaleX(-1) translateX(3px);
+  }
+  .case-id {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .thumb {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--surface-raised);
+  }
+  .thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .case-name {
+    font-size: var(--t-lead);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+  }
+
+  .toc ol,
+  .menu ol {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .toc-group {
+    display: block;
+    padding: 12px 12px 4px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  [data-toc] {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 12px 8px 28px;
+    font-size: var(--t-body-sm);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+    transition:
+      background var(--dur-fast) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard);
+  }
+  .grouped [data-toc],
+  .sub [data-toc] {
+    padding-left: 28px;
+  }
+  [data-toc]:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+  }
+  /* Current section: a pixel pointer, like the cursor in a game menu */
+  [data-toc][aria-current] {
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font-weight: var(--fw-medium);
+  }
+  [data-toc][aria-current]::before {
+    content: '';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    width: 6px;
+    height: 10px;
+    transform: translateY(-50%);
+    background: var(--accent);
+    clip-path: polygon(
+      0 0,
+      2px 0,
+      2px 2px,
+      4px 2px,
+      4px 4px,
+      6px 4px,
+      6px 6px,
+      4px 6px,
+      4px 8px,
+      2px 8px,
+      2px 10px,
+      0 10px
+    );
+  }
+
+  /* ---------- Mobile bar ---------- */
+
+  .bar {
+    display: none;
+  }
+
+  /* ---------- Sheets ---------- */
+
+  .main {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .sheets {
+    display: flex;
+    flex-direction: column;
+    gap: var(--layout-feed-gap);
+  }
+  .sheet {
+    --pad: clamp(24px, 3.2vw, 64px);
+    scroll-margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    padding: var(--pad);
+    background: var(--surface-card);
+  }
+  .sheet > * + * {
+    margin-top: var(--space-stack);
+  }
+  .sheet > .eyebrow + * {
+    margin-top: 10px;
+  }
+  .sheet > .h2 + .lead {
+    margin-top: 16px;
+  }
+
+  .eyebrow {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-accent);
+  }
+  .title {
+    max-width: 22ch;
+    font-size: var(--t-display);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tighter);
+    text-wrap: balance;
+  }
+  .h2 {
+    font-size: var(--t-h2);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tighter);
+  }
+  .h3 {
+    font-size: var(--t-h3);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+    text-wrap: balance;
+  }
+  .lead {
+    max-width: var(--measure-lead);
+    font-size: var(--t-lead);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .body {
+    font-size: var(--t-body);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .note {
+    max-width: var(--measure-note);
+    font-size: var(--t-caption);
+    line-height: var(--lh-normal);
+    color: var(--text-tertiary);
+  }
+
+  /* Overview */
+  .hero {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--surface-raised);
+  }
+  .hero img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--space-split);
+    align-items: start;
+  }
+  .prose {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-paragraph);
+    max-width: var(--measure-body);
+  }
+  .prose p {
+    font-size: var(--t-body);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .prose strong {
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+  }
+  /* Facts read like a character sheet: pixel caps label, plain value */
+  .facts {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+  }
+  .facts div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 0;
+    border-top: var(--border-width-hair) solid var(--border-subtle);
+  }
+  .facts div:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .facts dt {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .facts dd {
+    margin: 0;
+    font-size: var(--t-body);
+    color: var(--text-primary);
+  }
+
+  .pair,
+  .trio {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-grid);
+  }
+  .trio {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+  .tile-icon {
+    --px-step: 3px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 4px;
+    background: var(--surface-card);
+    color: var(--text-accent);
+  }
+  .tile-title {
+    font-size: var(--t-lead);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+  }
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .list li {
+    position: relative;
+    padding-left: 18px;
+    font-size: var(--t-body);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+  }
+  .list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: calc(var(--t-body) * var(--lh-normal) / 2 - 3px);
+    width: 6px;
+    height: 6px;
+    background: var(--text-tertiary);
+  }
+
+  .results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-grid);
+  }
+  .results-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: var(--t-lead);
+    font-weight: var(--fw-bold);
+  }
+  .results-title .tile-icon {
+    margin: 0;
+    background: var(--surface-raised);
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-grid);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+  .stat-value {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-stat) * 1.3);
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    color: var(--text-accent);
+  }
+  .stat-from {
+    color: var(--text-tertiary);
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+  }
+  .stat-arrow {
+    display: flex;
+    color: var(--text-tertiary);
+  }
+  .stat-unit {
+    font-size: 0.6em;
+    color: var(--text-secondary);
+  }
+  .stat-label {
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+
+  /* Final screens: a row of phones that scrolls sideways */
+  .gallery {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(200px, 22%, 300px);
+    gap: var(--space-media-grid);
+    margin-left: calc(var(--pad) * -1);
+    margin-right: calc(var(--pad) * -1);
+    padding: 4px var(--pad) 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--pad);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
+  .shot {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-snap-align: start;
+  }
+  .shot figcaption {
+    font-size: var(--t-caption);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  /* Process */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-article);
+    margin: var(--space-stack) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .step {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: var(--space-split);
+    align-items: center;
+  }
+  .step-text {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .step-num {
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-list-num) * 1.2);
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    color: var(--text-accent);
+  }
+  .slot {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .wide-slot {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Interviews */
+  .findings {
+    display: flex;
+    flex-direction: column;
+    margin: var(--space-stack) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .findings li {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: 8px var(--space-grid);
+    align-items: baseline;
+    padding: 20px 0;
+    border-top: var(--border-width-hair) solid var(--border-subtle);
+  }
+  .findings li:last-child {
+    border-bottom: var(--border-width-hair) solid var(--border-subtle);
+  }
+  .finding-title {
+    font-size: var(--t-lead);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+  }
+  .quote {
+    padding: var(--space-note-y) var(--space-note-x);
+    background: var(--surface-raised);
+    font-size: var(--t-h3);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--ls-tight);
+    text-wrap: pretty;
+  }
+
+  /* Directions */
+  .stage {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: clamp(40px, 4vw, 72px) var(--pad);
+    background: var(--surface-sunken);
+  }
+  .stage-phone {
+    width: clamp(220px, 26vw, 340px);
+  }
+  .stage-phones {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-media-grid);
+    width: 100%;
+  }
+  .stage-phones .stage-phone {
+    flex: 0 1 clamp(180px, 22vw, 300px);
+  }
+  .stage-tag {
+    --px-step: 2px;
+    position: absolute;
+    top: 16px;
+    padding: 4px 10px;
+    background: var(--surface-card);
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .stage-tag.left {
+    left: 16px;
+  }
+  .stage-tag.right {
+    right: 16px;
+  }
+  .stage-note {
+    position: absolute;
+    right: 16px;
+    bottom: 12px;
+    font-size: var(--t-caption);
+    color: var(--text-tertiary);
+  }
+  .psr {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-grid);
+  }
+  .psr > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: var(--border-width-keyline) solid var(--border-default);
+  }
+  .psr-title {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+
+  /* Testing */
+  .table-wrap {
+    overflow-x: auto;
+    background: var(--surface-raised);
+  }
+  table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: var(--t-body);
+  }
+  th,
+  td {
+    padding: 14px var(--space-tile);
+    text-align: left;
+    border-top: var(--border-width-hair) solid var(--border-default);
+  }
+  thead th {
+    border-top: 0;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  tbody th {
+    font-weight: var(--fw-medium);
+  }
+  tbody td {
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-body) * 1.35);
+    font-weight: var(--fw-semibold);
+    color: var(--text-accent);
+  }
+
+  .sub-title {
+    margin-top: var(--space-article);
+  }
+  .sheet > .sub-title + .trio {
+    margin-top: 20px;
+  }
+
+  /* ---------- Narrow desktop ---------- */
+
+  @media (max-width: 1280px) {
+    .intro,
+    .step {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .stats,
+    .trio,
+    .psr {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .findings li {
+      grid-template-columns: 48px minmax(0, 1fr);
+    }
+    .findings li .body {
+      grid-column: 2;
+    }
+  }
+
+  /* ---------- Mobile / tablet portrait ---------- */
+
+  @media (max-width: 960px) {
+    .root {
+      display: block;
+      max-width: 672px;
+      padding: 0 16px;
+    }
+    .aside {
+      display: none;
+    }
+    .bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: block;
+      /* The page shows through only below the bar */
+      margin: 0 -16px;
+      padding: 16px 16px 0;
+      background: linear-gradient(var(--surface-page) 70%, transparent);
+    }
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: var(--surface-card);
+    }
+    .bar-row .back-icon {
+      display: flex;
+    }
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: var(--control-h);
+      padding: 0 12px 0 14px;
+      border: 0;
+      background: transparent;
+      text-align: left;
+    }
+    .toggle-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .toggle-label {
+      font-family: var(--font-pixel);
+      font-size: 14px;
+      line-height: 1;
+      letter-spacing: var(--ls-caps);
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .toggle-current {
+      overflow: hidden;
+      font-size: 16px;
+      font-weight: var(--fw-semibold);
+      line-height: var(--lh-snug);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+    .toggle-icon {
+      display: flex;
+      flex: none;
+      color: var(--text-secondary);
+      transition: transform var(--dur-fast) var(--ease-standard);
+    }
+    .toggle[aria-expanded='true'] .toggle-icon {
+      transform: rotate(180deg);
+    }
+    .menu {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: calc(100% + 8px);
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      padding: 8px;
+      background: var(--surface-card);
+    }
+    .menu[hidden] {
+      display: none;
+    }
+    [data-toc] {
+      min-height: 44px;
+      font-size: 16px;
+    }
+
+    .sheets {
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .sheet {
+      --pad: 16px;
+      /* Clears the pinned bar */
+      scroll-margin-top: 96px;
+    }
+    .sheet > * + * {
+      margin-top: 24px;
+    }
+    .title {
+      font-size: 30px;
+    }
+    .h2 {
+      font-size: 26px;
+    }
+    .pair,
+    .trio,
+    .psr {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .psr {
+      gap: 20px;
+    }
+    .stats {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+    .stat {
+      padding: 14px;
+    }
+    .stat-value {
+      font-size: 30px;
+    }
+    .gallery {
+      grid-auto-columns: 62%;
+      gap: 12px;
+    }
+    .stage {
+      padding: 56px 16px 40px;
+    }
+    .stage-phone {
+      width: min(260px, 72%);
+    }
+    /* Several "after" screens scroll sideways like the gallery */
+    .stage-phones {
+      justify-content: flex-start;
+      margin: 0 -16px;
+      padding: 0 16px;
+      width: calc(100% + 32px);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+    }
+    .stage-phones .stage-phone {
+      flex: 0 0 min(240px, 66%);
+      width: auto;
+      scroll-snap-align: center;
+    }
+    .stage-phones .stage-phone:only-child {
+      margin: 0 auto;
+    }
+    .stage-note {
+      left: 16px;
+      right: auto;
+    }
+    .findings li {
+      grid-template-columns: 40px minmax(0, 1fr);
+      padding: 16px 0;
+    }
+  }
+</style>

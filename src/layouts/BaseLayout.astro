@@ -9,7 +9,8 @@ interface Props {
   image?: string;
 }
 
-const { title, description = 'Портфолио', image = 'assets/og-cover.png' } = Astro.props;
+// Bump ?v= whenever og-cover.png changes: messengers cache link-preview images by URL.
+const { title, description = 'Портфолио', image = 'assets/og-cover.png?v=2' } = Astro.props;
 // Messengers need absolute URLs; `site` is set by the deploy workflow.
 const absolute = (path: string) => (Astro.site ? new URL(path, Astro.site).href : path);
 const pageUrl = absolute(Astro.url.pathname);

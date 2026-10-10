@@ -1,0 +1,106 @@
+/*
+ * Pixel game-UI shape: stepped corners instead of rounded ones. Fill only, no outlines.
+ * Knob: --px-step (corner step, default 4px).
+ */
+.px-clip {
+  --px-step: 4px;
+  --px-clip: polygon(
+    0 calc(var(--px-step) * 2),
+    var(--px-step) calc(var(--px-step) * 2),
+    var(--px-step) var(--px-step),
+    calc(var(--px-step) * 2) var(--px-step),
+    calc(var(--px-step) * 2) 0,
+    calc(100% - var(--px-step) * 2) 0,
+    calc(100% - var(--px-step) * 2) var(--px-step),
+    calc(100% - var(--px-step)) var(--px-step),
+    calc(100% - var(--px-step)) calc(var(--px-step) * 2),
+    100% calc(var(--px-step) * 2),
+    100% calc(100% - var(--px-step) * 2),
+    calc(100% - var(--px-step)) calc(100% - var(--px-step) * 2),
+    calc(100% - var(--px-step)) calc(100% - var(--px-step)),
+    calc(100% - var(--px-step) * 2) calc(100% - var(--px-step)),
+    calc(100% - var(--px-step) * 2) 100%,
+    calc(var(--px-step) * 2) 100%,
+    calc(var(--px-step) * 2) calc(100% - var(--px-step)),
+    var(--px-step) calc(100% - var(--px-step)),
+    var(--px-step) calc(100% - var(--px-step) * 2),
+    0 calc(100% - var(--px-step) * 2)
+  );
+  clip-path: var(--px-clip);
+}
+
+/* Dialog box at the bottom of the screen (showDialog in scripts/dialog.ts) */
+.px-dialog {
+  --px-step: 4px;
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  z-index: 100;
+  width: min(560px, calc(100vw - 32px));
+  padding: 18px 24px 20px;
+  background: var(--surface-dialog);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  opacity: 0;
+  transform: translate(-50%, 12px);
+  transition:
+    opacity var(--dur-slow) var(--ease-standard),
+    transform var(--dur-slow) var(--ease-standard);
+  pointer-events: none;
+}
+.px-dialog.is-open {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+/* The full text sits invisibly under the typed one, so the box keeps its final size while typing */
+.px-dialog-text {
+  display: grid;
+  margin: 0;
+  font-size: var(--t-body);
+  line-height: var(--lh-normal);
+  color: var(--text-on-dialog);
+}
+.px-dialog-text::before {
+  content: attr(data-full);
+  visibility: hidden;
+}
+.px-dialog-text::before,
+.px-dialog-text > span {
+  grid-area: 1 / 1;
+}
+/* "Next" marker: a small pixel triangle that blinks once the text is out */
+.px-dialog-next {
+  position: absolute;
+  right: 16px;
+  bottom: 10px;
+  width: 10px;
+  height: 6px;
+  background: var(--text-on-dialog);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 2px,
+    80% 2px,
+    80% 4px,
+    60% 4px,
+    60% 6px,
+    40% 6px,
+    40% 4px,
+    20% 4px,
+    20% 2px,
+    0 2px
+  );
+  opacity: 0;
+}
+.px-dialog.is-done .px-dialog-next {
+  animation: px-blink 1s steps(1, end) infinite;
+}
+@keyframes px-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

@@ -1,7 +1,9 @@
 export type Lang = 'ru' | 'en';
 export type Localized = Record<Lang, string>;
 
-export type CaseStatus = 'default' | 'featured' | 'soon';
+import type { PixelIconName } from './pixel-icons';
+
+export type CaseStatus = 'default' | 'soon';
 
 export interface CaseItem {
   id: string;
@@ -19,28 +21,38 @@ export interface CaseItem {
 export const profile = {
   name: { ru: 'Даниил Тынчеров', en: 'Daniil Tyncherov' } satisfies Localized,
   role: 'Product designer',
-  level: '25 lvl',
+  /** Birth date (YYYY-MM-DD): the level badge shows the age and counts up on its own. */
+  birthday: '2000-11-09',
   /** Portrait in /public (5:4). Placeholder is shown while it is missing. */
   portrait: 'assets/portrait.jpg' as string | undefined,
   bio: {
     ru: 'Проектирую мобильные приложения и веб-сервисы. Веду задачу от исследования до передачи в разработку.',
     en: 'I design mobile apps and web services. I take a task from research through to developer handoff.',
   } satisfies Localized,
-  skills: ['Figma', 'Claude', 'Codex', 'Framer', 'Miro', 'Xcode'],
+  /** Availability line under the role; set to undefined to hide it. */
+  status: { ru: 'Открыт к предложениям', en: 'Open to offers' } as Localized | undefined,
   contacts: [
     {
       label: 'Email',
+      icon: 'mail',
       value: 'tyncherovmail@icloud.com',
       href: 'mailto:tyncherovmail@icloud.com',
       external: false,
     },
     {
       label: 'LinkedIn',
+      icon: 'linkedin',
       value: 'linkedin.com/in/daniil-tyncherov',
       href: 'https://www.linkedin.com/in/daniil-tyncherov-455b713a8',
       external: true,
     },
-  ],
+  ] satisfies {
+    label: string;
+    icon: PixelIconName;
+    value: string;
+    href: string;
+    external: boolean;
+  }[],
   cvHref: '#',
   telegramHref: 'https://t.me/everlastinghate',
 };
@@ -54,7 +66,7 @@ export const cases: CaseItem[] = [
       en: 'A Telegram Mini App for secure internet access over VPN',
     },
     tags: ['B2C', '2026'],
-    status: 'featured',
+    status: 'default',
     href: '#',
     coverLabel: { ru: 'Обложка — BittVPN', en: 'Cover — BittVPN' },
   },
@@ -84,8 +96,13 @@ export const cases: CaseItem[] = [
 ];
 
 export const ui = {
-  skills: { ru: 'Навыки', en: 'Skills' },
-  soon: { ru: 'Скоро', en: 'Soon' },
+  class: { ru: 'Класс', en: 'Class' },
+  locked: { ru: 'Откроется позже', en: 'Unlocks later' },
+  noMana: {
+    ru: 'Не хватает маны. Этот кейс откроется позже.',
+    en: 'Not enough mana. This case unlocks later.',
+  },
+  levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now {n} lvl.' },
   footer: { ru: 'Даниил Тынчеров — 2026', en: 'Daniil Tyncherov — 2026' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },

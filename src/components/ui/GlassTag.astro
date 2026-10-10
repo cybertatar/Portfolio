@@ -1,4 +1,4 @@
-<span class="glass-tag">
+<span class="glass-tag px-clip">
   <slot />
 </span>
 
@@ -11,9 +11,9 @@
     background: var(--surface-glass);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: var(--r-control);
-    font-family: var(--font-mono);
-    font-size: var(--t-tag);
+    --px-step: 2px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
     color: var(--text-on-glass);
   }
 </style>

@@ -34,7 +34,7 @@
   --layout-sidebar-max: 360px;
   --layout-feed-max: 1600px;
   --layout-case-max: 1200px;
-  --layout-feed-gap: 48px;
+  --layout-feed-gap: 24px; /* = page margin and column gap: one 24px frame */
 
   /* Control heights */
   --control-h: clamp(44px, 2.6vw, 60px);

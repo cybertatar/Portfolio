@@ -2,42 +2,49 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Button from '../components/ui/Button.astro';
-import Chip from '../components/ui/Chip.astro';
 import ContactRow from '../components/ui/ContactRow.astro';
 import Eyebrow from '../components/ui/Eyebrow.astro';
 import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
+import PixelIcon from '../components/ui/PixelIcon.astro';
 import { cases, profile, ui } from '../content/site';
-import { withBase } from '../scripts/url';
+import { levelOn } from '../scripts/level';
 ---
 
 <BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
   <div class="root">
-    <aside class="aside" data-stage="0" data-profile>
+    <aside class="aside px-clip" data-stage="0" data-profile>
       <div class="head">
         <div class="portrait">
-          <div class="portrait-media">
+          <div class="portrait-media px-clip">
             <Media src={profile.portrait} label={ui.portrait} />
           </div>
-          <span class="lvl">{profile.level}</span>
+          <span class="lvl px-clip">
+            <span class="lvl-num" data-level>
+              {levelOn(profile.birthday)}
+            </span>
+            <span class="lvl-label">lvl</span>
+          </span>
         </div>
         <div class="name">
           <h1 data-en={profile.name.en}>{profile.name.ru}</h1>
-          <p class="role">{profile.role}</p>
+          <p class="role">
+            <span class="role-label" data-en={ui.class.en}>
+              {ui.class.ru}
+            </span>
+            <span>{profile.role}</span>
+          </p>
+          {profile.status && (
+            <p class="status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-en={profile.status.en}>{profile.status.ru}</span>
+            </p>
+          )}
         </div>
       </div>
 
       <div class="bio">
         <p data-en={profile.bio.en}>{profile.bio.ru}</p>
-      </div>
-
-      <div class="zone zone-skills">
-        <Eyebrow data-en={ui.skills.en}>{ui.skills.ru}</Eyebrow>
-        <div class="chips">
-          {profile.skills.map((skill) => (
-            <Chip>{skill}</Chip>
-          ))}
-        </div>
       </div>
 
       <div class="zone zone-contacts">
@@ -46,6 +53,7 @@ import { withBase } from '../scripts/url';
             href={c.href}
             value={c.value}
             label={c.label}
+            icon={c.icon}
             external={c.external}
             divider={i < profile.contacts.length - 1}
           />
@@ -57,7 +65,7 @@ import { withBase } from '../scripts/url';
           CV
         </Button>
         <IconButton href={profile.telegramHref} label="Telegram" target="_blank" rel="noopener">
-          <img src={withBase('assets/telegram.png')} alt="" class="telegram" />
+          <PixelIcon name="telegram" />
         </IconButton>
       </div>
     </aside>
@@ -84,11 +92,15 @@ import { withBase } from '../scripts/url';
 </BaseLayout>
 
 <script>
-  import { initCardStack, initProfileFit } from '../scripts/home';
+  import { profile, ui } from '../content/site';
+  import { initCardStack, initLevel, initLocked, initProfileFit } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
   if (aside) initProfileFit(aside);
+  const level = document.querySelector<HTMLElement>('[data-level]');
+  if (level) initLevel(level, profile.birthday, ui.levelUp);
+  initLocked([...document.querySelectorAll<HTMLElement>('[data-locked]')]);
   if (feed) {
     initCardStack(
       feed,
@@ -112,9 +124,9 @@ import { withBase } from '../scripts/url';
   /* ---------- Profile aside ---------- */
 
   .aside {
-    flex: 0 0 25%;
-    min-width: var(--layout-sidebar-min);
-    max-width: var(--layout-sidebar-max);
+    /* One clamped basis, not 25% + min/max-width: Safari split the row by the raw 25%
+       and pushed the feed past the right edge whenever the 280px minimum kicked in */
+    flex: 0 0 clamp(var(--layout-sidebar-min), 25vw, var(--layout-sidebar-max));
     align-self: flex-start;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
@@ -122,9 +134,12 @@ import { withBase } from '../scripts/url';
     margin: 24px 0 24px calc(var(--side) + 24px);
     display: flex;
     flex-direction: column;
-    padding: clamp(24px, 1.2vw, 28px);
+    padding: 24px;
+    /* Empty space above and below the text in a contact row (rows are tall for tapping);
+       subtracted so gaps around the contacts read the same as the others */
+    --row-inset: calc((var(--control-h) - var(--t-body-sm) * var(--lh-normal)) / 2);
+    --cta-gap: 24px;
     background: var(--surface-card);
-    border-radius: var(--r-shell);
   }
   .head {
     display: flex;
@@ -138,55 +153,102 @@ import { withBase } from '../scripts/url';
     width: 100%;
     aspect-ratio: 5 / 4;
     flex: none;
-    border-radius: 8px;
   }
   .portrait-media {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    border-radius: inherit;
     color: var(--text-tertiary);
   }
+
+  /* Level badge: sits on the portrait's bottom edge, like a unit frame in an MMO */
   .lvl {
+    --px-step: 2px;
     position: absolute;
     left: 12px;
-    bottom: 12px;
+    bottom: -14px;
     display: flex;
-    align-items: center;
-    height: clamp(26px, 1.6vw, 32px);
+    align-items: baseline;
+    gap: 5px;
+    height: 32px;
     padding: 0 10px;
-    background: var(--surface-glass);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: 6px;
-    font-family: var(--font-mono);
-    font-size: clamp(12px, 0.62vw, 15px);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    background: var(--surface-raised);
+    font-family: var(--font-pixel);
+    line-height: 32px;
     white-space: nowrap;
-    color: var(--text-on-glass);
+    color: var(--text-primary);
   }
+  .lvl-num {
+    color: var(--text-accent);
+    font-size: 26px;
+    font-weight: var(--fw-bold);
+  }
+  /* Fira Mono: in the pixel font a lowercase l is a bare stick */
+  .lvl-label {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
   .name {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     flex: 1 1 auto;
     min-width: 0;
-    margin-top: clamp(16px, 1vw, 20px);
+    margin-top: clamp(28px, 1.8vw, 34px);
   }
   h1 {
     margin: 0;
-    font-size: var(--t-name);
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-name) * 1.25);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
-    letter-spacing: var(--ls-tight);
     color: var(--text-primary);
   }
   .role {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
     margin: 0;
     font-size: var(--t-button);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
+  }
+  .role-label {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  /* Availability, like an "online" status: a blinking pixel dot */
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+  .status-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    background: var(--status-online);
+    animation: blink 1.6s steps(1, end) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status-dot {
+      animation: none;
+    }
   }
   .bio {
     flex: none;
@@ -205,30 +267,18 @@ import { withBase } from '../scripts/url';
     flex: none;
     padding-top: var(--space-zone);
   }
-  .zone-skills {
-    gap: 12px;
-  }
   .zone-contacts {
     gap: 2px;
+    margin-top: calc(var(--row-inset) * -1);
   }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+
   .cta {
     display: flex;
     align-items: center;
     gap: 8px;
     flex: none;
-    margin-top: clamp(24px, 1.8vw, 32px);
-  }
-  .telegram {
-    display: block;
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
+    /* Closer to the contacts than the zones are to each other: CV and Telegram are contacts too */
+    margin-top: calc(var(--cta-gap) - var(--row-inset));
   }
 
   /* Height fit, stage 1+: tighter rhythm */
@@ -238,49 +288,28 @@ import { withBase } from '../scripts/url';
   .aside:not([data-stage='0']) .zone {
     padding-top: 24px;
   }
-  .aside:not([data-stage='0']) .cta {
-    margin-top: 16px;
+  .aside:not([data-stage='0']) {
+    --cta-gap: 16px;
   }
 
-  /* Stage 2+: compact header in a row with a round 70px portrait */
-  .aside:is([data-stage='2'], [data-stage='3']) .head {
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-  }
+  /* Stage 2+: a small square portrait on its own row; the name block keeps the full width
+     below it, so the name, class and status never wrap in a narrow sidebar */
   .aside:is([data-stage='2'], [data-stage='3']) .portrait {
-    width: 70px;
-    height: 70px;
+    width: 64px;
+    height: 64px;
     aspect-ratio: auto;
-    flex: 0 0 70px;
-    border-radius: 50%;
   }
-  /* The round crop zooms in on the face: its centre lands at ~34% / 37% of the circle. */
+  /* The square crop zooms in on the face: its centre lands at ~34% / 37% of the frame. */
   .aside:is([data-stage='2'], [data-stage='3']) .portrait-media :global(img) {
     transform-origin: 34% 37%;
     transform: translate(16%, 13%) scale(1.8);
   }
   .aside:is([data-stage='2'], [data-stage='3']) .lvl {
-    left: auto;
-    right: -8px;
-    bottom: -4px;
-    height: 22px;
-    padding: 0 7px;
-    border-radius: var(--r-pill);
-    background: var(--surface-raised);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    color: var(--text-primary);
-    font-size: 11px;
+    left: calc(100% + 12px);
+    bottom: 0;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .name {
-    margin-top: 0;
-  }
-  .aside:is([data-stage='2'], [data-stage='3']) h1 {
-    font-size: 22px;
-  }
-  .aside:is([data-stage='2'], [data-stage='3']) .role {
-    font-size: 14px;
+    margin-top: 16px;
   }
 
   /* Stage 3: drop the bio */
@@ -291,7 +320,7 @@ import { withBase } from '../scripts/url';
   /* ---------- Feed ---------- */
 
   .feed {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-width: 0;
     height: 100vh;
     /* Padding, not margin: the feed scrolls, so its scrollbar and wheel area
@@ -304,7 +333,7 @@ import { withBase } from '../scripts/url';
     width: 100%;
     max-width: var(--layout-feed-max);
     margin: 0 auto;
-    padding: 24px 40px 0;
+    padding: 24px 24px 0;
   }
   .list {
     display: flex;
@@ -349,6 +378,8 @@ import { withBase } from '../scripts/url';
       max-height: none;
       overflow: visible;
       margin: 16px auto 0;
+      /* Inner padding no larger than the 16px screen margin and gaps */
+      padding: 16px;
     }
     .feed {
       height: auto;

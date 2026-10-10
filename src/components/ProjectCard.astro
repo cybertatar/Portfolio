@@ -1,21 +1,29 @@
 ---
 import { ui, type CaseItem } from '../content/site';
-import ArrowRightIcon from './ui/ArrowRightIcon.astro';
-import Badge from './ui/Badge.astro';
 import GlassTag from './ui/GlassTag.astro';
 import IconButton from './ui/IconButton.astro';
 import Media from './ui/Media.astro';
+import PixelIcon from './ui/PixelIcon.astro';
 
 interface Props {
   item: CaseItem;
 }
 
-/** Home-feed card for one case: 16:9 cover, glass tags, title + description, round arrow or "Soon". */
+/** Home-feed card for one case: 16:9 cover, title + description, arrow or lock. */
 const { item } = Astro.props;
 const soon = item.status === 'soon';
 const Tag = soon ? 'div' : 'a';
+// A locked case is a button that answers with a "not enough mana" dialog (initLocked in home.ts).
 const linkProps = soon
-  ? {}
+  ? ({
+      role: 'button',
+      tabindex: 0,
+      'data-locked': '',
+      'data-msg': ui.noMana.ru,
+      'data-msg-en': ui.noMana.en,
+      'aria-label': `${item.title}: ${ui.locked.ru}`,
+      'data-en-label': `${item.title}: ${ui.locked.en}`,
+    } as const)
   : {
       href: item.href ?? '#',
       'aria-label': `${ui.openCase.ru}: ${item.title}`,
@@ -23,11 +31,19 @@ const linkProps = soon
     };
 ---
 
-<Tag class="card" {...linkProps}>
-  <div class="cover">
+<Tag class:list={['card', 'px-clip', { soon }]} {...linkProps}>
+  <div class="cover px-clip">
     <div class="cover-media">
       <Media src={item.cover} label={item.coverLabel} />
     </div>
+    {soon && (
+      <div class="locked">
+        <span class="lock" data-lock>
+          <PixelIcon name="lock" size={48} />
+        </span>
+        <span data-en={ui.locked.en}>{ui.locked.ru}</span>
+      </div>
+    )}
     {item.tags.length > 0 && (
       <div class="tags">
         {item.tags.map((tag) => (
@@ -43,13 +59,9 @@ const linkProps = soon
         {item.description.ru}
       </p>
     </div>
-    {soon ? (
-      <span class="soon">
-        <Badge data-en={ui.soon.en}>{ui.soon.ru}</Badge>
-      </span>
-    ) : (
-      <IconButton shape="circle" tone={item.status === 'featured' ? 'inverse' : 'raised'}>
-        <ArrowRightIcon />
+    {!soon && (
+      <IconButton shape="large">
+        <PixelIcon name="arrow" />
       </IconButton>
     )}
   </div>
@@ -61,10 +73,8 @@ const linkProps = soon
     flex-direction: column;
     gap: 20px;
     padding: 24px;
-    background: var(--surface-card);
-    border-radius: var(--r-shell);
-    overflow: hidden;
     text-decoration: none;
+    background: var(--surface-card);
     color: inherit;
   }
   .card:hover {
@@ -75,20 +85,54 @@ const linkProps = soon
     flex: none;
     width: 100%;
     aspect-ratio: 16 / 9;
-    border-radius: var(--r-control);
     overflow: hidden;
     color: var(--text-tertiary);
   }
   .cover-media {
     position: absolute;
     inset: 0;
-    border-radius: inherit;
     transform: scale(1);
     transition: transform var(--dur-slower) var(--ease-standard);
     will-change: transform;
   }
   .card:hover .cover-media {
     transform: scale(var(--cover-zoom));
+  }
+  /* Locked quest: the cover is replaced by a lock */
+  .locked {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: var(--surface-sunken);
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .lock {
+    display: block;
+  }
+  /* Shake on click: short, stepped, like a sprite */
+  .lock:global(.is-shaking) {
+    animation: shake 360ms steps(1, end);
+  }
+  @keyframes shake {
+    0%,
+    50% {
+      transform: translateX(-4px);
+    }
+    25%,
+    75% {
+      transform: translateX(4px);
+    }
+    100% {
+      transform: none;
+    }
   }
   .tags {
     position: absolute;
@@ -120,15 +164,22 @@ const linkProps = soon
     letter-spacing: var(--ls-tighter);
     color: var(--text-primary);
   }
+  .soon .title,
+  .soon .description {
+    color: var(--text-tertiary);
+  }
   .description {
     margin: 0;
     font-size: var(--t-card-sub);
     line-height: var(--lh-normal);
     color: var(--text-secondary);
   }
-  .soon {
-    flex: none;
-    align-self: center;
-    display: flex;
+
+  /* Mobile: inner padding no larger than the 16px gaps around the card */
+  @media (max-width: 960px) {
+    .card {
+      gap: 16px;
+      padding: 16px;
+    }
   }
 </style>

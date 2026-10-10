@@ -6,7 +6,7 @@ interface Props {
 const { href, full = false } = Astro.props;
 ---
 
-<a href={href} class:list={['button', { full }]}>
+<a href={href} class:list={['button', 'px-clip', { full }]}>
   <slot />
 </a>
 
@@ -23,17 +23,15 @@ const { href, full = false } = Astro.props;
     background: var(--surface-inverse);
     color: var(--text-inverse);
     border: 0;
-    border-radius: var(--r-control);
-    font-family: var(--font-sans);
-    font-size: var(--t-button);
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-button) * 1.3);
     font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-tight);
+    letter-spacing: var(--ls-caps);
     text-decoration: none;
-    cursor: pointer;
     transition: background var(--dur-fast) var(--ease-standard);
   }
   .button:hover {
-    background: var(--fg-2);
+    background: var(--surface-inverse-hover);
     color: var(--text-inverse);
   }
   .full {

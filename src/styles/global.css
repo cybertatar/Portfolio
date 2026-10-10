@@ -1,9 +1,10 @@
-/* Tyncherov Portfolio DS — global entry. Fira Sans / Fira Mono are linked in BaseLayout. */
+/* Tyncherov Portfolio DS — global entry. Fira Sans / Fira Mono / Handjet are linked in BaseLayout. */
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
 @import './tokens/radius.css';
 @import './tokens/effects.css';
+@import './pixel.css';
 
 *,
 *::before,
@@ -58,5 +59,22 @@ textarea {
     --t-card-title: 28px;
     --t-card-sub: 15px;
     --t-body: 16px;
+  }
+}
+
+/* Pixel cursors on mouse devices: a sword, and a gauntlet over anything clickable */
+@media (pointer: fine) {
+  html {
+    cursor:
+      url('../assets/cursors/sword.png') 2 2,
+      auto;
+  }
+  a,
+  button,
+  [role='button'],
+  .px-dialog {
+    cursor:
+      url('../assets/cursors/gauntlet.png') 10 2,
+      pointer;
   }
 }

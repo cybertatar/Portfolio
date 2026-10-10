@@ -1,3 +1,6 @@
+import { localized, showDialog } from './dialog';
+import { isBirthday, levelOn } from './level';
+
 const MOBILE = '(max-width: 960px)';
 
 /** Card-stack motion. Desktop and mobile values come from the design handoff. */
@@ -78,4 +81,43 @@ export function initCardStack(feed: HTMLElement, slots: HTMLElement[], spacer: H
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', onScroll);
   update();
+}
+
+/** Keeps the level badge in step with the real age and says "Level up!" on the birthday. */
+export function initLevel(el: HTMLElement, birthday: string, message: { ru: string; en: string }) {
+  const level = levelOn(birthday);
+  el.textContent = String(level);
+  if (!isBirthday(birthday)) return;
+
+  // Once per day and visitor; storage may be unavailable, then it simply shows again.
+  const key = `level-up-${new Date().getFullYear()}`;
+  try {
+    if (localStorage.getItem(key)) return;
+    localStorage.setItem(key, '1');
+  } catch {
+    /* ignore */
+  }
+  const text = localized(message.ru, message.en).replace('{n}', String(level));
+  setTimeout(() => showDialog(text), 900);
+}
+
+/** Locked cases: the lock shakes and a dialog says there's not enough mana. */
+export function initLocked(cards: HTMLElement[]) {
+  cards.forEach((card) => {
+    const lock = card.querySelector<HTMLElement>('[data-lock]');
+    const open = () => {
+      showDialog(localized(card.dataset.msg ?? '', card.dataset.msgEn));
+      if (!lock) return;
+      lock.classList.remove('is-shaking');
+      void lock.offsetWidth; // restart the animation
+      lock.classList.add('is-shaking');
+    };
+    card.addEventListener('click', open);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+  });
 }

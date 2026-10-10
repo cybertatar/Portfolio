@@ -18,13 +18,6 @@ export interface CaseItem {
   coverLabel: Localized;
 }
 
-/** A work tool, shown as an equipped item: name, pixel icon and what the tool is for. */
-export interface Tool {
-  name: string;
-  icon: PixelIconName;
-  kind: Localized;
-}
-
 export const profile = {
   name: { ru: 'Даниил Тынчеров', en: 'Daniil Tyncherov' } satisfies Localized,
   role: 'Product designer',
@@ -36,18 +29,8 @@ export const profile = {
     ru: 'Проектирую мобильные приложения и веб-сервисы. Веду задачу от исследования до передачи в разработку.',
     en: 'I design mobile apps and web services. I take a task from research through to developer handoff.',
   } satisfies Localized,
-  tools: [
-    {
-      name: 'Figma',
-      icon: 'figma',
-      kind: { ru: 'Интерфейсы и прототипы', en: 'Interfaces and prototypes' },
-    },
-    { name: 'Claude', icon: 'claude', kind: { ru: 'ИИ-ассистент', en: 'AI assistant' } },
-    { name: 'Codex', icon: 'codex', kind: { ru: 'ИИ-агент для кода', en: 'AI coding agent' } },
-    { name: 'Framer', icon: 'framer', kind: { ru: 'Сайты и анимация', en: 'Websites and motion' } },
-    { name: 'Miro', icon: 'miro', kind: { ru: 'Онлайн-доски', en: 'Online whiteboards' } },
-    { name: 'Xcode', icon: 'xcode', kind: { ru: 'Сборка под iOS', en: 'Building for iOS' } },
-  ] satisfies Tool[],
+  /** Availability line under the role; set to undefined to hide it. */
+  status: { ru: 'Открыт к предложениям', en: 'Open to offers' } as Localized | undefined,
   contacts: [
     {
       label: 'Email',
@@ -114,7 +97,6 @@ export const cases: CaseItem[] = [
 
 export const ui = {
   class: { ru: 'Класс', en: 'Class' },
-  tools: { ru: 'Инструменты', en: 'Tools' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },
   footer: { ru: 'Даниил Тынчеров — 2026', en: 'Daniil Tyncherov — 2026' },
   portrait: { ru: 'Портрет', en: 'Portrait' },

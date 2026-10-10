@@ -13,7 +13,7 @@
   --fg-3: #71717f;
   --fg-4: #4b4b57;
 
-  /* Accent — coral, the only chromatic colour in the system */
+  /* Accent — coral, the only chromatic colour in the system (besides the status dot) */
   --coral-300: #ff8ca6;
   --coral-400: #ff6a85;
   --coral-500: #ff4d6d;
@@ -39,6 +39,7 @@
   --text-accent-hover: var(--coral-400);
   --accent: var(--coral-500);
   --accent-soft: var(--coral-500);
+  --status-online: #3ddc84; /* availability dot only */
 
   /* Borders */
   --border-subtle: var(--line-1);

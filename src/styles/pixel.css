@@ -28,32 +28,3 @@
   );
   clip-path: var(--px-clip);
 }
-
-/* Item tooltip (created by initTooltips in scripts/home.ts) */
-.px-tip {
-  --px-step: 2px;
-  position: fixed;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  max-width: 240px;
-  padding: 10px 12px 11px;
-  background: var(--surface-raised);
-  pointer-events: none;
-}
-.px-tip[hidden] {
-  display: none;
-}
-.px-tip-title {
-  font-family: var(--font-pixel);
-  font-size: 22px;
-  font-weight: var(--fw-semibold);
-  color: var(--text-primary);
-}
-.px-tip-text {
-  margin-top: 4px;
-  font-size: 13px;
-  line-height: var(--lh-snug);
-  color: var(--text-secondary);
-}

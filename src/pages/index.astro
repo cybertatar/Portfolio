@@ -31,31 +31,17 @@ import { cases, profile, ui } from '../content/site';
             </span>
             <span>{profile.role}</span>
           </p>
+          {profile.status && (
+            <p class="status">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span data-en={profile.status.en}>{profile.status.ru}</span>
+            </p>
+          )}
         </div>
       </div>
 
       <div class="bio">
         <p data-en={profile.bio.en}>{profile.bio.ru}</p>
-      </div>
-
-      <div class="zone zone-gear">
-        <Eyebrow data-en={ui.tools.en}>{ui.tools.ru}</Eyebrow>
-        <ul class="gear">
-          {profile.tools.map((tool) => (
-            <li
-              class="gear-item"
-              tabindex="0"
-              data-tip={tool.name}
-              data-tip-text={tool.kind.ru}
-              data-tip-text-en={tool.kind.en}
-            >
-              <span class="gear-slot px-clip">
-                <PixelIcon name={tool.icon} />
-              </span>
-              <span class="gear-name">{tool.name}</span>
-            </li>
-          ))}
-        </ul>
       </div>
 
       <div class="zone zone-contacts">
@@ -103,12 +89,11 @@ import { cases, profile, ui } from '../content/site';
 </BaseLayout>
 
 <script>
-  import { initCardStack, initProfileFit, initTooltips } from '../scripts/home';
+  import { initCardStack, initProfileFit } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
   if (aside) initProfileFit(aside);
-  initTooltips();
   if (feed) {
     initCardStack(
       feed,
@@ -226,6 +211,33 @@ import { cases, profile, ui } from '../content/site';
     text-transform: uppercase;
     color: var(--text-tertiary);
   }
+  /* Availability, like an "online" status: a blinking pixel dot */
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 2px 0 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+  .status-dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    background: var(--status-online);
+    animation: blink 1.6s steps(1, end) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .status-dot {
+      animation: none;
+    }
+  }
   .bio {
     flex: none;
     margin-top: var(--space-zone);
@@ -243,62 +255,8 @@ import { cases, profile, ui } from '../content/site';
     flex: none;
     padding-top: var(--space-zone);
   }
-  .zone-gear {
-    gap: 12px;
-  }
   .zone-contacts {
     gap: 2px;
-  }
-
-  /* Tools: small square inventory slots with the name beside them, three per row */
-  .gear {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px 16px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .gear-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    cursor: default;
-    outline: none;
-  }
-  .gear-slot {
-    --px-step: 2px;
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 40px;
-    height: 40px;
-    background: var(--surface-raised);
-    color: var(--text-primary);
-    transition: background var(--dur-fast) var(--ease-standard);
-  }
-  .gear-name {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    color: var(--text-secondary);
-    transition: color var(--dur-fast) var(--ease-standard);
-  }
-  .gear-item:hover .gear-slot,
-  .gear-item:focus-visible .gear-slot {
-    background: var(--surface-active);
-  }
-  .gear-item:hover .gear-name,
-  .gear-item:focus-visible .gear-name {
-    color: var(--text-primary);
-  }
-  .gear-item:focus-visible .gear-slot {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: -2px;
   }
 
   .cta {

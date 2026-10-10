@@ -19,6 +19,7 @@
 - Токены дизайн-системы: `src/styles/tokens`. Примитивы: `src/components/ui`.
 - Главная: `src/pages/index.astro`, поведение (ужатие профиля, стопка карточек): `src/scripts/home.ts`.
 - Пути к файлам из `public/` — через `withBase()` из `src/scripts/url.ts` (сайт живёт в подпапке `/Portfolio/`).
+- Safari: не сочетать процентный `flex-basis` с `min-width`/`max-width` (Safari делит строку по сырому проценту, и соседняя колонка вылезает за край). Задавать одним `clamp()`, как у сайдбара. Проверяю только в Chromium, поэтому правки вёрстки владелец смотрит в Safari.
 
 ## Статус
 

@@ -51,6 +51,28 @@
   --accent-soft: var(--sky-300);
   --status-online: #2e9466; /* availability dot only */
 
+  /* Footer flower field only: muted, like pressed flowers on parchment. Each flower takes
+     a petal colour (-1), a second shade (-2) and a heart (-heart, or the shared one). */
+  --flora-leaf: #8fa577;
+  --flora-grass: #6f8a5c;
+  --flora-heart: #d6ae55;
+  --flora-sky-1: var(--sky-300);
+  --flora-sky-2: var(--sky-400);
+  --flora-deep-1: var(--sky-400);
+  --flora-deep-2: var(--sky-500);
+  --flora-white-1: #fbf8f1;
+  --flora-white-2: #e9dfca;
+  --flora-lilac-1: #b7a6d2;
+  --flora-lilac-2: #9a87bd;
+  --flora-rose-1: #e3b5b6;
+  --flora-rose-2: #cc9097;
+  --flora-butter-1: #ead38b;
+  --flora-butter-2: #d4b35a;
+  --flora-butter-heart: #9c7a3c;
+  --flora-frog: #80a35f;
+  --flora-frog-light: #9cbd7a;
+  --flora-frog-dark: #5d7d44;
+
   /* Borders */
   --border-subtle: var(--line-1);
   --border-default: var(--line-2);

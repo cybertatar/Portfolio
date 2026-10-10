@@ -1,0 +1,138 @@
+<!doctype html>
+<!--
+  Case cover for PSB-Bank Redesign concept, 1920×1080 (16:9) → public/assets/cases/psb-cover.webp.
+  Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
+  as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
+  Screens: frames from the "mockup for claude" section of the PSB Figma file, cropped to the
+  first 874pt of each frame and exported at 2x (tools/case-covers/psb/*.png).
+  Colours mirror src/styles/tokens/colors.css. The card zooms the cover on hover,
+  so keep the key content away from the edges.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root {
+        --paper-0: #e7e0d0;
+        --paper-3: #e8e1d2;
+        --paper-4: #ddd5c3;
+        --line-2: #cfc6b2;
+        --ink-1: #29251e;
+        --bezel: #1d1a15;
+        --s: 8px; /* pixel corner step of the device body */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: var(--paper-3);
+      }
+      /* Pixel grid: 4px dots every 32px, like tiles on a game map; fades out toward the top */
+      body::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: conic-gradient(from 270deg at 4px 4px, var(--line-2) 25%, transparent 0);
+        background-size: 32px 32px;
+        background-position: 14px 14px;
+        mask-image: linear-gradient(to bottom, transparent 10%, #000 90%);
+        opacity: 0.8;
+      }
+      /* Stepped corners, same shape as .px-clip on the site */
+      .px {
+        clip-path: polygon(
+          0 calc(var(--s) * 2),
+          var(--s) calc(var(--s) * 2),
+          var(--s) var(--s),
+          calc(var(--s) * 2) var(--s),
+          calc(var(--s) * 2) 0,
+          calc(100% - var(--s) * 2) 0,
+          calc(100% - var(--s) * 2) var(--s),
+          calc(100% - var(--s)) var(--s),
+          calc(100% - var(--s)) calc(var(--s) * 2),
+          100% calc(var(--s) * 2),
+          100% calc(100% - var(--s) * 2),
+          calc(100% - var(--s)) calc(100% - var(--s) * 2),
+          calc(100% - var(--s)) calc(100% - var(--s)),
+          calc(100% - var(--s) * 2) calc(100% - var(--s)),
+          calc(100% - var(--s) * 2) 100%,
+          calc(var(--s) * 2) 100%,
+          calc(var(--s) * 2) calc(100% - var(--s)),
+          var(--s) calc(100% - var(--s)),
+          var(--s) calc(100% - var(--s) * 2),
+          0 calc(100% - var(--s) * 2)
+        );
+      }
+      .row {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        display: flex;
+        gap: 48px;
+        transform: translateX(-50%);
+      }
+      .phone {
+        position: relative;
+        flex: none;
+        width: 474px;
+        /* Hard pixel shadow: the stepped silhouette offset down-right, no blur */
+        filter: drop-shadow(12px 12px 0 rgb(41 37 30 / 0.14));
+      }
+      .body {
+        position: relative;
+        padding: 12px;
+        background: var(--bezel);
+      }
+      .screen {
+        --s: 6px;
+        display: block;
+        width: 450px;
+        height: 979px; /* 402×874 screen at 1.12 */
+        object-fit: cover;
+        object-position: top;
+      }
+      .phone:nth-child(1) {
+        margin-top: 264px;
+      }
+      .phone:nth-child(2) {
+        margin-top: 176px;
+      }
+      .phone:nth-child(3) {
+        margin-top: 96px;
+      }
+      .phone:nth-child(4) {
+        margin-top: 176px;
+      }
+      .phone:nth-child(5) {
+        margin-top: 264px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <div class="phone">
+        <div class="body px"><img class="screen px" src="psb/account.png" alt="" /></div>
+      </div>
+      <div class="phone">
+        <div class="body px"><img class="screen px" src="psb/cb-off.png" alt="" /></div>
+      </div>
+      <div class="phone">
+        <div class="body px"><img class="screen px" src="psb/main.png" alt="" /></div>
+      </div>
+      <div class="phone">
+        <div class="body px"><img class="screen px" src="psb/cb-connect.png" alt="" /></div>
+      </div>
+      <div class="phone">
+        <div class="body px"><img class="screen px" src="psb/cb-on.png" alt="" /></div>
+      </div>
+    </div>
+  </body>
+</html>

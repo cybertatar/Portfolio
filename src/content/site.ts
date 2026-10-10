@@ -80,6 +80,7 @@ export const cases: CaseItem[] = [
     tags: ['B2C', '2026'],
     status: 'default',
     href: '#',
+    cover: 'assets/cases/psb-cover.webp',
     coverLabel: { ru: 'Обложка — PSB', en: 'Cover — PSB' },
   },
   {

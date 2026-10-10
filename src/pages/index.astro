@@ -8,9 +8,6 @@ import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
 import PixelIcon from '../components/ui/PixelIcon.astro';
 import { cases, profile, ui } from '../content/site';
-
-const upcoming = cases.filter((c) => c.status === 'soon').length;
-const done = cases.length - upcoming;
 ---
 
 <BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
@@ -90,13 +87,6 @@ const done = cases.length - upcoming;
       <div class="inner">
         <header class="log-head">
           <Eyebrow data-en={ui.questLog.en}>{ui.questLog.ru}</Eyebrow>
-          <span class="log-count">
-            <span data-en={`${ui.completed.en}: ${done}`}>{`${ui.completed.ru}: ${done}`}</span>
-            <span aria-hidden="true">·</span>
-            <span
-              data-en={`${ui.upcoming.en}: ${upcoming}`}
-            >{`${ui.upcoming.ru}: ${upcoming}`}</span>
-          </span>
         </header>
 
         <div class="list">
@@ -404,19 +394,8 @@ const done = cases.length - upcoming;
   .log-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
     height: 32px;
     margin-bottom: 16px;
-  }
-  .log-count {
-    display: flex;
-    gap: 8px;
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
-    color: var(--text-tertiary);
   }
   .list {
     display: flex;

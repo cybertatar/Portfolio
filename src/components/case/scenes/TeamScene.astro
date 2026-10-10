@@ -2,8 +2,9 @@
 import Sprite from './Sprite.astro';
 
 /**
- * "Designed in pairs, checked with a senior": the two of us argue in a cloud of dust,
- * show the result, the senior drops in with a review, we get sad, and it starts over.
+ * "Designed in pairs, checked with a senior": the swordsman and the mage (the two of us)
+ * argue in a cloud of dust, show the result, the elder quest-giver (the senior) descends
+ * with a review, the party gets sad, and it starts over.
  */
 const review = 'Карты над счётом, а сумма счёта мелкая. Сам понял, что сделал-то?';
 ---
@@ -17,26 +18,26 @@ const review = 'Карты над счётом, а сумма счёта мел�
   <div class="desk"></div>
 
   <div class="hero a">
-    <Sprite name="mustache" />
-    <Sprite name="mustache-happy" class="face happy" />
-    <Sprite name="mustache-blink" class="face blink" />
-    <Sprite name="mustache-sad" class="face sad" />
+    <Sprite name="swordsman" />
+    <Sprite name="swordsman-happy" class="face happy" />
+    <Sprite name="swordsman-blink" class="face blink" />
+    <Sprite name="swordsman-sad" class="face sad" />
   </div>
   <div class="hero b">
-    <Sprite name="beret" />
-    <Sprite name="beret-happy" class="face happy" />
-    <Sprite name="beret-blink" class="face blink" />
-    <Sprite name="beret-sad" class="face sad" />
+    <Sprite name="mage" />
+    <Sprite name="mage-happy" class="face happy" />
+    <Sprite name="mage-blink" class="face blink" />
+    <Sprite name="mage-sad" class="face sad" />
   </div>
 
   <div class="arm arm-a">
-    <Sprite name="arm-warm" />
+    <Sprite name="arm-sword" />
   </div>
   <div class="phone">
     <Sprite name="phone" />
   </div>
   <div class="arm arm-b">
-    <Sprite name="arm-cool" />
+    <Sprite name="arm-mage" />
   </div>
 
   <div class="cloud">
@@ -55,16 +56,19 @@ const review = 'Карты над счётом, а сумма счёта мел�
     <span class="swear s3">@</span>
   </div>
 
-  <div class="senior">
+  <div class="elder">
+    <span class="quest">
+      <Sprite name="quest" />
+    </span>
     <span class="arm-s left">
-      <Sprite name="arm-senior" />
+      <Sprite name="arm-elder" />
     </span>
     <span class="arm-s right">
-      <Sprite name="arm-senior" />
+      <Sprite name="arm-elder" />
     </span>
-    <Sprite name="senior" />
-    <Sprite name="senior-angry" class="face angry" />
-    <Sprite name="senior-talk" class="face talk" />
+    <Sprite name="elder" />
+    <Sprite name="elder-angry" class="face angry" />
+    <Sprite name="elder-talk" class="face talk" />
   </div>
 
   <div class="dialog px-clip" aria-hidden="true">
@@ -117,15 +121,15 @@ const review = 'Карты над счётом, а сумма счёта мел�
 
   .hero {
     position: absolute;
-    bottom: 8cqi;
+    bottom: 7cqi;
     z-index: 2;
-    width: 34cqi;
+    width: 30cqi;
   }
   .a {
-    left: 6cqi;
+    left: 8cqi;
   }
   .b {
-    right: 6cqi;
+    right: 8cqi;
   }
   .stage :global(.face) {
     position: absolute;
@@ -245,15 +249,15 @@ const review = 'Карты над счётом, а сумма счёта мел�
     animation: swear 0.6s steps(1, end) infinite;
   }
   .s1 {
-    left: 6cqi;
+    left: 10cqi;
   }
   .s2 {
-    left: 20cqi;
+    left: 27cqi;
     top: -16cqi;
     animation-delay: -0.2s;
   }
   .s3 {
-    left: 32cqi;
+    left: 42cqi;
     animation-delay: -0.4s;
   }
   @keyframes swear {
@@ -265,7 +269,7 @@ const review = 'Карты над счётом, а сумма счёта мел�
     }
   }
 
-  /* Show: a mitten holds up the phone, the other one points at it */
+  /* Show: the swordsman holds up the phone, the mage points at it */
   .arm,
   .phone {
     position: absolute;
@@ -273,53 +277,68 @@ const review = 'Карты над счётом, а сумма счёта мел�
     opacity: 0;
     transition: opacity 0.2s steps(2, end);
   }
+  /* Arms grow from the shoulders (torso tops sit ~18cqi up, see the sprite sizes) */
   .arm {
-    width: 4.6cqi;
-    bottom: 20cqi;
+    width: 4.4cqi;
+    bottom: 15cqi;
+    transform-origin: 50% 100%;
   }
   .arm-a {
-    left: 38cqi;
-    transform: rotate(35deg);
+    left: 27cqi;
+    transform: rotate(50deg);
   }
   .arm-b {
-    right: 38cqi;
-    transform: rotate(-35deg);
+    left: 68.6cqi;
+    transform: rotate(-58deg);
   }
   .phone {
-    left: 50%;
-    bottom: 25cqi;
-    width: 9cqi;
-    transform: translateX(-50%);
+    left: 34cqi;
+    bottom: 19cqi;
+    width: 8cqi;
+    transform: rotate(-8deg);
   }
   [data-state]:not([data-state='fight']) :is(.arm, .phone) {
     opacity: 1;
   }
 
-  /* Review: the senior drops in from above and talks */
-  .senior {
+  /* Review: the elder descends from above, the quest mark bobbing over his hood */
+  .elder {
     position: absolute;
     left: 50%;
     top: 0;
     z-index: 5;
-    width: 18cqi;
+    width: 17cqi;
     transform: translate(-50%, -130%);
     transition: transform 0.45s steps(5, end);
   }
-  [data-state='review'] .senior,
-  [data-state='sad'] .senior {
-    transform: translate(-50%, 3cqi);
+  [data-state='review'] .elder,
+  [data-state='sad'] .elder {
+    transform: translate(-50%, 6cqi);
+  }
+  .quest {
+    position: absolute;
+    left: 50%;
+    top: -6cqi;
+    width: 2.6cqi;
+    transform: translateX(-50%);
+    animation: bob 0.8s steps(2, end) infinite;
+  }
+  @keyframes bob {
+    50% {
+      translate: 0 -0.8cqi;
+    }
   }
   .arm-s {
     position: absolute;
-    top: 30%;
-    width: 4cqi;
+    top: 64%;
+    width: 3.4cqi;
   }
   .arm-s.left {
-    left: -3cqi;
+    left: -1.6cqi;
     transform: rotate(-30deg);
   }
   .arm-s.right {
-    right: -3cqi;
+    right: -1.6cqi;
     transform: rotate(30deg);
   }
   [data-state='review'] .arm-s {
@@ -347,7 +366,7 @@ const review = 'Карты над счётом, а сумма счёта мел�
     --px-step: 0.8cqi;
     position: absolute;
     left: 50%;
-    top: 18.5cqi;
+    top: 26cqi;
     z-index: 6;
     width: 72cqi;
     padding: 2.4cqi 3.2cqi 2.8cqi;

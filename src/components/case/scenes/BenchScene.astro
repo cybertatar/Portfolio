@@ -1,17 +1,20 @@
 ---
 import Sprite from './Sprite.astro';
+import { withBase } from '../../../scripts/url';
 
 /**
- * "Picked four directions": one of us lifts a bank's coin, it floats up with the idea we took
- * from that bank, and lands with the other one. Coins are letters on the bank's colour, not logos.
+ * "Picked four directions": a chest between the swordsman and the mage opens, a bank's
+ * real app icon rises with the idea we took from that bank, like loot with its tooltip,
+ * and one of the two takes it. Logos stay as they are, no pixel styling.
+ * `tile`: the mark sits on a white app-icon tile; without it the file is the whole icon.
  */
 const banks = [
-  { name: 'Сбер', letter: 'С', bg: '#6f9a5c', ink: '#fbf8f1', idea: 'Флип карты' },
-  { name: 'Ozon Банк', letter: 'O', bg: '#3a6ea5', ink: '#fbf8f1', idea: 'Копирование иконкой' },
-  { name: 'Т-Банк', letter: 'Т', bg: '#ead38b', ink: '#29251e', idea: 'Акцент на скорости' },
-  { name: 'Альфа-Банк', letter: 'А', bg: '#c9605a', ink: '#fbf8f1', idea: 'Кешбэк в таббаре' },
-  { name: 'Райффайзен', letter: 'Р', bg: '#d4b35a', ink: '#29251e', idea: 'Кешбэк в бейдже' },
-];
+  { name: 'Сбер', logo: 'sber.svg', tile: true, idea: 'Флип карты' },
+  { name: 'Ozon Банк', logo: 'ozon.svg', tile: false, idea: 'Копирование иконкой' },
+  { name: 'Т-Банк', logo: 'tbank.svg', tile: true, idea: 'Акцент на скорости' },
+  { name: 'Альфа-Банк', logo: 'alfa.svg', tile: true, idea: 'Кешбэк в таббаре' },
+  { name: 'Райффайзен', logo: 'raiffeisen.svg', tile: false, idea: 'Кешбэк в бейдже' },
+].map((b) => ({ ...b, logo: withBase(`assets/cases/psb/banks/${b.logo}`) }));
 ---
 
 <div
@@ -24,30 +27,38 @@ const banks = [
   <div class="desk"></div>
 
   <div class="hero a">
-    <Sprite name="mustache" />
-    <Sprite name="mustache-happy" class="face happy" />
-    <Sprite name="mustache-blink" class="face blink" />
+    <Sprite name="swordsman" />
+    <Sprite name="swordsman-happy" class="face happy" />
+    <Sprite name="swordsman-blink" class="face blink" />
   </div>
   <div class="hero b">
-    <Sprite name="beret" />
-    <Sprite name="beret-happy" class="face happy" />
-    <Sprite name="beret-blink" class="face blink" />
+    <Sprite name="mage" />
+    <Sprite name="mage-happy" class="face happy" />
+    <Sprite name="mage-blink" class="face blink" />
   </div>
   <div class="arm arm-a">
-    <Sprite name="arm-warm" />
+    <Sprite name="arm-sword" />
   </div>
   <div class="arm arm-b">
-    <Sprite name="arm-cool" />
+    <Sprite name="arm-mage" />
   </div>
 
-  <span class="coin px-clip" data-coin aria-hidden="true">
-    {banks[0].letter}
+  <div class="chest">
+    <Sprite name="chest" class="shut" />
+    <Sprite name="chest-open" class="open" />
+  </div>
+  <span class="glint g1"></span>
+  <span class="glint g2"></span>
+  <span class="glint g3"></span>
+
+  <span class="loot" data-loot aria-hidden="true">
+    <img src={banks[0].logo} alt="" data-logo />
   </span>
-  <div class="caption px-clip" aria-hidden="true">
-    <span class="caption-bank" data-bank>
+  <div class="tooltip px-clip" aria-hidden="true">
+    <span class="tooltip-bank" data-bank>
       {banks[0].name}
     </span>
-    <span class="caption-idea" data-idea>
+    <span class="tooltip-idea" data-idea>
       {banks[0].idea}
     </span>
   </div>
@@ -58,32 +69,35 @@ const banks = [
 
   interface Bank {
     name: string;
-    letter: string;
-    bg: string;
-    ink: string;
+    logo: string;
+    tile: boolean;
     idea: string;
   }
 
   document.querySelectorAll<HTMLElement>('[data-scene="bench"]').forEach((root) => {
     const banks: Bank[] = JSON.parse(root.dataset.banks ?? '[]');
-    const coin = root.querySelector<HTMLElement>('[data-coin]')!;
+    const loot = root.querySelector<HTMLElement>('[data-loot]')!;
+    const logo = root.querySelector<HTMLImageElement>('[data-logo]')!;
     const bank = root.querySelector<HTMLElement>('[data-bank]')!;
     const idea = root.querySelector<HTMLElement>('[data-idea]')!;
-    const set = (b: Bank) => {
-      coin.textContent = b.letter;
-      coin.style.setProperty('--coin-bg', b.bg);
-      coin.style.setProperty('--coin-ink', b.ink);
+    // Load every logo up front, so a swap never shows an empty tile
+    banks.forEach((b) => (new Image().src = b.logo));
+    const set = (b: Bank, i: number) => {
+      logo.src = b.logo;
+      loot.classList.toggle('tile', b.tile);
       bank.textContent = b.name;
       idea.textContent = b.idea;
+      // The two take turns: even banks go to the swordsman, odd ones to the mage
+      root.dataset.to = i % 2 ? 'b' : 'a';
     };
-    set(banks[0]);
-    const steps: SceneStep[] = banks.flatMap((b) => [
-      { state: 'pick', ms: 700, enter: () => set(b) },
-      { state: 'show', ms: 1800 },
-      { state: 'pass', ms: 800 },
-      { state: 'got', ms: 500 },
+    set(banks[0], 0);
+    const steps: SceneStep[] = banks.flatMap((b, i) => [
+      { state: 'open', ms: 500, enter: () => set(b, i) },
+      { state: 'rise', ms: 2000 },
+      { state: 'take', ms: 600 },
+      { state: 'got', ms: 600 },
     ]);
-    runScene(root, steps, 'show');
+    runScene(root, steps, 'rise');
   });
 </script>
 
@@ -108,15 +122,15 @@ const banks = [
   }
   .hero {
     position: absolute;
-    bottom: 8cqi;
+    bottom: 7cqi;
     z-index: 2;
-    width: 34cqi;
+    width: 28cqi;
   }
   .a {
-    left: 6cqi;
+    left: 4cqi;
   }
   .b {
-    right: 6cqi;
+    right: 4cqi;
   }
   .stage :global(.face) {
     position: absolute;
@@ -145,8 +159,9 @@ const banks = [
       opacity: 1;
     }
   }
-  /* The catcher hops when the coin lands */
-  [data-state='got'] .b {
+  /* Whoever takes the loot hops */
+  [data-state='got'][data-to='a'] .a,
+  [data-state='got'][data-to='b'] .b {
     animation: hop 0.5s steps(3, end);
   }
   @keyframes hop {
@@ -155,78 +170,158 @@ const banks = [
     }
   }
 
+  /* Only the one taking the loot reaches out; the arm grows from the shoulder */
   .arm {
     position: absolute;
     z-index: 3;
-    width: 4.6cqi;
-    bottom: 22cqi;
-    transition: transform 0.25s steps(3, end);
+    width: 4.4cqi;
+    bottom: 15cqi;
+    transform-origin: 50% 100%;
+    opacity: 0;
   }
   .arm-a {
-    left: 38cqi;
-    transform-origin: 50% 100%;
-    transform: rotate(80deg) translateY(2cqi);
-  }
-  [data-state='pick'] .arm-a {
-    transform: rotate(20deg);
+    left: 22cqi;
+    transform: rotate(35deg);
   }
   .arm-b {
-    right: 38cqi;
-    transform-origin: 50% 100%;
-    transform: rotate(-80deg) translateY(2cqi);
+    left: 73cqi;
+    transform: rotate(-35deg);
   }
-  [data-state='pass'] .arm-b,
-  [data-state='got'] .arm-b {
-    transform: rotate(-20deg);
+  [data-to='a']:is([data-state='take'], [data-state='got']) .arm-a,
+  [data-to='b']:is([data-state='take'], [data-state='got']) .arm-b {
+    opacity: 1;
   }
 
-  /* The coin: in the left hand, up under the caption, then in the right hand */
-  .coin {
-    --px-step: 0.8cqi;
+  /* The chest sits on the desk between them */
+  .chest {
+    position: absolute;
+    left: 50%;
+    bottom: 12.4cqi;
+    z-index: 5;
+    width: 20cqi;
+    transform: translateX(-50%);
+  }
+  .chest :global(.open) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  [data-state='open'] .chest :global(.open),
+  [data-state='rise'] .chest :global(.open) {
+    opacity: 1;
+  }
+  [data-state='open'] .chest :global(.shut),
+  [data-state='rise'] .chest :global(.shut) {
+    opacity: 0;
+  }
+  /* Gold glints over the open chest */
+  .glint {
     position: absolute;
     z-index: 5;
-    left: 41cqi;
-    top: 31cqi;
+    width: 1.2cqi;
+    height: 1.2cqi;
+    background: var(--flora-heart);
+    opacity: 0;
+  }
+  .g1 {
+    left: 43cqi;
+    bottom: 24cqi;
+  }
+  .g2 {
+    left: 55cqi;
+    bottom: 26cqi;
+  }
+  .g3 {
+    left: 50cqi;
+    bottom: 29cqi;
+  }
+  [data-state='open'] .glint,
+  [data-state='rise'] .glint {
+    animation: glint 0.6s steps(2, end) infinite;
+  }
+  [data-state] .g2 {
+    animation-delay: -0.2s;
+  }
+  [data-state] .g3 {
+    animation-delay: -0.4s;
+  }
+  @keyframes glint {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-3cqi);
+    }
+  }
+
+  /* The loot: the bank's real icon, out of the chest, up under the tooltip, then to a hand */
+  .loot {
+    position: absolute;
+    z-index: 6;
+    left: 50cqi;
+    top: 52cqi;
     display: grid;
     place-items: center;
-    width: 10cqi;
-    height: 10cqi;
-    background: var(--coin-bg);
-    color: var(--coin-ink);
-    font-family: var(--font-pixel);
-    font-size: 6.6cqi;
-    font-weight: var(--fw-bold);
-    line-height: 1;
-    transform: translateX(-50%);
+    width: 12cqi;
+    height: 12cqi;
+    border-radius: 22%;
+    overflow: hidden;
+    transform: translate(-50%, 0) scale(0.4);
+    opacity: 0;
     transition:
-      left 0.5s steps(5, end),
-      top 0.5s steps(5, end),
+      left 0.45s steps(5, end),
+      top 0.45s steps(5, end),
+      transform 0.45s steps(5, end),
       opacity 0.2s steps(2, end);
   }
-  /* A new coin appears in the hand at once, without flying back across the stage */
-  [data-state='pick'] .coin {
+  .loot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .loot.tile {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
+  .loot.tile img {
+    width: 66%;
+    height: 66%;
+  }
+  [data-state='open'] .loot {
     transition: none;
   }
-  [data-state='show'] .coin {
-    left: 50cqi;
-    top: 8cqi;
+  [data-state='rise'] .loot {
+    top: 9cqi;
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
   }
-  [data-state='pass'] .coin {
-    left: 59cqi;
-    top: 31cqi;
+  [data-state='take'] .loot {
+    top: 40cqi;
+    transform: translate(-50%, 0) scale(0.7);
+    opacity: 1;
   }
-  [data-state='got'] .coin {
-    left: 59cqi;
-    top: 38cqi;
+  [data-to='a']:is([data-state='take'], [data-state='got']) .loot {
+    left: 30cqi;
+  }
+  [data-to='b']:is([data-state='take'], [data-state='got']) .loot {
+    left: 70cqi;
+  }
+  [data-state='got'] .loot {
+    top: 46cqi;
+    transform: translate(-50%, 0) scale(0.4);
     opacity: 0;
   }
 
-  .caption {
+  /* Loot tooltip, as in an MMO: what it is and what it gives */
+  .tooltip {
     --px-step: 0.6cqi;
     position: absolute;
     left: 50%;
-    top: 21cqi;
-    z-index: 5;
+    top: 24cqi;
+    z-index: 6;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -240,18 +335,19 @@ const banks = [
       opacity 0.2s steps(2, end),
       transform 0.2s steps(2, end);
   }
-  [data-state='show'] .caption {
+  [data-state='rise'] .tooltip {
     opacity: 1;
     transform: translate(-50%, 0);
+    transition-delay: 0.3s;
   }
-  .caption-bank {
+  .tooltip-bank {
     font-family: var(--font-pixel);
     font-size: max(12px, 3cqi);
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
     color: var(--text-tertiary);
   }
-  .caption-idea {
+  .tooltip-idea {
     font-size: max(13px, 3.8cqi);
     font-weight: var(--fw-semibold);
     color: var(--text-primary);

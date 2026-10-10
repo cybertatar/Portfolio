@@ -13,8 +13,17 @@ interface Props {
 const { item } = Astro.props;
 const soon = item.status === 'soon';
 const Tag = soon ? 'div' : 'a';
+// A locked case is a button that answers with a "not enough mana" dialog (initLocked in home.ts).
 const linkProps = soon
-  ? {}
+  ? {
+      role: 'button',
+      tabindex: 0,
+      'data-locked': '',
+      'data-msg': ui.noMana.ru,
+      'data-msg-en': ui.noMana.en,
+      'aria-label': `${item.title}: ${ui.locked.ru}`,
+      'data-en-label': `${item.title}: ${ui.locked.en}`,
+    } as const
   : {
       href: item.href ?? '#',
       'aria-label': `${ui.openCase.ru}: ${item.title}`,
@@ -29,7 +38,9 @@ const linkProps = soon
     </div>
     {soon && (
       <div class="locked">
-        <PixelIcon name="lock" size={48} />
+        <span class="lock" data-lock>
+          <PixelIcon name="lock" size={48} />
+        </span>
         <span data-en={ui.locked.en}>{ui.locked.ru}</span>
       </div>
     )}
@@ -102,6 +113,26 @@ const linkProps = soon
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
     color: var(--text-tertiary);
+  }
+  .lock {
+    display: block;
+  }
+  /* Shake on click: short, stepped, like a sprite */
+  .lock:global(.is-shaking) {
+    animation: shake 360ms steps(1, end);
+  }
+  @keyframes shake {
+    0%,
+    50% {
+      transform: translateX(-4px);
+    }
+    25%,
+    75% {
+      transform: translateX(4px);
+    }
+    100% {
+      transform: none;
+    }
   }
   .tags {
     position: absolute;

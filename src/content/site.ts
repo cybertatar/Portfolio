@@ -21,8 +21,8 @@ export interface CaseItem {
 export const profile = {
   name: { ru: 'Даниил Тынчеров', en: 'Daniil Tyncherov' } satisfies Localized,
   role: 'Product designer',
-  /** Age, shown as the character level. */
-  level: 25,
+  /** Birth date (YYYY-MM-DD): the level badge shows the age and counts up on its own. */
+  birthday: '2000-11-09',
   /** Portrait in /public (5:4). Placeholder is shown while it is missing. */
   portrait: 'assets/portrait.jpg' as string | undefined,
   bio: {
@@ -98,6 +98,11 @@ export const cases: CaseItem[] = [
 export const ui = {
   class: { ru: 'Класс', en: 'Class' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },
+  noMana: {
+    ru: 'Не хватает маны. Этот кейс откроется позже.',
+    en: 'Not enough mana. This case unlocks later.',
+  },
+  levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now {n} lvl.' },
   footer: { ru: 'Даниил Тынчеров — 2026', en: 'Daniil Tyncherov — 2026' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },

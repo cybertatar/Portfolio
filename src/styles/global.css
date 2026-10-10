@@ -61,3 +61,20 @@ textarea {
     --t-body: 16px;
   }
 }
+
+/* Pixel cursors on mouse devices: a sword, and a gauntlet over anything clickable */
+@media (pointer: fine) {
+  html {
+    cursor:
+      url('../assets/cursors/sword.png') 2 2,
+      auto;
+  }
+  a,
+  button,
+  [role='button'],
+  .px-dialog {
+    cursor:
+      url('../assets/cursors/gauntlet.png') 10 2,
+      pointer;
+  }
+}

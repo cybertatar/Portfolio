@@ -8,6 +8,7 @@ import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
 import PixelIcon from '../components/ui/PixelIcon.astro';
 import { cases, profile, ui } from '../content/site';
+import { levelOn } from '../scripts/level';
 ---
 
 <BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
@@ -19,7 +20,9 @@ import { cases, profile, ui } from '../content/site';
             <Media src={profile.portrait} label={ui.portrait} />
           </div>
           <span class="lvl px-clip">
-            <span class="lvl-num">{profile.level}</span>
+            <span class="lvl-num" data-level>
+              {levelOn(profile.birthday)}
+            </span>
             <span class="lvl-label">lvl</span>
           </span>
         </div>
@@ -89,11 +92,15 @@ import { cases, profile, ui } from '../content/site';
 </BaseLayout>
 
 <script>
-  import { initCardStack, initProfileFit } from '../scripts/home';
+  import { profile, ui } from '../content/site';
+  import { initCardStack, initLevel, initLocked, initProfileFit } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
   if (aside) initProfileFit(aside);
+  const level = document.querySelector<HTMLElement>('[data-level]');
+  if (level) initLevel(level, profile.birthday, ui.levelUp);
+  initLocked([...document.querySelectorAll<HTMLElement>('[data-locked]')]);
   if (feed) {
     initCardStack(
       feed,

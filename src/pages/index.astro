@@ -15,76 +15,74 @@ const done = cases.length - upcoming;
 
 <BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
   <div class="root">
-    <aside class="aside px-frame" data-stage="0" data-profile>
-      <div class="aside-body" data-profile-body>
-        <div class="head">
-          <div class="portrait">
-            <div class="portrait-media px-clip">
-              <Media src={profile.portrait} label={ui.portrait} />
-            </div>
-            <span class="lvl px-frame">
-              <span class="lvl-num">{profile.level}</span>
-              <span class="lvl-label" data-en={ui.level.en}>
-                {ui.level.ru}
-              </span>
+    <aside class="aside px-clip" data-stage="0" data-profile>
+      <div class="head">
+        <div class="portrait">
+          <div class="portrait-media px-clip">
+            <Media src={profile.portrait} label={ui.portrait} />
+          </div>
+          <span class="lvl px-clip">
+            <span class="lvl-num">{profile.level}</span>
+            <span class="lvl-label" data-en={ui.level.en}>
+              {ui.level.ru}
             </span>
-          </div>
-          <div class="name">
-            <h1 data-en={profile.name.en}>{profile.name.ru}</h1>
-            <p class="role">
-              <span class="role-label" data-en={ui.class.en}>
-                {ui.class.ru}
-              </span>
-              <span>{profile.role}</span>
-            </p>
-          </div>
+          </span>
         </div>
-
-        <div class="bio">
-          <p data-en={profile.bio.en}>{profile.bio.ru}</p>
+        <div class="name">
+          <h1 data-en={profile.name.en}>{profile.name.ru}</h1>
+          <p class="role">
+            <span class="role-label" data-en={ui.class.en}>
+              {ui.class.ru}
+            </span>
+            <span>{profile.role}</span>
+          </p>
         </div>
+      </div>
 
-        <div class="zone zone-gear">
-          <Eyebrow data-en={ui.equipment.en}>{ui.equipment.ru}</Eyebrow>
-          <ul class="gear">
-            {profile.tools.map((tool) => (
-              <li
-                class="gear-item px-frame"
-                tabindex="0"
-                data-tip={tool.name}
-                data-tip-type={ui.tool.ru}
-                data-tip-type-en={ui.tool.en}
-                data-tip-text={tool.kind.ru}
-                data-tip-text-en={tool.kind.en}
-              >
-                <PixelIcon name={tool.icon} />
-                <span class="gear-name">{tool.name}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      <div class="bio">
+        <p data-en={profile.bio.en}>{profile.bio.ru}</p>
+      </div>
 
-        <div class="zone zone-contacts">
-          {profile.contacts.map((c, i) => (
-            <ContactRow
-              href={c.href}
-              value={c.value}
-              label={c.label}
-              icon={c.icon}
-              external={c.external}
-              divider={i < profile.contacts.length - 1}
-            />
+      <div class="zone zone-gear">
+        <Eyebrow data-en={ui.equipment.en}>{ui.equipment.ru}</Eyebrow>
+        <ul class="gear">
+          {profile.tools.map((tool) => (
+            <li
+              class="gear-item px-clip"
+              tabindex="0"
+              data-tip={tool.name}
+              data-tip-type={ui.tool.ru}
+              data-tip-type-en={ui.tool.en}
+              data-tip-text={tool.kind.ru}
+              data-tip-text-en={tool.kind.en}
+            >
+              <PixelIcon name={tool.icon} />
+              <span class="gear-name">{tool.name}</span>
+            </li>
           ))}
-        </div>
+        </ul>
+      </div>
 
-        <div class="cta">
-          <Button href={profile.cvHref} full>
-            CV
-          </Button>
-          <IconButton href={profile.telegramHref} label="Telegram" target="_blank" rel="noopener">
-            <PixelIcon name="telegram" />
-          </IconButton>
-        </div>
+      <div class="zone zone-contacts">
+        {profile.contacts.map((c, i) => (
+          <ContactRow
+            href={c.href}
+            value={c.value}
+            label={c.label}
+            icon={c.icon}
+            external={c.external}
+            divider={i < profile.contacts.length - 1}
+          />
+        ))}
+      </div>
+
+      <div class="cta">
+        <Button href={profile.cvHref} full>
+          CV
+        </Button>
+        <IconButton href={profile.telegramHref} label="Telegram" target="_blank" rel="noopener">
+          <PixelIcon name="telegram" />
+        </IconButton>
       </div>
     </aside>
 
@@ -124,9 +122,8 @@ const done = cases.length - upcoming;
   import { initCardStack, initProfileFit, initTooltips } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
-  const asideBody = document.querySelector<HTMLElement>('[data-profile-body]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
-  if (aside && asideBody) initProfileFit(aside, asideBody);
+  if (aside) initProfileFit(aside);
   initTooltips();
   if (feed) {
     initCardStack(
@@ -151,26 +148,18 @@ const done = cases.length - upcoming;
   /* ---------- Profile aside ---------- */
 
   .aside {
-    --px-fill: var(--surface-card);
-    --px-border: var(--border-default);
     flex: 0 0 25%;
     min-width: var(--layout-sidebar-min);
     max-width: var(--layout-sidebar-max);
     align-self: flex-start;
-    display: flex;
     max-height: calc(100vh - 48px);
-    margin: 24px 0 24px calc(var(--side) + 24px);
-  }
-  /* The frame can't scroll (its fill would scroll away), so the body inside it does. */
-  .aside-body {
-    flex: 1 1 auto;
-    min-height: 0;
-    min-width: 0;
     overflow-y: auto;
     overflow-x: hidden;
+    margin: 24px 0 24px calc(var(--side) + 24px);
     display: flex;
     flex-direction: column;
     padding: clamp(24px, 1.2vw, 28px);
+    background: var(--surface-card);
   }
   .head {
     display: flex;
@@ -195,8 +184,6 @@ const done = cases.length - upcoming;
   /* Level badge: sits on the portrait's bottom edge, like a unit frame in an MMO */
   .lvl {
     --px-step: 2px;
-    --px-border: var(--accent);
-    --px-fill: var(--ink-0);
     position: absolute;
     left: 12px;
     bottom: -14px;
@@ -205,6 +192,7 @@ const done = cases.length - upcoming;
     gap: 5px;
     height: 32px;
     padding: 0 10px;
+    background: var(--ink-0);
     font-family: var(--font-pixel);
     line-height: 32px;
     white-space: nowrap;
@@ -289,23 +277,20 @@ const done = cases.length - upcoming;
   }
   .gear-item {
     --px-step: 2px;
-    --px-border: var(--border-subtle);
-    --px-fill: var(--ink-1);
-    --px-bevel: rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
     height: var(--chip-h);
     padding: 0 10px;
+    background: var(--surface-raised);
     color: var(--text-primary);
     cursor: default;
     transition: background var(--dur-fast) var(--ease-standard);
   }
   .gear-item:hover,
   .gear-item:focus-visible {
-    --px-border: var(--border-strong);
-    --px-fill: var(--surface-raised);
+    background: var(--surface-active);
     outline: none;
   }
   .gear-name {
@@ -459,10 +444,8 @@ const done = cases.length - upcoming;
       max-width: 640px;
       min-width: 0;
       max-height: none;
-      margin: 16px auto 0;
-    }
-    .aside-body {
       overflow: visible;
+      margin: 16px auto 0;
     }
     .feed {
       height: auto;

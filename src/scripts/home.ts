@@ -6,16 +6,17 @@ const STACK = {
   mobile: { travel: 320, lift: 24, scale: 0.03, fade: 0 },
 };
 
-/** Shrink the profile card in stages (0→3) until its body fits the viewport height. Desktop only. */
-export function initProfileFit(aside: HTMLElement, body: HTMLElement) {
+/** Shrink the profile card in stages (0→3) until it fits the viewport height. Desktop only. */
+export function initProfileFit(aside: HTMLElement) {
   const fit = () => {
     if (matchMedia(MOBILE).matches) {
       aside.dataset.stage = '0';
       return;
     }
+    const room = Math.max(0, innerHeight - 48);
     for (const n of [0, 1, 2, 3]) {
       aside.dataset.stage = String(n);
-      if (body.scrollHeight <= body.clientHeight + 8) return;
+      if (aside.scrollHeight <= Math.min(room, aside.clientHeight) + 8) return;
     }
   };
 
@@ -88,7 +89,7 @@ export function initTooltips() {
   if (!items.length) return;
 
   const tip = document.createElement('div');
-  tip.className = 'px-tip px-frame';
+  tip.className = 'px-tip px-clip';
   tip.setAttribute('role', 'tooltip');
   tip.hidden = true;
   document.body.append(tip);

@@ -26,7 +26,7 @@ const linkProps = soon
     };
 ---
 
-<Tag class:list={['card', 'px-frame', { featured, soon }]} {...linkProps}>
+<Tag class:list={['card', 'px-clip', { soon }]} {...linkProps}>
   <div class="cover px-clip">
     <div class="cover-media">
       <Media src={item.cover} label={item.coverLabel} />
@@ -77,29 +77,16 @@ const linkProps = soon
 
 <style>
   .card {
-    --px-border: var(--border-default);
-    --px-fill: var(--surface-card);
     display: flex;
     flex-direction: column;
     gap: 20px;
     padding: 24px;
     text-decoration: none;
+    background: var(--surface-card);
     color: inherit;
-    transition: background var(--dur-fast) var(--ease-standard);
   }
   .card:hover {
-    --px-border: var(--border-strong);
     color: inherit;
-  }
-  /* Main quest: the one coral frame in the log */
-  .featured {
-    --px-border: color-mix(in srgb, var(--accent) 55%, var(--surface-card));
-  }
-  .featured:hover {
-    --px-border: var(--accent);
-  }
-  .soon {
-    --px-border: var(--border-subtle);
   }
   .cover {
     position: relative;

@@ -170,15 +170,25 @@ export function initMeadow(footer: HTMLElement, meadow: HTMLElement) {
     }
   };
 
-  /** Mouse: flowers open under the cursor as it wanders over the field, a cell at a time. */
+  /** Mouse: now and then a single flower opens under the cursor as it wanders over the field;
+      never right next to another one, so a sweep leaves scattered flowers, not a solid trail. */
   let cell = '';
   footer.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse') return;
     const box = meadow.getBoundingClientRect();
-    const key = `${Math.floor((e.clientX - box.left) / CELL)}:${Math.floor((e.clientY - box.top) / CELL)}`;
+    const col = Math.floor((e.clientX - box.left) / CELL);
+    const row = Math.floor((e.clientY - box.top) / CELL);
+    const { cols, rows } = grid();
+    const key = `${col}:${row}`;
     if (key === cell) return;
     cell = key;
-    cast(e.clientX, e.clientY, 1.6);
+    if (col < 0 || row < 0 || col >= cols || row >= rows || Math.random() > 0.45) return;
+    for (let dc = -1; dc <= 1; dc++) {
+      for (let dr = -1; dr <= 1; dr++) {
+        if (cells.get(`${col + dc}:${row + dr}`)?.dataset.kind === 'flower') return;
+      }
+    }
+    plant(col, row, 'flower', 0, true);
   });
   footer.addEventListener('pointerleave', () => (cell = ''));
 

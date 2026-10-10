@@ -116,8 +116,6 @@ export const ui = {
   level: { ru: 'Ур.', en: 'Lvl' },
   class: { ru: 'Класс', en: 'Class' },
   tools: { ru: 'Инструменты', en: 'Tools' },
-  questLog: { ru: 'Журнал квестов', en: 'Quest log' },
-  quest: { ru: 'Квест', en: 'Quest' },
   mainQuest: { ru: 'Главный', en: 'Main' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },
   footer: { ru: 'Даниил Тынчеров — 2026', en: 'Daniil Tyncherov — 2026' },

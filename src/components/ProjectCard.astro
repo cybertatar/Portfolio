@@ -7,15 +7,12 @@ import PixelIcon from './ui/PixelIcon.astro';
 
 interface Props {
   item: CaseItem;
-  /** Position in the quest log, from 1. */
-  number: number;
 }
 
-/** Home-feed card for one case, styled as a quest-log entry: 16:9 cover, quest line, title + description. */
-const { item, number } = Astro.props;
+/** Home-feed card for one case: 16:9 cover, main-quest marker if featured, title + description. */
+const { item } = Astro.props;
 const soon = item.status === 'soon';
 const featured = item.status === 'featured';
-const quest = String(number).padStart(2, '0');
 const Tag = soon ? 'div' : 'a';
 const linkProps = soon
   ? {}
@@ -47,15 +44,12 @@ const linkProps = soon
   </div>
   <div class="body">
     <div class="text">
-      <p class="quest">
-        {featured && (
-          <span class="main">
-            <span aria-hidden="true">!</span>
-            <span data-en={ui.mainQuest.en}>{ui.mainQuest.ru}</span>
-          </span>
-        )}
-        <span data-en={`${ui.quest.en} ${quest}`}>{`${ui.quest.ru} ${quest}`}</span>
-      </p>
+      {featured && (
+        <p class="main">
+          <span aria-hidden="true">!</span>
+          <span data-en={ui.mainQuest.en}>{ui.mainQuest.ru}</span>
+        </p>
+      )}
       <h2 class="title">{item.title}</h2>
       <p class="description" data-en={item.description.en}>
         {item.description.ru}
@@ -138,21 +132,14 @@ const linkProps = soon
     flex: 1 1 auto;
     min-width: 0;
   }
-  .quest {
+  .main {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
+    gap: 6px;
     margin: 0;
     font-family: var(--font-pixel);
     font-size: var(--t-pixel-label);
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-  .main {
-    display: flex;
-    gap: 6px;
     color: var(--text-accent);
   }
   .title {

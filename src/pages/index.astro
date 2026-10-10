@@ -85,14 +85,10 @@ import { cases, profile, ui } from '../content/site';
 
     <main class="feed" data-feed>
       <div class="inner">
-        <header class="log-head">
-          <Eyebrow data-en={ui.questLog.en}>{ui.questLog.ru}</Eyebrow>
-        </header>
-
         <div class="list">
           {cases.map((item, i) => (
             <article class:list={['slot', { last: i === cases.length - 1 }]} data-slot>
-              <ProjectCard item={item} number={i + 1} />
+              <ProjectCard item={item} />
             </article>
           ))}
         </div>
@@ -390,12 +386,6 @@ import { cases, profile, ui } from '../content/site';
     max-width: var(--layout-feed-max);
     margin: 0 auto;
     padding: 24px 40px 0;
-  }
-  .log-head {
-    display: flex;
-    align-items: center;
-    height: 32px;
-    margin-bottom: 16px;
   }
   .list {
     display: flex;

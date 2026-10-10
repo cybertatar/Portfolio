@@ -38,7 +38,7 @@
   z-index: 100;
   width: min(560px, calc(100vw - 32px));
   padding: 18px 24px 20px;
-  background: rgba(8, 8, 10, 0.88);
+  background: var(--surface-dialog);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   opacity: 0;
@@ -59,7 +59,7 @@
   margin: 0;
   font-size: var(--t-body);
   line-height: var(--lh-normal);
-  color: var(--text-primary);
+  color: var(--text-on-dialog);
 }
 .px-dialog-text::before {
   content: attr(data-full);
@@ -76,7 +76,7 @@
   bottom: 10px;
   width: 10px;
   height: 6px;
-  background: var(--text-primary);
+  background: var(--text-on-dialog);
   clip-path: polygon(
     0 0,
     100% 0,

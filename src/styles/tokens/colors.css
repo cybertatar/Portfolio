@@ -1,55 +1,69 @@
 :root {
-  /* Neutral ramp — near-black, cool-neutral */
-  --ink-0: #08080a;
-  --ink-1: #0e0e12;
-  --ink-2: #14141a;
-  --ink-3: #1c1c23;
-  --ink-4: #24242d;
-  --line-1: #26262f;
-  --line-2: #33333f;
-  --line-3: #484857;
-  --fg-1: #f6f6f8;
-  --fg-2: #ababb8;
-  --fg-3: #71717f;
-  --fg-4: #4b4b57;
+  color-scheme: light;
 
-  /* Accent — coral, the only chromatic colour in the system (besides the status dot) */
-  --coral-300: #ff8ca6;
-  --coral-400: #ff6a85;
-  --coral-500: #ff4d6d;
-  --coral-600: #e23458;
+  /* Paper ramp — warm parchment. Cards are lighter than the page, like sheets on a desk. */
+  --paper-0: #ece6d8; /* page */
+  --paper-1: #e3dccc; /* sunken */
+  --paper-2: #f7f3ea; /* card */
+  --paper-3: #e8e1d2; /* raised */
+  --paper-4: #ddd5c3; /* active */
+  --line-1: #ddd5c4;
+  --line-2: #cfc6b2;
+  --line-3: #b5ab95;
+
+  /* Ink ramp — text. Steps 1–3 clear WCAG AA (4.5:1) on card and raised paper. */
+  --ink-1: #29251e;
+  --ink-2: #585143;
+  --ink-3: #665e4f;
+  --ink-4: #a39a88;
+
+  /* Accent — muted sky blue, the only chromatic colour (besides the status dot).
+     600 is for text (5:1 on raised paper), 500 for fills. */
+  --sky-300: #8fb2d6;
+  --sky-400: #4f81b6;
+  --sky-500: #3a6ea5;
+  --sky-600: #2f5f93;
 
   /* Surfaces */
-  --surface-page: var(--ink-0);
-  --surface-card: var(--ink-2);
-  --surface-raised: var(--ink-3);
-  --surface-hover: var(--ink-3);
-  --surface-active: var(--ink-4);
-  --surface-inverse: var(--fg-1);
-  --surface-glass: rgba(8, 8, 10, 0.55);
+  --surface-page: var(--paper-0);
+  --surface-sunken: var(--paper-1);
+  --surface-card: var(--paper-2);
+  --surface-raised: var(--paper-3);
+  --surface-hover: var(--paper-3);
+  --surface-active: var(--paper-4);
+  --surface-inverse: var(--ink-1);
+  --surface-inverse-hover: #3d382f;
+  --surface-glass: rgba(247, 243, 234, 0.78);
+  /* Game dialog box: stays dark over the light page, like dialogs over the world in Zelda */
+  --surface-dialog: rgba(33, 30, 24, 0.92);
 
   /* Text */
-  --text-primary: var(--fg-1);
-  --text-secondary: var(--fg-2);
-  --text-tertiary: var(--fg-3);
-  --text-disabled: var(--fg-4);
-  --text-inverse: var(--ink-0);
-  --text-on-glass: #f6f6f8;
-  --text-accent: var(--coral-500);
-  --text-accent-hover: var(--coral-400);
-  --accent: var(--coral-500);
-  --accent-soft: var(--coral-500);
-  --status-online: #3ddc84; /* availability dot only */
+  --text-primary: var(--ink-1);
+  --text-secondary: var(--ink-2);
+  --text-tertiary: var(--ink-3);
+  --text-disabled: var(--ink-4);
+  --text-inverse: var(--paper-2);
+  --text-on-glass: var(--ink-1);
+  --text-on-dialog: var(--paper-2);
+  --text-accent: var(--sky-600);
+  --text-accent-hover: var(--sky-500);
+  --accent: var(--sky-500);
+  --accent-soft: var(--sky-300);
+  --status-online: #2e9466; /* availability dot only */
+
+  /* Bevels: the shaded bottom edge of pixel buttons */
+  --bevel-shade: rgba(41, 37, 30, 0.1);
+  --bevel-shade-inverse: rgba(0, 0, 0, 0.35);
 
   /* Borders */
   --border-subtle: var(--line-1);
   --border-default: var(--line-2);
   --border-strong: var(--line-3);
-  --border-accent: var(--coral-500);
+  --border-accent: var(--sky-500);
   --border-width-hair: 1px;
   --border-width-frame: 2px;
   --border-width-keyline: 2px;
 
-  --focus-ring: var(--coral-500);
-  --selection-bg: rgba(255, 255, 255, 0.16);
+  --focus-ring: var(--sky-500);
+  --selection-bg: rgba(58, 110, 165, 0.18);
 }

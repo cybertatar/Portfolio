@@ -1,7 +1,6 @@
 /**
  * Case page behaviour: the contents highlight the section being read, the mobile bar opens
- * the contents as a list, before/after sliders follow their range inputs, silent loops play
- * only while on screen.
+ * the contents as a list, before/after sliders follow their range inputs.
  */
 
 /** Marks the link of the section under the reading line (a third down the screen). */
@@ -78,19 +77,4 @@ export function initCompare(root: HTMLElement) {
   const set = () => root.style.setProperty('--pos', `${range.value}%`);
   range.addEventListener('input', set);
   set();
-}
-
-export function initLoopVideos(videos: HTMLVideoElement[]) {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const io = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(({ target, isIntersecting }) => {
-        const v = target as HTMLVideoElement;
-        if (isIntersecting) v.play().catch(() => {});
-        else v.pause();
-      });
-    },
-    { threshold: 0.25 },
-  );
-  videos.forEach((v) => io.observe(v));
 }

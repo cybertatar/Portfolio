@@ -1,0 +1,381 @@
+---
+import Sprite from './Sprite.astro';
+
+/**
+ * "Designed in pairs, checked with a senior": the two of us argue in a cloud of dust,
+ * show the result, the senior drops in with a review, we get sad, and it starts over.
+ */
+const review = 'Карты над счётом, а сумма счёта мелкая. Сам понял, что сделал-то?';
+---
+
+<div
+  class="stage px-clip"
+  data-scene="team"
+  role="img"
+  aria-label={`Двое дизайнеров спорят, показывают макет сеньору, он отвечает: «${review}»`}
+>
+  <div class="desk"></div>
+
+  <div class="hero a">
+    <Sprite name="mustache" />
+    <Sprite name="mustache-happy" class="face happy" />
+    <Sprite name="mustache-blink" class="face blink" />
+    <Sprite name="mustache-sad" class="face sad" />
+  </div>
+  <div class="hero b">
+    <Sprite name="beret" />
+    <Sprite name="beret-happy" class="face happy" />
+    <Sprite name="beret-blink" class="face blink" />
+    <Sprite name="beret-sad" class="face sad" />
+  </div>
+
+  <div class="arm arm-a">
+    <Sprite name="arm-warm" />
+  </div>
+  <div class="phone">
+    <Sprite name="phone" />
+  </div>
+  <div class="arm arm-b">
+    <Sprite name="arm-cool" />
+  </div>
+
+  <div class="cloud">
+    <Sprite name="cloud" />
+    <span class="puff p1">
+      <Sprite name="puff" />
+    </span>
+    <span class="puff p2">
+      <Sprite name="puff" />
+    </span>
+    <span class="puff p3">
+      <Sprite name="puff" />
+    </span>
+    <span class="swear s1">#</span>
+    <span class="swear s2">!</span>
+    <span class="swear s3">@</span>
+  </div>
+
+  <div class="senior">
+    <span class="arm-s left">
+      <Sprite name="arm-senior" />
+    </span>
+    <span class="arm-s right">
+      <Sprite name="arm-senior" />
+    </span>
+    <Sprite name="senior" />
+    <Sprite name="senior-angry" class="face angry" />
+    <Sprite name="senior-talk" class="face talk" />
+  </div>
+
+  <div class="dialog px-clip" aria-hidden="true">
+    <span class="dialog-label">Ревью сеньора</span>
+    <p class="dialog-text">
+      <span data-type={review}></span>
+    </p>
+  </div>
+</div>
+
+<script>
+  import { runScene, typeOut } from '../../../scripts/scenes';
+
+  document.querySelectorAll<HTMLElement>('[data-scene="team"]').forEach((root) => {
+    const line = root.querySelector<HTMLElement>('[data-type]');
+    runScene(
+      root,
+      [
+        { state: 'fight', ms: 2600 },
+        { state: 'show', ms: 1400 },
+        { state: 'review', ms: 3600, enter: () => typeOut(line, 38) },
+        { state: 'sad', ms: 2200 },
+        { state: 'leave', ms: 900 },
+      ],
+      'sad',
+    );
+  });
+</script>
+
+<style>
+  /* Everything is placed in % of the stage width (cqi), so the scene scales as one picture */
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    container-type: inline-size;
+    background: var(--surface-sunken);
+  }
+  .desk {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    height: 13cqi;
+    background: var(--surface-active);
+    border-top: 0.8cqi solid var(--border-strong);
+  }
+
+  .hero {
+    position: absolute;
+    bottom: 8cqi;
+    z-index: 2;
+    width: 34cqi;
+  }
+  .a {
+    left: 6cqi;
+  }
+  .b {
+    right: 6cqi;
+  }
+  .stage :global(.face) {
+    position: absolute;
+    inset: 0;
+  }
+  /* Blink now and then; each hero on its own beat */
+  .stage :global(.happy) {
+    animation: eyes-open 4.2s steps(1, end) infinite;
+  }
+  .stage :global(.blink) {
+    animation: eyes-shut 4.2s steps(1, end) infinite;
+  }
+  .b :global(.happy),
+  .b :global(.blink) {
+    animation-delay: -1.7s;
+  }
+  @keyframes eyes-open {
+    94% {
+      opacity: 0;
+    }
+  }
+  @keyframes eyes-shut {
+    0% {
+      opacity: 0;
+    }
+    94% {
+      opacity: 1;
+    }
+  }
+  .stage :global(.sad) {
+    opacity: 0;
+  }
+  [data-state='sad'] .hero :global(.sad),
+  [data-state='leave'] .hero :global(.sad) {
+    opacity: 1;
+  }
+  [data-state='sad'] .hero :global(:is(.happy, .blink)),
+  [data-state='leave'] .hero :global(:is(.happy, .blink)) {
+    visibility: hidden;
+  }
+
+  /* Fight: both shake inside a cloud of dust and swearing */
+  [data-state='fight'] .a {
+    animation: shake 0.24s steps(2, end) infinite;
+  }
+  [data-state='fight'] .b {
+    animation: shake 0.24s steps(2, end) infinite reverse;
+  }
+  @keyframes shake {
+    0% {
+      transform: translate(0.6cqi, 0);
+    }
+    50% {
+      transform: translate(-0.6cqi, -0.6cqi);
+    }
+    100% {
+      transform: translate(0.6cqi, 0);
+    }
+  }
+  .cloud {
+    position: absolute;
+    left: 50%;
+    bottom: 9cqi;
+    z-index: 3;
+    width: 60cqi;
+    transform: translateX(-50%) scale(0);
+    transition: transform 0.3s steps(3, end);
+  }
+  [data-state='fight'] .cloud {
+    transform: translateX(-50%) scale(1);
+  }
+  [data-state='fight'] .cloud > :global(.sprite) {
+    animation: churn 0.5s steps(2, end) infinite;
+  }
+  @keyframes churn {
+    50% {
+      transform: scaleX(-1) translateY(-0.8cqi);
+    }
+  }
+  .puff {
+    position: absolute;
+    width: 6cqi;
+    animation: puff 0.9s steps(3, end) infinite;
+  }
+  .p1 {
+    left: -6cqi;
+    top: 2cqi;
+  }
+  .p2 {
+    right: -5cqi;
+    top: -2cqi;
+    animation-delay: -0.3s;
+  }
+  .p3 {
+    left: 40%;
+    top: -7cqi;
+    animation-delay: -0.6s;
+  }
+  @keyframes puff {
+    0% {
+      transform: translate(0, 0) scale(0.6);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(0, -5cqi) scale(1.2);
+      opacity: 0;
+    }
+  }
+  .swear {
+    position: absolute;
+    top: -12cqi;
+    font-family: var(--font-pixel);
+    font-size: 9cqi;
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    color: var(--text-primary);
+    animation: swear 0.6s steps(1, end) infinite;
+  }
+  .s1 {
+    left: 6cqi;
+  }
+  .s2 {
+    left: 20cqi;
+    top: -16cqi;
+    animation-delay: -0.2s;
+  }
+  .s3 {
+    left: 32cqi;
+    animation-delay: -0.4s;
+  }
+  @keyframes swear {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-1.2cqi) rotate(-8deg);
+    }
+  }
+
+  /* Show: a mitten holds up the phone, the other one points at it */
+  .arm,
+  .phone {
+    position: absolute;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.2s steps(2, end);
+  }
+  .arm {
+    width: 4.6cqi;
+    bottom: 20cqi;
+  }
+  .arm-a {
+    left: 38cqi;
+    transform: rotate(35deg);
+  }
+  .arm-b {
+    right: 38cqi;
+    transform: rotate(-35deg);
+  }
+  .phone {
+    left: 50%;
+    bottom: 25cqi;
+    width: 9cqi;
+    transform: translateX(-50%);
+  }
+  [data-state]:not([data-state='fight']) :is(.arm, .phone) {
+    opacity: 1;
+  }
+
+  /* Review: the senior drops in from above and talks */
+  .senior {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    z-index: 5;
+    width: 18cqi;
+    transform: translate(-50%, -130%);
+    transition: transform 0.45s steps(5, end);
+  }
+  [data-state='review'] .senior,
+  [data-state='sad'] .senior {
+    transform: translate(-50%, 3cqi);
+  }
+  .arm-s {
+    position: absolute;
+    top: 30%;
+    width: 4cqi;
+  }
+  .arm-s.left {
+    left: -3cqi;
+    transform: rotate(-30deg);
+  }
+  .arm-s.right {
+    right: -3cqi;
+    transform: rotate(30deg);
+  }
+  [data-state='review'] .arm-s {
+    animation: wave 0.4s steps(1, end) infinite;
+  }
+  @keyframes wave {
+    50% {
+      translate: 0 -1cqi;
+    }
+  }
+  .stage :global(.talk) {
+    opacity: 0;
+  }
+  [data-state='review'] :global(.talk) {
+    animation: talk 0.3s steps(1, end) infinite;
+  }
+  @keyframes talk {
+    50% {
+      opacity: 1;
+    }
+  }
+
+  /* The game dialog box, as on the home page */
+  .dialog {
+    --px-step: 0.8cqi;
+    position: absolute;
+    left: 50%;
+    top: 18.5cqi;
+    z-index: 6;
+    width: 72cqi;
+    padding: 2.4cqi 3.2cqi 2.8cqi;
+    background: var(--surface-dialog);
+    color: var(--text-on-dialog);
+    transform: translate(-50%, 2cqi);
+    opacity: 0;
+    transition:
+      opacity 0.2s steps(2, end),
+      transform 0.2s steps(2, end);
+  }
+  [data-state='review'] .dialog,
+  [data-state='sad'] .dialog {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  .dialog-label {
+    display: block;
+    margin-bottom: 0.8cqi;
+    font-family: var(--font-pixel);
+    font-size: max(12px, 3.2cqi);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--accent-soft);
+  }
+  .dialog-text {
+    min-height: 2lh;
+    font-size: max(12px, 3.6cqi);
+    line-height: var(--lh-snug);
+  }
+</style>

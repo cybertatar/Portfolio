@@ -1,0 +1,616 @@
+---
+import gauntlet from '../../../assets/cursors/gauntlet.png';
+import { withBase } from '../../../scripts/url';
+
+/**
+ * "We saw the path, not just the finish": the prototype's research flow in the site's light
+ * style — sign in, task, a session replay logging every tap, the ease rating, the summary.
+ */
+const log = [
+  { t: '+00:00.0', kind: 'start', what: 'Первое подключение кешбэка' },
+  { t: '+00:04.2', kind: 'tap', what: 'Хочу подключить' },
+  { t: '+00:09.8', kind: 'tap', what: '7% Деливери' },
+  { t: '+00:12.1', kind: 'tap', what: '3% На бензин' },
+  { t: '+00:15.5', kind: 'tap', what: 'Подключить' },
+  { t: '+00:18.3', kind: 'finish', what: 'Кешбэк подключён' },
+];
+const rows = [
+  { task: 'Подключить кешбэк', done: 30, fcs: 83, seq: '6,5' },
+  { task: 'Выбрать категории', done: 30, fcs: 100, seq: '6,7' },
+  { task: 'Скопировать данные карты', done: 30, fcs: 83, seq: '6,0' },
+];
+const screens = ['cb-off', 'cb-connect', 'success'];
+---
+
+<div
+  class="stage px-clip"
+  data-scene="testing"
+  role="img"
+  aria-label="Прототип для теста: участник вводит имя, получает задание, каждое его нажатие записывается в журнал сессии, в конце он оценивает лёгкость задания, а результаты сводятся в таблицу"
+>
+  <!-- 1. Sign in -->
+  <div class="card start px-clip">
+    <span class="kicker">PSB usability test</span>
+    <span class="card-title">Начать тест</span>
+    <span class="field-label">Ваше имя</span>
+    <span class="field px-clip">
+      <span data-type="Участник 12"></span>
+      <i class="caret"></i>
+    </span>
+    <span class="btn px-clip">Начать тест</span>
+  </div>
+
+  <!-- 2. Task -->
+  <div class="card task px-clip">
+    <span class="kicker">Задание</span>
+    <span class="card-title">Первое подключение кешбэка</span>
+    <span class="card-text">Подключите кешбэк и выберите три категории на этот месяц.</span>
+    <span class="btn px-clip">Старт</span>
+  </div>
+
+  <!-- 3. Session replay: the phone and the log of what the participant does -->
+  <div class="session">
+    <div class="mini-phone px-clip">
+      {screens.map((s, i) => (
+        <img class={`screen s${i}`} src={withBase(`assets/cases/psb/${s}.webp`)} alt="" />
+      ))}
+    </div>
+    <div class="log px-clip">
+      <span class="kicker">Повтор сессии</span>
+      <span class="timer" data-timer>
+        +00:00.0
+      </span>
+      <span class="track">
+        <span class="track-fill"></span>
+      </span>
+      <ol>
+        {log.map((e, i) => (
+          <li style={`--i: ${i}`}>
+            <span class="log-t">{e.t}</span>
+            <span class:list={['log-kind', e.kind]}>{e.kind}</span>
+            <span class="log-what">{e.what}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+
+  <!-- 4. Ease rating -->
+  <div class="card seq px-clip">
+    <span class="card-title">Насколько легко было выполнить задание?</span>
+    <span class="scale">
+      {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+        <span class:list={['pick px-clip', { on: n === 6 }]}>{n}</span>
+      ))}
+    </span>
+    <span class="scale-ends">
+      <span>Очень сложно</span>
+      <span>Очень легко</span>
+    </span>
+  </div>
+
+  <!-- 5. Summary across sessions -->
+  <div class="card summary px-clip">
+    <span class="kicker">Саммари по сессиям</span>
+    <span class="card-title">30 клиентов ПСБ, 3 задания</span>
+    <table>
+      <thead>
+        <tr>
+          <th>Сценарий</th>
+          <th>Завершили</th>
+          <th>First click</th>
+          <th>SEQ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr>
+            <td>{r.task}</td>
+            <td>
+              <span data-count={r.done}>0</span>/30
+            </td>
+            <td>
+              <span data-count={r.fcs}>0</span>%<span class="bar" style={`--v: ${r.fcs}%`}></span>
+            </td>
+            <td>
+              <span data-final={r.seq}>0,0</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6. Done -->
+  <div class="card done px-clip">
+    <span class="check px-clip" aria-hidden="true">
+      <svg viewBox="0 0 12 12" shape-rendering="crispEdges">
+        <path
+          fill="currentColor"
+          d="M1 6h2v2H1zM2 7h2v2H2zM3 8h2v2H3zM5 7h2v2H5zM6 6h2v2H6zM7 5h2v2H7zM8 4h2v2H8zM9 3h2v2H9zM4 9h2v1H4z"
+        ></path>
+      </svg>
+    </span>
+    <span class="card-title">Тест завершён</span>
+    <span class="card-text">Запись сохранена. Спасибо за участие!</span>
+  </div>
+
+  <img class="cursor" src={gauntlet.src} alt="" width="22" height="22" />
+</div>
+
+<script>
+  import { runScene, typeOut } from '../../../scripts/scenes';
+
+  document.querySelectorAll<HTMLElement>('[data-scene="testing"]').forEach((root) => {
+    const name = root.querySelector<HTMLElement>('[data-type]');
+    const timer = root.querySelector<HTMLElement>('[data-timer]');
+    let tick: ReturnType<typeof setInterval> | undefined;
+
+    // The replay clock runs ~4× faster than the 18-second session it shows
+    const runTimer = () => {
+      clearInterval(tick);
+      const t0 = performance.now();
+      tick = setInterval(() => {
+        const s = Math.min(18.3, ((performance.now() - t0) / 1000) * 4.2);
+        if (timer) timer.textContent = `+00:${s.toFixed(1).padStart(4, '0')}`;
+        if (s >= 18.3) clearInterval(tick);
+      }, 50);
+    };
+
+    const count = () => {
+      root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+        const to = Number(el.dataset.count);
+        const t0 = performance.now();
+        const step = () => {
+          const p = Math.min(1, (performance.now() - t0) / 900);
+          el.textContent = String(Math.round(to * p));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        step();
+      });
+      root.querySelectorAll<HTMLElement>('[data-final]').forEach((el) => {
+        el.textContent = '0,0';
+        setTimeout(() => (el.textContent = el.dataset.final ?? ''), 900);
+      });
+    };
+
+    runScene(
+      root,
+      [
+        { state: 'start', ms: 2200, enter: () => typeOut(name, 70) },
+        { state: 'task', ms: 1800 },
+        { state: 'session', ms: 4600, enter: runTimer },
+        { state: 'seq', ms: 1800 },
+        { state: 'summary', ms: 2800, enter: count },
+        { state: 'done', ms: 1600 },
+      ],
+      'summary',
+    );
+  });
+</script>
+
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    container-type: inline-size;
+    background: var(--surface-sunken);
+    /* Type in this scene scales with it, but never below a readable floor */
+    --fs-xs: max(10px, 2.3cqi);
+    --fs-s: max(11px, 2.8cqi);
+    --fs-m: max(13px, 3.6cqi);
+    --fs-l: max(16px, 5cqi);
+  }
+
+  /* Each step is a card in the middle of the stage; only the current one shows */
+  .card {
+    --px-step: 0.8cqi;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6cqi;
+    width: 58cqi;
+    padding: 4cqi;
+    background: var(--surface-card);
+    transform: translate(-50%, calc(-50% + 2cqi));
+    opacity: 0;
+    transition:
+      opacity 0.25s steps(3, end),
+      transform 0.25s steps(3, end);
+  }
+  .session {
+    position: absolute;
+    inset: 6cqi;
+    display: flex;
+    gap: 3cqi;
+    justify-content: center;
+    opacity: 0;
+  }
+  [data-state='start'] .start,
+  [data-state='task'] .task,
+  [data-state='seq'] .seq,
+  [data-state='summary'] .summary,
+  [data-state='done'] .done {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  /* Fades in only: on the way out the replay would visibly rewind */
+  [data-state='session'] .session {
+    opacity: 1;
+    transition: opacity 0.25s steps(3, end);
+  }
+
+  .kicker {
+    font-family: var(--font-pixel);
+    font-size: var(--fs-s);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-accent);
+  }
+  .card-title {
+    font-size: var(--fs-l);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tight);
+    color: var(--text-primary);
+  }
+  .card-text {
+    font-size: var(--fs-m);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+  .field-label {
+    margin-top: 1cqi;
+    font-size: var(--fs-s);
+    color: var(--text-tertiary);
+  }
+  .field {
+    --px-step: 0.5cqi;
+    display: flex;
+    align-items: center;
+    height: 8cqi;
+    padding: 0 2.4cqi;
+    background: var(--surface-raised);
+    font-size: var(--fs-m);
+    color: var(--text-primary);
+  }
+  .caret {
+    width: 0.4cqi;
+    height: 4cqi;
+    margin-left: 0.3cqi;
+    background: var(--accent);
+    animation: caret 0.8s steps(1, end) infinite;
+  }
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  .btn {
+    --px-step: 0.6cqi;
+    display: grid;
+    place-items: center;
+    height: 8cqi;
+    margin-top: 1cqi;
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    font-family: var(--font-pixel);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+  }
+
+  /* Session replay */
+  .mini-phone {
+    --px-step: 0.8cqi;
+    position: relative;
+    flex: none;
+    width: 30cqi;
+    background: var(--surface-inverse);
+    padding: 1cqi;
+  }
+  .screen {
+    position: absolute;
+    inset: 1cqi;
+    width: calc(100% - 2cqi);
+    height: calc(100% - 2cqi);
+    object-fit: cover;
+    object-position: top;
+    opacity: 0;
+  }
+  .s0 {
+    opacity: 1;
+  }
+  [data-state='session'] .s1 {
+    animation: show-from 4.6s steps(1, end) forwards;
+    --at: 34%;
+  }
+  [data-state='session'] .s2 {
+    animation: show-from-late 4.6s steps(1, end) forwards;
+  }
+  @keyframes show-from {
+    0%,
+    33% {
+      opacity: 0;
+    }
+    34%,
+    100% {
+      opacity: 1;
+    }
+  }
+  @keyframes show-from-late {
+    0%,
+    79% {
+      opacity: 0;
+    }
+    80%,
+    100% {
+      opacity: 1;
+    }
+  }
+  .log {
+    --px-step: 0.8cqi;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2cqi;
+    flex: 1 1 auto;
+    max-width: 52cqi;
+    padding: 3cqi;
+    background: var(--surface-card);
+  }
+  /* Numbers in Fira Mono: Handjet slashes its zero, 30 would read as 38 */
+  .timer {
+    font-family: var(--font-mono);
+    font-size: var(--fs-l);
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    color: var(--text-accent);
+  }
+  .track {
+    position: relative;
+    height: 0.8cqi;
+    background: var(--surface-raised);
+  }
+  .track-fill {
+    position: absolute;
+    inset: 0 100% 0 0;
+    background: var(--accent);
+  }
+  [data-state='session'] .track-fill {
+    animation: fill 4.4s linear forwards;
+  }
+  @keyframes fill {
+    to {
+      right: 0;
+    }
+  }
+  .log ol {
+    display: flex;
+    flex-direction: column;
+    margin: 0.6cqi 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .log li {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 1.4cqi;
+    align-items: baseline;
+    padding: 1cqi 0;
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--fs-xs);
+    white-space: nowrap;
+    opacity: 0;
+  }
+  [data-state='session'] .log li {
+    animation: appear 0.01s calc(var(--i) * 0.75s) forwards;
+  }
+  @keyframes appear {
+    to {
+      opacity: 1;
+    }
+  }
+  .log-t {
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+  }
+  .log-kind {
+    font-family: var(--font-pixel);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .log-kind.start,
+  .log-kind.finish {
+    color: var(--text-accent);
+  }
+  .log-what {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+  }
+
+  /* Ease rating */
+  .seq .card-title {
+    font-size: var(--fs-m);
+    line-height: var(--lh-snug);
+  }
+  .scale {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1cqi;
+  }
+  .pick {
+    --px-step: 0.5cqi;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: var(--surface-raised);
+    font-family: var(--font-mono);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
+  }
+  [data-state='seq'] .pick.on {
+    animation: choose 1.8s steps(1, end) forwards;
+  }
+  @keyframes choose {
+    55% {
+      background: var(--accent);
+      color: var(--text-inverse);
+    }
+    100% {
+      background: var(--accent);
+      color: var(--text-inverse);
+    }
+  }
+  .scale-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+  }
+
+  /* Summary */
+  .summary {
+    width: 76cqi;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-s);
+  }
+  th,
+  td {
+    padding: 1.2cqi 1cqi 1.2cqi 0;
+    text-align: left;
+    border-top: 1px solid var(--border-subtle);
+    white-space: nowrap;
+  }
+  th {
+    border-top: 0;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-regular);
+    color: var(--text-tertiary);
+  }
+  td {
+    color: var(--text-primary);
+  }
+  td:nth-child(n + 2) {
+    font-family: var(--font-mono);
+    font-size: var(--fs-s);
+    font-weight: var(--fw-semibold);
+    color: var(--text-accent);
+  }
+  .bar {
+    display: block;
+    width: 10cqi;
+    height: 0.6cqi;
+    margin-top: 0.4cqi;
+    background: linear-gradient(var(--accent), var(--accent)) 0 0 / 0 100% no-repeat
+      var(--surface-raised);
+  }
+  [data-state='summary'] .bar {
+    background-size: var(--v) 100%;
+    transition: background-size 0.9s steps(8, end);
+  }
+
+  /* Done */
+  .done {
+    align-items: flex-start;
+  }
+  .check {
+    --px-step: 0.6cqi;
+    display: grid;
+    place-items: center;
+    width: 10cqi;
+    height: 10cqi;
+    background: var(--accent);
+    color: var(--text-inverse);
+  }
+  .check svg {
+    width: 6cqi;
+    height: 6cqi;
+  }
+
+  /* The pixel gauntlet from the site cursor taps through the flow */
+  .cursor {
+    position: absolute;
+    z-index: 10;
+    width: 5cqi;
+    height: auto;
+    image-rendering: pixelated;
+    left: 70cqi;
+    top: 62cqi;
+    transition:
+      left 0.5s steps(5, end),
+      top 0.5s steps(5, end);
+  }
+  [data-state='start'] .cursor {
+    animation: tap-start 2.2s steps(1, end) forwards;
+  }
+  @keyframes tap-start {
+    0% {
+      left: 70cqi;
+      top: 62cqi;
+    }
+    60% {
+      left: 52cqi;
+      top: 54cqi;
+    }
+    80% {
+      left: 52cqi;
+      top: 55cqi;
+    }
+    100% {
+      left: 52cqi;
+      top: 54cqi;
+    }
+  }
+  [data-state='task'] .cursor {
+    left: 50cqi;
+    top: 48cqi;
+  }
+  [data-state='session'] .cursor {
+    animation: tap-phone 4.6s steps(1, end) forwards;
+  }
+  @keyframes tap-phone {
+    0% {
+      left: 26cqi;
+      top: 38cqi;
+    }
+    30% {
+      left: 22cqi;
+      top: 30cqi;
+    }
+    48% {
+      left: 30cqi;
+      top: 52cqi;
+    }
+    62% {
+      left: 30cqi;
+      top: 60cqi;
+    }
+    76% {
+      left: 24cqi;
+      top: 66cqi;
+    }
+    100% {
+      left: 26cqi;
+      top: 60cqi;
+    }
+  }
+  [data-state='seq'] .cursor {
+    left: 62cqi;
+    top: 52cqi;
+  }
+  [data-state='summary'] .cursor,
+  [data-state='done'] .cursor {
+    left: 104cqi;
+    top: 80cqi;
+  }
+</style>

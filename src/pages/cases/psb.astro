@@ -4,6 +4,9 @@ import Footer from '../../components/Footer.astro';
 import CaseVideo from '../../components/case/CaseVideo.astro';
 import Compare from '../../components/case/Compare.astro';
 import Phone from '../../components/case/Phone.astro';
+import BenchScene from '../../components/case/scenes/BenchScene.astro';
+import TeamScene from '../../components/case/scenes/TeamScene.astro';
+import TestingScene from '../../components/case/scenes/TestingScene.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import Media from '../../components/ui/Media.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
@@ -46,12 +49,12 @@ const steps = [
   {
     title: 'Дизайнили вдвоём, проверяли у сеньора',
     text: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
-    video: { src: 'assets/cases/psb/team.mp4', poster: 'assets/cases/psb/team-poster.webp' },
+    scene: 'team',
   },
   {
     title: 'Выбрали четыре направления',
     text: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
-    video: { src: 'assets/cases/psb/bench.mp4', poster: 'assets/cases/psb/bench-poster.webp' },
+    scene: 'bench',
   },
   {
     title: 'Не только макеты',
@@ -60,7 +63,7 @@ const steps = [
   {
     title: 'Видели путь, а не только финал',
     text: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
-    video: { src: 'assets/cases/psb/testing.mp4', poster: 'assets/cases/psb/testing-poster.webp' },
+    scene: 'testing',
   },
 ];
 
@@ -380,13 +383,12 @@ const home = withBase('/');
                   <p class="body">{s.text}</p>
                 </div>
                 <div class="step-media">
-                  {s.video ? (
-                    <CaseVideo
-                      src={s.video.src}
-                      poster={s.video.poster}
-                      ratio="4 / 3"
-                      label={s.title}
-                    />
+                  {s.scene === 'team' ? (
+                    <TeamScene />
+                  ) : s.scene === 'bench' ? (
+                    <BenchScene />
+                  ) : s.scene === 'testing' ? (
+                    <TestingScene />
                   ) : (
                     <div class="slot px-clip">
                       <Media label={{ ru: 'Видео прототипа', en: 'Prototype video' }} />
@@ -412,7 +414,6 @@ const home = withBase('/');
               poster="assets/cases/psb/interviews-poster.webp"
               ratio="16 / 9"
               label="Фрагменты интервью"
-              mode="player"
             />
           </div>
           <ol class="findings">
@@ -555,7 +556,7 @@ const home = withBase('/');
 </BaseLayout>
 
 <script>
-  import { initCaseMenu, initCompare, initLoopVideos, initScrollSpy } from '../../scripts/case';
+  import { initCaseMenu, initCompare, initScrollSpy } from '../../scripts/case';
 
   initScrollSpy(
     [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')],
@@ -564,7 +565,6 @@ const home = withBase('/');
   const bar = document.querySelector<HTMLElement>('[data-case-bar]');
   if (bar) initCaseMenu(bar);
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
-  initLoopVideos([...document.querySelectorAll<HTMLVideoElement>('[data-loop-video]')]);
 </script>
 
 <style>

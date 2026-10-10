@@ -4,39 +4,24 @@ import { withBase } from '../../scripts/url';
 interface Props {
   src: string;
   poster: string;
-  /** Width / height, e.g. "4 / 3". */
+  /** Width / height, e.g. "16 / 9". */
   ratio: string;
   label: string;
-  /** loop: silent, plays while on screen. player: has sound, plays on demand. */
-  mode?: 'loop' | 'player';
 }
 
-const { src, poster, ratio, label, mode = 'loop' } = Astro.props;
-const loop = mode === 'loop';
+/** A video with sound that plays on demand, in the page's pixel frame. */
+const { src, poster, ratio, label } = Astro.props;
 ---
 
 <div class="video px-clip" style={{ aspectRatio: ratio }}>
-  {loop ? (
-    <video
-      src={withBase(src)}
-      poster={withBase(poster)}
-      muted
-      loop
-      playsinline
-      preload="none"
-      aria-label={label}
-      data-loop-video
-    />
-  ) : (
-    <video
-      src={withBase(src)}
-      poster={withBase(poster)}
-      controls
-      playsinline
-      preload="none"
-      aria-label={label}
-    />
-  )}
+  <video
+    src={withBase(src)}
+    poster={withBase(poster)}
+    controls
+    playsinline
+    preload="none"
+    aria-label={label}
+  ></video>
 </div>
 
 <style>

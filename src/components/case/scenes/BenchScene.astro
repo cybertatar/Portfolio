@@ -1,0 +1,259 @@
+---
+import Sprite from './Sprite.astro';
+
+/**
+ * "Picked four directions": one of us lifts a bank's coin, it floats up with the idea we took
+ * from that bank, and lands with the other one. Coins are letters on the bank's colour, not logos.
+ */
+const banks = [
+  { name: 'Сбер', letter: 'С', bg: '#6f9a5c', ink: '#fbf8f1', idea: 'Флип карты' },
+  { name: 'Ozon Банк', letter: 'O', bg: '#3a6ea5', ink: '#fbf8f1', idea: 'Копирование иконкой' },
+  { name: 'Т-Банк', letter: 'Т', bg: '#ead38b', ink: '#29251e', idea: 'Акцент на скорости' },
+  { name: 'Альфа-Банк', letter: 'А', bg: '#c9605a', ink: '#fbf8f1', idea: 'Кешбэк в таббаре' },
+  { name: 'Райффайзен', letter: 'Р', bg: '#d4b35a', ink: '#29251e', idea: 'Кешбэк в бейдже' },
+];
+---
+
+<div
+  class="stage px-clip"
+  data-scene="bench"
+  data-banks={JSON.stringify(banks)}
+  role="img"
+  aria-label={`Сравнили пять банков: ${banks.map((b) => `${b.name} — ${b.idea.toLowerCase()}`).join(', ')}`}
+>
+  <div class="desk"></div>
+
+  <div class="hero a">
+    <Sprite name="mustache" />
+    <Sprite name="mustache-happy" class="face happy" />
+    <Sprite name="mustache-blink" class="face blink" />
+  </div>
+  <div class="hero b">
+    <Sprite name="beret" />
+    <Sprite name="beret-happy" class="face happy" />
+    <Sprite name="beret-blink" class="face blink" />
+  </div>
+  <div class="arm arm-a">
+    <Sprite name="arm-warm" />
+  </div>
+  <div class="arm arm-b">
+    <Sprite name="arm-cool" />
+  </div>
+
+  <span class="coin px-clip" data-coin aria-hidden="true">
+    {banks[0].letter}
+  </span>
+  <div class="caption px-clip" aria-hidden="true">
+    <span class="caption-bank" data-bank>
+      {banks[0].name}
+    </span>
+    <span class="caption-idea" data-idea>
+      {banks[0].idea}
+    </span>
+  </div>
+</div>
+
+<script>
+  import { runScene, type SceneStep } from '../../../scripts/scenes';
+
+  interface Bank {
+    name: string;
+    letter: string;
+    bg: string;
+    ink: string;
+    idea: string;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-scene="bench"]').forEach((root) => {
+    const banks: Bank[] = JSON.parse(root.dataset.banks ?? '[]');
+    const coin = root.querySelector<HTMLElement>('[data-coin]')!;
+    const bank = root.querySelector<HTMLElement>('[data-bank]')!;
+    const idea = root.querySelector<HTMLElement>('[data-idea]')!;
+    const set = (b: Bank) => {
+      coin.textContent = b.letter;
+      coin.style.setProperty('--coin-bg', b.bg);
+      coin.style.setProperty('--coin-ink', b.ink);
+      bank.textContent = b.name;
+      idea.textContent = b.idea;
+    };
+    set(banks[0]);
+    const steps: SceneStep[] = banks.flatMap((b) => [
+      { state: 'pick', ms: 700, enter: () => set(b) },
+      { state: 'show', ms: 1800 },
+      { state: 'pass', ms: 800 },
+      { state: 'got', ms: 500 },
+    ]);
+    runScene(root, steps, 'show');
+  });
+</script>
+
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    container-type: inline-size;
+    background: var(--surface-sunken);
+  }
+  .desk {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    height: 13cqi;
+    background: var(--surface-active);
+    border-top: 0.8cqi solid var(--border-strong);
+  }
+  .hero {
+    position: absolute;
+    bottom: 8cqi;
+    z-index: 2;
+    width: 34cqi;
+  }
+  .a {
+    left: 6cqi;
+  }
+  .b {
+    right: 6cqi;
+  }
+  .stage :global(.face) {
+    position: absolute;
+    inset: 0;
+  }
+  .stage :global(.happy) {
+    animation: eyes-open 4.2s steps(1, end) infinite;
+  }
+  .stage :global(.blink) {
+    animation: eyes-shut 4.2s steps(1, end) infinite;
+  }
+  .b :global(.happy),
+  .b :global(.blink) {
+    animation-delay: -1.7s;
+  }
+  @keyframes eyes-open {
+    94% {
+      opacity: 0;
+    }
+  }
+  @keyframes eyes-shut {
+    0% {
+      opacity: 0;
+    }
+    94% {
+      opacity: 1;
+    }
+  }
+  /* The catcher hops when the coin lands */
+  [data-state='got'] .b {
+    animation: hop 0.5s steps(3, end);
+  }
+  @keyframes hop {
+    50% {
+      transform: translateY(-2.4cqi);
+    }
+  }
+
+  .arm {
+    position: absolute;
+    z-index: 3;
+    width: 4.6cqi;
+    bottom: 22cqi;
+    transition: transform 0.25s steps(3, end);
+  }
+  .arm-a {
+    left: 38cqi;
+    transform-origin: 50% 100%;
+    transform: rotate(80deg) translateY(2cqi);
+  }
+  [data-state='pick'] .arm-a {
+    transform: rotate(20deg);
+  }
+  .arm-b {
+    right: 38cqi;
+    transform-origin: 50% 100%;
+    transform: rotate(-80deg) translateY(2cqi);
+  }
+  [data-state='pass'] .arm-b,
+  [data-state='got'] .arm-b {
+    transform: rotate(-20deg);
+  }
+
+  /* The coin: in the left hand, up under the caption, then in the right hand */
+  .coin {
+    --px-step: 0.8cqi;
+    position: absolute;
+    z-index: 5;
+    left: 41cqi;
+    top: 31cqi;
+    display: grid;
+    place-items: center;
+    width: 10cqi;
+    height: 10cqi;
+    background: var(--coin-bg);
+    color: var(--coin-ink);
+    font-family: var(--font-pixel);
+    font-size: 6.6cqi;
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    transform: translateX(-50%);
+    transition:
+      left 0.5s steps(5, end),
+      top 0.5s steps(5, end),
+      opacity 0.2s steps(2, end);
+  }
+  /* A new coin appears in the hand at once, without flying back across the stage */
+  [data-state='pick'] .coin {
+    transition: none;
+  }
+  [data-state='show'] .coin {
+    left: 50cqi;
+    top: 8cqi;
+  }
+  [data-state='pass'] .coin {
+    left: 59cqi;
+    top: 31cqi;
+  }
+  [data-state='got'] .coin {
+    left: 59cqi;
+    top: 38cqi;
+    opacity: 0;
+  }
+
+  .caption {
+    --px-step: 0.6cqi;
+    position: absolute;
+    left: 50%;
+    top: 21cqi;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4cqi;
+    padding: 1.4cqi 3cqi 1.8cqi;
+    background: var(--surface-card);
+    white-space: nowrap;
+    transform: translate(-50%, 1.6cqi);
+    opacity: 0;
+    transition:
+      opacity 0.2s steps(2, end),
+      transform 0.2s steps(2, end);
+  }
+  [data-state='show'] .caption {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  .caption-bank {
+    font-family: var(--font-pixel);
+    font-size: max(12px, 3cqi);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .caption-idea {
+    font-size: max(13px, 3.8cqi);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+  }
+</style>

@@ -9,10 +9,9 @@ interface Props {
   item: CaseItem;
 }
 
-/** Home-feed card for one case: 16:9 cover, main-quest marker if featured, title + description. */
+/** Home-feed card for one case: 16:9 cover, title + description, arrow or lock. */
 const { item } = Astro.props;
 const soon = item.status === 'soon';
-const featured = item.status === 'featured';
 const Tag = soon ? 'div' : 'a';
 const linkProps = soon
   ? {}
@@ -44,19 +43,13 @@ const linkProps = soon
   </div>
   <div class="body">
     <div class="text">
-      {featured && (
-        <p class="main">
-          <span aria-hidden="true">!</span>
-          <span data-en={ui.mainQuest.en}>{ui.mainQuest.ru}</span>
-        </p>
-      )}
       <h2 class="title">{item.title}</h2>
       <p class="description" data-en={item.description.en}>
         {item.description.ru}
       </p>
     </div>
     {!soon && (
-      <IconButton shape="large" tone={featured ? 'inverse' : 'raised'}>
+      <IconButton shape="large">
         <PixelIcon name="arrow" />
       </IconButton>
     )}
@@ -131,16 +124,6 @@ const linkProps = soon
     gap: clamp(8px, 0.6vw, 14px);
     flex: 1 1 auto;
     min-width: 0;
-  }
-  .main {
-    display: flex;
-    gap: 6px;
-    margin: 0;
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
-    color: var(--text-accent);
   }
   .title {
     margin: 0;

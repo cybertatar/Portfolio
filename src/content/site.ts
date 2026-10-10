@@ -3,7 +3,7 @@ export type Localized = Record<Lang, string>;
 
 import type { PixelIconName } from './pixel-icons';
 
-export type CaseStatus = 'default' | 'featured' | 'soon';
+export type CaseStatus = 'default' | 'soon';
 
 export interface CaseItem {
   id: string;
@@ -83,7 +83,7 @@ export const cases: CaseItem[] = [
       en: 'A Telegram Mini App for secure internet access over VPN',
     },
     tags: ['B2C', '2026'],
-    status: 'featured',
+    status: 'default',
     href: '#',
     coverLabel: { ru: 'Обложка — BittVPN', en: 'Cover — BittVPN' },
   },
@@ -116,7 +116,6 @@ export const ui = {
   level: { ru: 'Ур.', en: 'Lvl' },
   class: { ru: 'Класс', en: 'Class' },
   tools: { ru: 'Инструменты', en: 'Tools' },
-  mainQuest: { ru: 'Главный', en: 'Main' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },
   footer: { ru: 'Даниил Тынчеров — 2026', en: 'Daniil Tyncherov — 2026' },
   portrait: { ru: 'Портрет', en: 'Portrait' },

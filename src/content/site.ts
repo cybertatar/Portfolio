@@ -99,18 +99,6 @@ export const cases: CaseItem[] = [
     coverLabel: { ru: 'Обложка — PSB', en: 'Cover — PSB' },
   },
   {
-    id: 'wb-moneybox',
-    title: 'WB Bank moneybox concept',
-    description: {
-      ru: 'Переосмысление сценария копилки в банковском приложении',
-      en: 'Rethinking the savings-jar flow in a banking app',
-    },
-    tags: ['B2B', '2025'],
-    status: 'soon',
-    cover: 'assets/cases/wb-cover.webp',
-    coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
-  },
-  {
     id: 'ozon-sticker',
     title: 'Ozon Bank payment sticker reimagined',
     description: {
@@ -120,6 +108,18 @@ export const cases: CaseItem[] = [
     tags: ['B2C', '2026'],
     status: 'soon',
     cover: 'assets/cases/ozon-cover.webp',
+    coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
+  },
+  {
+    id: 'wb-moneybox',
+    title: 'WB Bank moneybox concept',
+    description: {
+      ru: 'Переосмысление сценария копилки в банковском приложении',
+      en: 'Rethinking the savings-jar flow in a banking app',
+    },
+    tags: ['B2B', '2025'],
+    status: 'soon',
+    cover: 'assets/cases/wb-cover.webp',
     coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
   },
 ];

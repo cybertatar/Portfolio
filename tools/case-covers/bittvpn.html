@@ -1,0 +1,193 @@
+<!doctype html>
+<!--
+  Case cover for BittVPN client, 1920×1080 (16:9) → public/assets/cases/bittvpn-cover.webp.
+  Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
+  as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
+  Idea: an airport departure board, but the "flights" are VPN locations. The whole cover is
+  one LED matrix; letters are lit dots, drawn from the 5×7 glyphs in bittvpn/glyphs.js
+  (the app's own dotted display face is Nothing Font, which we can't ship).
+  Screen: the main screen ("t-main") of the BittVPN Figma file, exported at 3x, cropped to
+  the first 874pt, with the floating tab bar and home indicator from the end of the frame
+  pasted over the bottom; saved at 2x (bittvpn/main.png). The iPhone 17 Pro body is shared
+  with the PSB cover (iphone-17-pro.png, 450×920pt, screen inset 24/23pt).
+  Colours are the app's: background #0A0C0F, online green #72D769, warning amber #C59908.
+  The card zooms the cover on hover, so keep the key content away from the edges.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: #0a0c0f;
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+      }
+      .phone {
+        --k: 0.96; /* scale from Figma points */
+        position: absolute;
+        left: 1404px;
+        top: 98px;
+        width: calc(450px * var(--k));
+        height: calc(920px * var(--k));
+        filter: drop-shadow(0 40px 60px rgb(0 0 0 / 0.7));
+      }
+      .phone .screen {
+        position: absolute;
+        left: calc(24px * var(--k));
+        top: calc(23px * var(--k));
+        width: calc(402px * var(--k));
+        height: calc(874px * var(--k));
+        border-radius: calc(60px * var(--k));
+      }
+      .phone .body {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script src="bittvpn/glyphs.js"></script>
+  </head>
+  <body>
+    <canvas id="board" width="1920" height="1080"></canvas>
+    <div class="phone">
+      <img class="screen" src="bittvpn/main.png" alt="" />
+      <img class="body" src="iphone-17-pro.png" alt="" />
+    </div>
+    <script>
+      const W = 1920;
+      const H = 1080;
+      const P = 7; // dot pitch, px
+      const R = 2.3; // dot radius, px
+      const COLS = Math.floor(W / P);
+      const ROWS = Math.floor(H / P);
+      const OX = (W - COLS * P) / 2 + P / 2;
+      const OY = (H - ROWS * P) / 2 + P / 2;
+
+      const INK = {
+        white: '#f4f5f6',
+        dim: '#5d6066',
+        mute: '#8b8d90',
+        green: '#72d769',
+        amber: '#c59908',
+      };
+
+      /** Lit dots: key "col,row" → colour */
+      const lit = new Map();
+
+      function text(str, col, row, ink, scale = 1) {
+        let c = col;
+        for (const ch of str) {
+          const g = GLYPHS[ch];
+          if (!g) throw new Error('No glyph for ' + ch);
+          g.forEach((line, y) => {
+            [...line].forEach((cell, x) => {
+              if (cell !== '#') return;
+              for (let dy = 0; dy < scale; dy++)
+                for (let dx = 0; dx < scale; dx++)
+                  lit.set(`${c + x * scale + dx},${row + y * scale + dy}`, ink);
+            });
+          });
+          c += 6 * scale;
+        }
+        return c;
+      }
+      const width = (str, scale = 1) => (str.length * 6 - 1) * scale;
+      const pad = (s, n) => s + ' '.repeat(Math.max(0, n - s.length));
+      const padL = (s, n) => ' '.repeat(Math.max(0, n - s.length)) + s;
+
+      // Board layout, in dot cells. Columns: code, location, ping, status.
+      const L = 16; // left edge
+      const colCode = L;
+      const colName = colCode + 6 * 3 + 3;
+      const colPing = colName + 6 * 10 + 3;
+      const colStatus = colPing + 6 * 5;
+      const right = colStatus + width('ТЕХРАБОТЫ');
+
+      let row = 22;
+      text('BITTVPN', L, row, INK.white, 2);
+      text('09:41', right - width('09:41', 2), row, INK.white, 2);
+      row += 14 + 9;
+
+      text('КОД', colCode, row, INK.dim);
+      text('ЛОКАЦИЯ', colName, row, INK.dim);
+      text(padL('МС', 3), colPing, row, INK.dim);
+      text('СТАТУС', colStatus, row, INK.dim);
+      row += 7 + 4;
+      for (let c = L; c <= right; c += 2) lit.set(`${c},${row}`, INK.dim);
+      row += 6;
+
+      const flights = [
+        ['DE', 'ГЕРМАНИЯ', '10', 'ОНЛАЙН', INK.green],
+        ['JP', 'ЯПОНИЯ', '33', 'ДОСТУПНА', INK.white],
+        ['RU', 'РОССИЯ', '923', 'ДОСТУПНА', INK.white],
+        ['KZ', 'КАЗАХСТАН', '930', 'ОНЛАЙН', INK.green],
+        ['LT', 'ЛИТВА', '-', 'ТЕХРАБОТЫ', INK.amber],
+        ['ES', 'ИСПАНИЯ', '-', 'НА ПАУЗЕ', INK.mute],
+      ];
+      for (const [code, name, ping, status, ink] of flights) {
+        const paused = ink === INK.mute;
+        const base = paused ? INK.mute : INK.white;
+        text(code, colCode, row, base);
+        text(name, colName, row, base);
+        text(padL(ping, 3), colPing, row, base);
+        text(status, colStatus, row, ink);
+        row += 7 + 6;
+      }
+
+      // Draw: unlit grid first, then glow, then lit dots on top.
+      const cv = document.getElementById('board');
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#0a0c0f';
+      ctx.fillRect(0, 0, W, H);
+
+      const dot = (x, y, r) => {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      ctx.fillStyle = 'rgb(255 255 255 / 0.055)';
+      for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++) if (!lit.has(`${c},${r}`)) dot(OX + c * P, OY + r * P, R);
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (const [key, ink] of lit) {
+        const [c, r] = key.split(',').map(Number);
+        const x = OX + c * P;
+        const y = OY + r * P;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, P * 1.6);
+        g.addColorStop(0, ink + '2c');
+        g.addColorStop(1, ink + '00');
+        ctx.fillStyle = g;
+        ctx.fillRect(x - P * 1.6, y - P * 1.6, P * 3.2, P * 3.2);
+      }
+      ctx.restore();
+      for (const [key, ink] of lit) {
+        const [c, r] = key.split(',').map(Number);
+        ctx.fillStyle = ink;
+        dot(OX + c * P, OY + r * P, R);
+      }
+
+      // Soft vignette so the matrix sinks into the edges.
+      const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.62);
+      v.addColorStop(0, 'rgb(10 12 15 / 0)');
+      v.addColorStop(1, 'rgb(10 12 15 / 0.85)');
+      ctx.fillStyle = v;
+      ctx.fillRect(0, 0, W, H);
+    </script>
+  </body>
+</html>

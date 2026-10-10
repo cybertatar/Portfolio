@@ -105,7 +105,7 @@ export const cases: CaseItem[] = [
       ru: 'Переосмысление платёжного стикера Ozon Банка',
       en: "Reimagining Ozon Bank's payment sticker",
     },
-    tags: ['B2C', '2026'],
+    tags: ['suppose', '2026'],
     status: 'soon',
     cover: 'assets/cases/ozon-cover.webp',
     coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },

@@ -20,9 +20,7 @@ import { cases, profile, ui } from '../content/site';
           </div>
           <span class="lvl px-clip">
             <span class="lvl-num">{profile.level}</span>
-            <span class="lvl-label" data-en={ui.level.en}>
-              {ui.level.ru}
-            </span>
+            <span class="lvl-label">lvl</span>
           </span>
         </div>
         <div class="name">
@@ -178,7 +176,7 @@ import { cases, profile, ui } from '../content/site';
     gap: 5px;
     height: 32px;
     padding: 0 10px;
-    background: var(--ink-0);
+    background: var(--surface-raised);
     font-family: var(--font-pixel);
     line-height: 32px;
     white-space: nowrap;
@@ -188,10 +186,10 @@ import { cases, profile, ui } from '../content/site';
     font-size: 26px;
     font-weight: var(--fw-bold);
   }
+  /* Fira Mono: in the pixel font a lowercase l is a bare stick */
   .lvl-label {
-    font-size: 15px;
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    font-family: var(--font-mono);
+    font-size: 13px;
     color: var(--text-secondary);
   }
 
@@ -352,7 +350,7 @@ import { cases, profile, ui } from '../content/site';
     font-size: 19px;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .lvl-label {
-    font-size: 13px;
+    font-size: 11px;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .name {
     margin-top: 0;

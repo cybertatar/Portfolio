@@ -113,7 +113,6 @@ export const cases: CaseItem[] = [
 ];
 
 export const ui = {
-  level: { ru: 'Ур.', en: 'Lvl' },
   class: { ru: 'Класс', en: 'Class' },
   tools: { ru: 'Инструменты', en: 'Tools' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },

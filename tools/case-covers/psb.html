@@ -3,8 +3,11 @@
   Case cover for PSB-Bank Redesign concept, 1920×1080 (16:9) → public/assets/cases/psb-cover.webp.
   Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
   as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
-  Screens: frames from the "mockup for claude" section of the PSB Figma file, cropped to the
-  first 874pt of each frame and exported at 2x (tools/case-covers/psb/*.png). The iPhone 17 Pro
+  Screens: frames from the "mockup for claude" section of the PSB Figma file, exported at 3x,
+  trimmed of the 1pt export rim and cropped to the first 874pt (one iPhone screen). Elements
+  pinned to the bottom in Figma (tab bar + home indicator, the footer button) sit at the very end
+  of the long frame, so that bottom strip is pasted over the end of the 874pt crop; saved at 2x
+  (tools/case-covers/psb/*.png). The iPhone 17 Pro
   body is the hidden "bezel" layer from the same file (450×920pt, screen inset 24/23pt).
   Background: a faint tile pattern of pixel coins and hearts.
   Colours mirror src/styles/tokens/colors.css. The card zooms the cover on hover,

@@ -110,6 +110,18 @@ export const cases: CaseItem[] = [
     cover: 'assets/cases/wb-cover.webp',
     coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
   },
+  {
+    id: 'ozon-sticker',
+    title: 'Ozon Bank payment sticker reimagined',
+    description: {
+      ru: 'Переосмысление платёжного стикера Ozon Банка',
+      en: "Reimagining Ozon Bank's payment sticker",
+    },
+    tags: ['B2C', '2026'],
+    status: 'soon',
+    cover: 'assets/cases/ozon-cover.webp',
+    coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
+  },
 ];
 
 export const ui = {

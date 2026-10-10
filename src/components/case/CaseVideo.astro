@@ -1,0 +1,42 @@
+---
+import { withBase } from '../../scripts/url';
+
+interface Props {
+  src: string;
+  poster: string;
+  /** Width / height, e.g. "16 / 9". */
+  ratio: string;
+  label: string;
+}
+
+/** A video with sound that plays on demand, in the page's pixel frame. */
+const { src, poster, ratio, label } = Astro.props;
+---
+
+<div class="video px-clip" style={{ aspectRatio: ratio }}>
+  <video
+    src={withBase(src)}
+    poster={withBase(poster)}
+    controls
+    playsinline
+    preload="none"
+    aria-label={label}
+  ></video>
+</div>
+
+<style>
+  .video {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface-inverse);
+  }
+  video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>

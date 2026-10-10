@@ -1,0 +1,641 @@
+---
+import gauntlet from '../../../assets/cursors/gauntlet.png';
+import { withBase } from '../../../scripts/url';
+
+/**
+ * "We saw the path, not just the finish": the prototype's research flow in the site's light
+ * style — sign in, task, a session replay logging every tap, the ease rating, the summary.
+ */
+const log = [
+  { t: '+00:00.0', kind: 'start', what: 'Первое подключение кешбэка' },
+  { t: '+00:04.3', kind: 'tap', what: 'Хочу подключить' },
+  { t: '+00:08.1', kind: 'tap', what: '7% Деливери' },
+  { t: '+00:11.1', kind: 'tap', what: '3% На бензин' },
+  { t: '+00:14.1', kind: 'tap', what: 'Подключить' },
+  { t: '+00:18.3', kind: 'finish', what: 'Кешбэк подключён' },
+];
+const rows = [
+  { task: 'Подключить кешбэк', done: 30, fcs: 83, seq: '6,5' },
+  { task: 'Выбрать категории', done: 30, fcs: 100, seq: '6,7' },
+  { task: 'Скопировать данные карты', done: 30, fcs: 83, seq: '6,0' },
+];
+const screens = ['cb-off', 'cb-connect', 'success'];
+---
+
+<div
+  class="stage px-clip"
+  data-scene="testing"
+  role="img"
+  aria-label="Прототип для теста: участник вводит имя, получает задание, каждое его нажатие записывается в журнал сессии, в конце он оценивает лёгкость задания, а результаты сводятся в таблицу"
+>
+  <!-- 1. Sign in -->
+  <div class="card start px-clip">
+    <span class="kicker">PSB usability test</span>
+    <span class="card-title">Начать тест</span>
+    <span class="field-label">Ваше имя</span>
+    <span class="field px-clip" data-target="field">
+      <span data-type="Участник 12"></span>
+      <i class="caret"></i>
+    </span>
+    <span class="btn px-clip" data-target="start">
+      Начать тест
+    </span>
+  </div>
+
+  <!-- 2. Task -->
+  <div class="card task px-clip">
+    <span class="kicker">Задание</span>
+    <span class="card-title">Первое подключение кешбэка</span>
+    <span class="card-text">Подключите кешбэк и выберите три категории на этот месяц.</span>
+    <span class="btn px-clip" data-target="go">
+      Старт
+    </span>
+  </div>
+
+  <!-- 3. Session replay: the phone and the log of what the participant does -->
+  <div class="session">
+    <div class="mini-phone px-clip">
+      {screens.map((s, i) => (
+        <img
+          class:list={['screen', { on: i === 0 }]}
+          src={withBase(`assets/cases/psb/${s}.webp`)}
+          alt=""
+          data-screen={i}
+        />
+      ))}
+    </div>
+    <div class="log px-clip">
+      <span class="kicker">Повтор сессии</span>
+      <span class="timer" data-timer>
+        +00:00.0
+      </span>
+      <span class="track">
+        <span class="track-fill"></span>
+      </span>
+      <ol>
+        {log.map((e, i) => (
+          <li data-row={i}>
+            <span class="log-t">{e.t}</span>
+            <span class:list={['log-kind', e.kind]}>{e.kind}</span>
+            <span class="log-what">{e.what}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+
+  <!-- 4. Ease rating -->
+  <div class="card seq px-clip">
+    <span class="card-title">Насколько легко было выполнить задание?</span>
+    <span class="scale">
+      {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+        <span class="pick px-clip" data-pick={n}>
+          {n}
+        </span>
+      ))}
+    </span>
+    <span class="scale-ends">
+      <span>Очень сложно</span>
+      <span>Очень легко</span>
+    </span>
+  </div>
+
+  <!-- 5. Summary across sessions -->
+  <div class="card summary px-clip">
+    <span class="kicker">Саммари по сессиям</span>
+    <span class="card-title">30 клиентов ПСБ, 3 задания</span>
+    <table>
+      <thead>
+        <tr>
+          <th>Сценарий</th>
+          <th>Завершили</th>
+          <th>First click</th>
+          <th>SEQ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr>
+            <td>{r.task}</td>
+            <td>
+              <span data-count={r.done}>0</span>/30
+            </td>
+            <td>
+              <span data-count={r.fcs}>0</span>%<span class="bar" style={`--v: ${r.fcs}%`}></span>
+            </td>
+            <td>
+              <span data-final={r.seq}>0,0</span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 6. Done -->
+  <div class="card done px-clip">
+    <span class="check px-clip" aria-hidden="true">
+      <svg viewBox="0 0 12 12" shape-rendering="crispEdges">
+        <path
+          fill="currentColor"
+          d="M1 6h2v2H1zM2 7h2v2H2zM3 8h2v2H3zM5 7h2v2H5zM6 6h2v2H6zM7 5h2v2H7zM8 4h2v2H8zM9 3h2v2H9zM4 9h2v1H4z"
+        ></path>
+      </svg>
+    </span>
+    <span class="card-title">Тест завершён</span>
+    <span class="card-text">Запись сохранена. Спасибо за участие!</span>
+  </div>
+
+  <img class="cursor" src={gauntlet.src} alt="" width="32" height="32" data-cursor />
+</div>
+
+<script>
+  import { runScene, typeOut } from '../../../scripts/scenes';
+
+  /**
+   * Taps on the phone, as fractions of the 804×1748 screen exports (measured on the orange
+   * buttons and checkboxes in tools/case-covers/psb/*.png).
+   */
+  const TAPS = {
+    want: [0.5, 0.514], // cb-off: «Хочу подключить»
+    delivery: [0.925, 0.79], // cb-connect: «7% Деливери»
+    fuel: [0.925, 0.862], // cb-connect: «3% На бензин»
+    connect: [0.5, 0.918], // cb-connect: «Подключить»
+    ok: [0.5, 0.898], // success: «Хорошо!»
+  } as const;
+  const SCREEN = { w: 804, h: 1748 };
+  // The gauntlet's fingertip, as in the site cursor (hotspot 10, 2 of 32)
+  const HOT = { x: 10 / 32, y: 2 / 32 };
+  // Replay clock: the 18.3-second session plays in 4.3 seconds
+  const SPEED = 4.26;
+
+  document.querySelectorAll<HTMLElement>('[data-scene="testing"]').forEach((root) => {
+    const name = root.querySelector<HTMLElement>('[data-type]');
+    const timer = root.querySelector<HTMLElement>('[data-timer]');
+    const cursor = root.querySelector<HTMLElement>('[data-cursor]')!;
+    const screens = [...root.querySelectorAll<HTMLElement>('[data-screen]')];
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-row]')];
+    const q = (sel: string) => root.querySelector<HTMLElement>(sel);
+
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    let tick: ReturnType<typeof setInterval> | undefined;
+    const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
+    const reset = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
+      clearInterval(tick);
+    };
+
+    // Moves the fingertip to a point in stage pixels
+    const point = (x: number, y: number) => {
+      const w = cursor.offsetWidth;
+      cursor.style.left = `${x - w * HOT.x}px`;
+      cursor.style.top = `${y - w * HOT.y}px`;
+    };
+    const toElement = (el: HTMLElement | null) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const s = root.getBoundingClientRect();
+      point(r.left - s.left + r.width / 2, r.top - s.top + r.height / 2);
+    };
+    // The screen fills the phone with object-fit: cover from the top
+    const toScreen = ([fx, fy]: readonly [number, number]) => {
+      const r = screens[0].getBoundingClientRect();
+      const s = root.getBoundingClientRect();
+      const k = Math.max(r.width / SCREEN.w, r.height / SCREEN.h);
+      const dx = (r.width - SCREEN.w * k) / 2;
+      point(r.left - s.left + dx + fx * SCREEN.w * k, r.top - s.top + fy * SCREEN.h * k);
+    };
+    const rest = () => point(root.clientWidth * 0.86, root.clientHeight * 0.86);
+    const press = () => {
+      cursor.classList.remove('press');
+      void cursor.offsetWidth;
+      cursor.classList.add('press');
+    };
+    const show = (i: number) => screens.forEach((el, n) => el.classList.toggle('on', n === i));
+    const logRow = (i: number) => rows[i]?.classList.add('on');
+
+    const start = () => {
+      reset();
+      rest();
+      at(150, () => toElement(q('[data-target="field"]')));
+      at(550, press);
+      at(650, () => typeOut(name, 60));
+      at(1500, () => toElement(q('[data-target="start"]')));
+      at(2000, press);
+    };
+    const task = () => {
+      reset();
+      // wait for the card to settle before aiming at its button
+      at(300, () => toElement(q('[data-target="go"]')));
+      at(900, press);
+    };
+    const session = () => {
+      reset();
+      show(0);
+      rows.forEach((r) => r.classList.remove('on'));
+      logRow(0);
+      const t0 = performance.now();
+      tick = setInterval(() => {
+        const sec = Math.min(18.3, ((performance.now() - t0) / 1000) * SPEED);
+        if (timer) timer.textContent = `+00:${sec.toFixed(1).padStart(4, '0')}`;
+      }, 50);
+      at(300, () => toScreen(TAPS.want));
+      at(1000, () => (press(), logRow(1)));
+      at(1150, () => show(1));
+      at(1450, () => toScreen(TAPS.delivery));
+      at(1900, () => (press(), logRow(2)));
+      at(2150, () => toScreen(TAPS.fuel));
+      at(2600, () => (press(), logRow(3)));
+      at(2850, () => toScreen(TAPS.connect));
+      at(3300, () => (press(), logRow(4)));
+      at(3450, () => show(2));
+      at(3850, () => toScreen(TAPS.ok));
+      at(4300, () => (press(), logRow(5)));
+    };
+    const seq = () => {
+      reset();
+      const six = q('[data-pick="6"]');
+      six?.classList.remove('on');
+      at(300, () => toElement(six));
+      at(800, () => (press(), six?.classList.add('on')));
+    };
+    const count = () => {
+      reset();
+      rest();
+      root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
+        const to = Number(el.dataset.count);
+        const t0 = performance.now();
+        const step = () => {
+          const p = Math.min(1, (performance.now() - t0) / 900);
+          el.textContent = String(Math.round(to * p));
+          if (p < 1) requestAnimationFrame(step);
+        };
+        step();
+      });
+      root.querySelectorAll<HTMLElement>('[data-final]').forEach((el) => {
+        el.textContent = '0,0';
+        at(900, () => (el.textContent = el.dataset.final ?? ''));
+      });
+    };
+
+    // With reduced motion the scene holds on the summary: show its final numbers
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.querySelectorAll<HTMLElement>('[data-count], [data-final]').forEach((el) => {
+        el.textContent = el.dataset.count ?? el.dataset.final ?? '';
+      });
+    }
+
+    runScene(
+      root,
+      [
+        { state: 'start', ms: 2500, enter: start },
+        { state: 'task', ms: 1500, enter: task },
+        { state: 'session', ms: 4900, enter: session },
+        { state: 'seq', ms: 1800, enter: seq },
+        { state: 'summary', ms: 2800, enter: count },
+        { state: 'done', ms: 1600, enter: reset },
+      ],
+      'summary',
+    );
+  });
+</script>
+
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    container-type: inline-size;
+    background: var(--surface-sunken);
+    /* Type in this scene scales with it, but never below a readable floor */
+    --fs-xs: max(10px, 2.3cqi);
+    --fs-s: max(11px, 2.8cqi);
+    --fs-m: max(13px, 3.6cqi);
+    --fs-l: max(16px, 5cqi);
+  }
+
+  /* Each step is a card in the middle of the stage; only the current one shows */
+  .card {
+    --px-step: 0.8cqi;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6cqi;
+    width: 58cqi;
+    padding: 4cqi;
+    background: var(--surface-card);
+    transform: translate(-50%, calc(-50% + 2cqi));
+    opacity: 0;
+    transition:
+      opacity 0.25s steps(3, end),
+      transform 0.25s steps(3, end);
+  }
+  .session {
+    position: absolute;
+    inset: 6cqi;
+    display: flex;
+    gap: 3cqi;
+    justify-content: center;
+    opacity: 0;
+  }
+  [data-state='start'] .start,
+  [data-state='task'] .task,
+  [data-state='seq'] .seq,
+  [data-state='summary'] .summary,
+  [data-state='done'] .done {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+  /* Fades in only: on the way out the replay would visibly rewind */
+  [data-state='session'] .session {
+    opacity: 1;
+    transition: opacity 0.25s steps(3, end);
+  }
+
+  .kicker {
+    font-family: var(--font-pixel);
+    font-size: var(--fs-s);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-accent);
+  }
+  .card-title {
+    font-size: var(--fs-l);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tight);
+    color: var(--text-primary);
+  }
+  .card-text {
+    font-size: var(--fs-m);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+  .field-label {
+    margin-top: 1cqi;
+    font-size: var(--fs-s);
+    color: var(--text-tertiary);
+  }
+  .field {
+    --px-step: 0.5cqi;
+    display: flex;
+    align-items: center;
+    height: 8cqi;
+    padding: 0 2.4cqi;
+    background: var(--surface-raised);
+    font-size: var(--fs-m);
+    color: var(--text-primary);
+  }
+  .caret {
+    width: 0.4cqi;
+    height: 4cqi;
+    margin-left: 0.3cqi;
+    background: var(--accent);
+    animation: caret 0.8s steps(1, end) infinite;
+  }
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+  .btn {
+    --px-step: 0.6cqi;
+    display: grid;
+    place-items: center;
+    height: 8cqi;
+    margin-top: 1cqi;
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+    font-family: var(--font-pixel);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+  }
+
+  /* Session replay */
+  .mini-phone {
+    --px-step: 0.8cqi;
+    position: relative;
+    flex: none;
+    width: 30cqi;
+    background: var(--surface-inverse);
+    padding: 1cqi;
+  }
+  .screen {
+    position: absolute;
+    inset: 1cqi;
+    width: calc(100% - 2cqi);
+    height: calc(100% - 2cqi);
+    object-fit: cover;
+    object-position: top;
+    opacity: 0;
+  }
+  .screen.on {
+    opacity: 1;
+  }
+  .log {
+    --px-step: 0.8cqi;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2cqi;
+    flex: 1 1 auto;
+    max-width: 52cqi;
+    padding: 3cqi;
+    background: var(--surface-card);
+  }
+  /* Numbers in Fira Mono: Handjet slashes its zero, 30 would read as 38 */
+  .timer {
+    font-family: var(--font-mono);
+    font-size: var(--fs-l);
+    font-weight: var(--fw-bold);
+    line-height: 1;
+    color: var(--text-accent);
+  }
+  .track {
+    position: relative;
+    height: 0.8cqi;
+    background: var(--surface-raised);
+  }
+  .track-fill {
+    position: absolute;
+    inset: 0 100% 0 0;
+    background: var(--accent);
+  }
+  [data-state='session'] .track-fill {
+    animation: fill 4.4s linear forwards;
+  }
+  @keyframes fill {
+    to {
+      right: 0;
+    }
+  }
+  .log ol {
+    display: flex;
+    flex-direction: column;
+    margin: 0.6cqi 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .log li {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 1.4cqi;
+    align-items: baseline;
+    padding: 1cqi 0;
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--fs-xs);
+    white-space: nowrap;
+    opacity: 0;
+  }
+  .log li.on {
+    opacity: 1;
+  }
+  .log-t {
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+  }
+  .log-kind {
+    font-family: var(--font-pixel);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .log-kind.start,
+  .log-kind.finish {
+    color: var(--text-accent);
+  }
+  .log-what {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+  }
+
+  /* Ease rating */
+  .seq .card-title {
+    font-size: var(--fs-m);
+    line-height: var(--lh-snug);
+  }
+  .scale {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1cqi;
+  }
+  .pick {
+    --px-step: 0.5cqi;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    background: var(--surface-raised);
+    font-family: var(--font-mono);
+    font-size: var(--fs-m);
+    font-weight: var(--fw-bold);
+    color: var(--text-secondary);
+  }
+  .pick.on {
+    background: var(--accent);
+    color: var(--text-inverse);
+  }
+  .scale-ends {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--fs-xs);
+    color: var(--text-tertiary);
+  }
+
+  /* Summary */
+  .summary {
+    width: 76cqi;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-s);
+  }
+  th,
+  td {
+    padding: 1.2cqi 1cqi 1.2cqi 0;
+    text-align: left;
+    border-top: 1px solid var(--border-subtle);
+    white-space: nowrap;
+  }
+  th {
+    border-top: 0;
+    font-size: var(--fs-xs);
+    font-weight: var(--fw-regular);
+    color: var(--text-tertiary);
+  }
+  td {
+    color: var(--text-primary);
+  }
+  td:nth-child(n + 2) {
+    font-family: var(--font-mono);
+    font-size: var(--fs-s);
+    font-weight: var(--fw-semibold);
+    color: var(--text-accent);
+  }
+  .bar {
+    display: block;
+    width: 10cqi;
+    height: 0.6cqi;
+    margin-top: 0.4cqi;
+    background: linear-gradient(var(--accent), var(--accent)) 0 0 / 0 100% no-repeat
+      var(--surface-raised);
+  }
+  [data-state='summary'] .bar {
+    background-size: var(--v) 100%;
+    transition: background-size 0.9s steps(8, end);
+  }
+
+  /* Done */
+  .done {
+    align-items: flex-start;
+  }
+  .check {
+    --px-step: 0.6cqi;
+    display: grid;
+    place-items: center;
+    width: 10cqi;
+    height: 10cqi;
+    background: var(--accent);
+    color: var(--text-inverse);
+  }
+  .check svg {
+    width: 6cqi;
+    height: 6cqi;
+  }
+
+  /* The pixel gauntlet from the site cursor; the script aims it at what is tapped */
+  .cursor {
+    position: absolute;
+    z-index: 10;
+    left: 86%;
+    top: 86%;
+    width: 5cqi;
+    height: auto;
+    image-rendering: pixelated;
+    transition:
+      left 0.4s steps(5, end),
+      top 0.4s steps(5, end);
+  }
+  .cursor.press {
+    animation: press 0.25s steps(2, end);
+  }
+  @keyframes press {
+    50% {
+      transform: scale(0.82) translateY(0.4cqi);
+    }
+  }
+  [data-state='summary'] .cursor,
+  [data-state='done'] .cursor {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      display: none;
+    }
+  }
+</style>

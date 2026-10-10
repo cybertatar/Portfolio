@@ -1,0 +1,101 @@
+---
+import IconButton from './ui/IconButton.astro';
+import PixelIcon from './ui/PixelIcon.astro';
+import { profile } from '../content/site';
+---
+
+<footer class="footer" data-footer>
+  <div class="meadow" aria-hidden="true" data-meadow></div>
+  <nav class="socials" aria-label="Соцсети" data-en-label="Social links">
+    {profile.socials.map((s) => (
+      <IconButton
+        href={s.href}
+        label={s.label}
+        {...(s.href.startsWith('http') && { target: '_blank', rel: 'noopener' })}
+      >
+        <PixelIcon name={s.icon} />
+      </IconButton>
+    ))}
+  </nav>
+</footer>
+
+<script>
+  import { initMeadow } from '../scripts/meadow';
+
+  const footer = document.querySelector<HTMLElement>('[data-footer]');
+  const meadow = document.querySelector<HTMLElement>('[data-meadow]');
+  if (footer && meadow) initMeadow(footer, meadow);
+</script>
+
+<style>
+  .footer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* On the home page initCardStack stretches it to whatever the last card leaves of the screen */
+    min-height: 160px;
+    padding: 24px 0 32px;
+    border-top: var(--border-width-hair) solid var(--border-subtle);
+    margin-top: 24px;
+  }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Flower field seen from above (src/scripts/meadow.ts); more flowers open under the cursor,
+     or around a tap */
+  .meadow {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* Over the field the sword gives way to a staff: here the visitor casts flowers, not fights.
+     The hotspot is the gem. */
+  @media (pointer: fine) {
+    .footer {
+      cursor:
+        url('../assets/cursors/staff.png') 9 9,
+        auto;
+    }
+  }
+  .meadow :global(.plant) {
+    position: absolute;
+    line-height: 0;
+  }
+  .meadow :global(svg) {
+    display: block;
+  }
+  /* The frog turns to face where it hops (quarter turns keep the pixels crisp) and hops
+     a cell at a time in a few stepped frames */
+  .meadow :global(.frog) {
+    position: absolute;
+    z-index: 1;
+    line-height: 0;
+    transform: rotate(var(--turn));
+    transition:
+      left 240ms steps(4, end),
+      top 240ms steps(4, end),
+      opacity 300ms steps(3, end);
+  }
+  .meadow :global(.frog.gone) {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .meadow :global(.frog) {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .footer {
+      min-height: 200px;
+      padding: 16px 0 24px;
+      margin-top: 16px;
+    }
+  }
+</style>

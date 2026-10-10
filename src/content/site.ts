@@ -12,7 +12,7 @@ export interface CaseItem {
   description: Localized;
   tags: string[];
   status: CaseStatus;
-  /** Case page URL; omitted for locked (soon, nda) cases. */
+  /** Case page path inside the site (e.g. 'cases/psb/'), or '#' until it exists; omitted for locked (soon, nda) cases. */
   href?: string;
   /** Cover image in /public (16:9). Placeholder is shown while it is missing. */
   cover?: string;
@@ -95,7 +95,7 @@ export const cases: CaseItem[] = [
     },
     tags: ['B2C', '2026'],
     status: 'default',
-    href: '#',
+    href: 'cases/psb/',
     cover: 'assets/cases/psb-cover.webp',
     coverLabel: { ru: 'Обложка — PSB', en: 'Cover — PSB' },
   },

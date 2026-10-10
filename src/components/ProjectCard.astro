@@ -4,6 +4,7 @@ import GlassTag from './ui/GlassTag.astro';
 import IconButton from './ui/IconButton.astro';
 import Media from './ui/Media.astro';
 import PixelIcon from './ui/PixelIcon.astro';
+import { withBase } from '../scripts/url';
 
 interface Props {
   item: CaseItem;
@@ -30,7 +31,7 @@ const linkProps = locked
       'data-en-label': `${item.title}: ${lockLabel.en}`,
     } as const)
   : {
-      href: item.href ?? '#',
+      href: item.href && item.href !== '#' ? withBase(item.href) : '#',
       'aria-label': `${ui.openCase.ru}: ${item.title}`,
       'data-en-label': `${ui.openCase.en}: ${item.title}`,
     };

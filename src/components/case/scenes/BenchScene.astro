@@ -1,0 +1,355 @@
+---
+import Sprite from './Sprite.astro';
+import { withBase } from '../../../scripts/url';
+
+/**
+ * "Picked four directions": a chest between the swordsman and the mage opens, a bank's
+ * real app icon rises with the idea we took from that bank, like loot with its tooltip,
+ * and one of the two takes it. Logos stay as they are, no pixel styling.
+ * `tile`: the mark sits on a white app-icon tile; without it the file is the whole icon.
+ */
+const banks = [
+  { name: 'Сбер', logo: 'sber.svg', tile: true, idea: 'Флип карты' },
+  { name: 'Ozon Банк', logo: 'ozon.svg', tile: false, idea: 'Копирование иконкой' },
+  { name: 'Т-Банк', logo: 'tbank.svg', tile: true, idea: 'Акцент на скорости' },
+  { name: 'Альфа-Банк', logo: 'alfa.svg', tile: true, idea: 'Кешбэк в таббаре' },
+  { name: 'Райффайзен', logo: 'raiffeisen.svg', tile: false, idea: 'Кешбэк в бейдже' },
+].map((b) => ({ ...b, logo: withBase(`assets/cases/psb/banks/${b.logo}`) }));
+---
+
+<div
+  class="stage px-clip"
+  data-scene="bench"
+  data-banks={JSON.stringify(banks)}
+  role="img"
+  aria-label={`Сравнили пять банков: ${banks.map((b) => `${b.name} — ${b.idea.toLowerCase()}`).join(', ')}`}
+>
+  <div class="desk"></div>
+
+  <div class="hero a">
+    <Sprite name="swordsman" />
+    <Sprite name="swordsman-happy" class="face happy" />
+    <Sprite name="swordsman-blink" class="face blink" />
+  </div>
+  <div class="hero b">
+    <Sprite name="mage" />
+    <Sprite name="mage-happy" class="face happy" />
+    <Sprite name="mage-blink" class="face blink" />
+  </div>
+  <div class="arm arm-a">
+    <Sprite name="arm-sword" />
+  </div>
+  <div class="arm arm-b">
+    <Sprite name="arm-mage" />
+  </div>
+
+  <div class="chest">
+    <Sprite name="chest" class="shut" />
+    <Sprite name="chest-open" class="open" />
+  </div>
+  <span class="glint g1"></span>
+  <span class="glint g2"></span>
+  <span class="glint g3"></span>
+
+  <span class="loot" data-loot aria-hidden="true">
+    <img src={banks[0].logo} alt="" data-logo />
+  </span>
+  <div class="tooltip px-clip" aria-hidden="true">
+    <span class="tooltip-bank" data-bank>
+      {banks[0].name}
+    </span>
+    <span class="tooltip-idea" data-idea>
+      {banks[0].idea}
+    </span>
+  </div>
+</div>
+
+<script>
+  import { runScene, type SceneStep } from '../../../scripts/scenes';
+
+  interface Bank {
+    name: string;
+    logo: string;
+    tile: boolean;
+    idea: string;
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-scene="bench"]').forEach((root) => {
+    const banks: Bank[] = JSON.parse(root.dataset.banks ?? '[]');
+    const loot = root.querySelector<HTMLElement>('[data-loot]')!;
+    const logo = root.querySelector<HTMLImageElement>('[data-logo]')!;
+    const bank = root.querySelector<HTMLElement>('[data-bank]')!;
+    const idea = root.querySelector<HTMLElement>('[data-idea]')!;
+    // Load every logo up front, so a swap never shows an empty tile
+    banks.forEach((b) => (new Image().src = b.logo));
+    const set = (b: Bank, i: number) => {
+      logo.src = b.logo;
+      loot.classList.toggle('tile', b.tile);
+      bank.textContent = b.name;
+      idea.textContent = b.idea;
+      // The two take turns: even banks go to the swordsman, odd ones to the mage
+      root.dataset.to = i % 2 ? 'b' : 'a';
+    };
+    set(banks[0], 0);
+    const steps: SceneStep[] = banks.flatMap((b, i) => [
+      { state: 'open', ms: 500, enter: () => set(b, i) },
+      { state: 'rise', ms: 2000 },
+      { state: 'take', ms: 600 },
+      { state: 'got', ms: 600 },
+    ]);
+    runScene(root, steps, 'rise');
+  });
+</script>
+
+<style>
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    container-type: inline-size;
+    background: var(--surface-sunken);
+  }
+  .desk {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    height: 13cqi;
+    background: var(--surface-active);
+    border-top: 0.8cqi solid var(--border-strong);
+  }
+  .hero {
+    position: absolute;
+    bottom: 7cqi;
+    z-index: 2;
+    width: 28cqi;
+  }
+  .a {
+    left: 4cqi;
+  }
+  .b {
+    right: 4cqi;
+  }
+  .stage :global(.face) {
+    position: absolute;
+    inset: 0;
+  }
+  .stage :global(.happy) {
+    animation: eyes-open 4.2s steps(1, end) infinite;
+  }
+  .stage :global(.blink) {
+    animation: eyes-shut 4.2s steps(1, end) infinite;
+  }
+  .b :global(.happy),
+  .b :global(.blink) {
+    animation-delay: -1.7s;
+  }
+  @keyframes eyes-open {
+    94% {
+      opacity: 0;
+    }
+  }
+  @keyframes eyes-shut {
+    0% {
+      opacity: 0;
+    }
+    94% {
+      opacity: 1;
+    }
+  }
+  /* Whoever takes the loot hops */
+  [data-state='got'][data-to='a'] .a,
+  [data-state='got'][data-to='b'] .b {
+    animation: hop 0.5s steps(3, end);
+  }
+  @keyframes hop {
+    50% {
+      transform: translateY(-2.4cqi);
+    }
+  }
+
+  /* Only the one taking the loot reaches out; the arm grows from the shoulder */
+  .arm {
+    position: absolute;
+    z-index: 3;
+    width: 4.4cqi;
+    bottom: 15cqi;
+    transform-origin: 50% 100%;
+    opacity: 0;
+  }
+  .arm-a {
+    left: 22cqi;
+    transform: rotate(35deg);
+  }
+  .arm-b {
+    left: 73cqi;
+    transform: rotate(-35deg);
+  }
+  [data-to='a']:is([data-state='take'], [data-state='got']) .arm-a,
+  [data-to='b']:is([data-state='take'], [data-state='got']) .arm-b {
+    opacity: 1;
+  }
+
+  /* The chest sits on the desk between them */
+  .chest {
+    position: absolute;
+    left: 50%;
+    bottom: 12.4cqi;
+    z-index: 5;
+    width: 20cqi;
+    transform: translateX(-50%);
+  }
+  .chest :global(.open) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  [data-state='open'] .chest :global(.open),
+  [data-state='rise'] .chest :global(.open) {
+    opacity: 1;
+  }
+  [data-state='open'] .chest :global(.shut),
+  [data-state='rise'] .chest :global(.shut) {
+    opacity: 0;
+  }
+  /* Gold glints over the open chest */
+  .glint {
+    position: absolute;
+    z-index: 5;
+    width: 1.2cqi;
+    height: 1.2cqi;
+    background: var(--flora-heart);
+    opacity: 0;
+  }
+  .g1 {
+    left: 43cqi;
+    bottom: 24cqi;
+  }
+  .g2 {
+    left: 55cqi;
+    bottom: 26cqi;
+  }
+  .g3 {
+    left: 50cqi;
+    bottom: 29cqi;
+  }
+  [data-state='open'] .glint,
+  [data-state='rise'] .glint {
+    animation: glint 0.6s steps(2, end) infinite;
+  }
+  [data-state] .g2 {
+    animation-delay: -0.2s;
+  }
+  [data-state] .g3 {
+    animation-delay: -0.4s;
+  }
+  @keyframes glint {
+    0% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-3cqi);
+    }
+  }
+
+  /* The loot: the bank's real icon, out of the chest, up under the tooltip, then to a hand */
+  .loot {
+    position: absolute;
+    z-index: 6;
+    left: 50cqi;
+    top: 52cqi;
+    display: grid;
+    place-items: center;
+    width: 12cqi;
+    height: 12cqi;
+    border-radius: 22%;
+    overflow: hidden;
+    transform: translate(-50%, 0) scale(0.4);
+    opacity: 0;
+    transition:
+      left 0.45s steps(5, end),
+      top 0.45s steps(5, end),
+      transform 0.45s steps(5, end),
+      opacity 0.2s steps(2, end);
+  }
+  .loot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .loot.tile {
+    background: #fff;
+    box-shadow: inset 0 0 0 1px var(--border-subtle);
+  }
+  .loot.tile img {
+    width: 66%;
+    height: 66%;
+  }
+  [data-state='open'] .loot {
+    transition: none;
+  }
+  [data-state='rise'] .loot {
+    top: 9cqi;
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+  [data-state='take'] .loot {
+    top: 40cqi;
+    transform: translate(-50%, 0) scale(0.7);
+    opacity: 1;
+  }
+  [data-to='a']:is([data-state='take'], [data-state='got']) .loot {
+    left: 30cqi;
+  }
+  [data-to='b']:is([data-state='take'], [data-state='got']) .loot {
+    left: 70cqi;
+  }
+  [data-state='got'] .loot {
+    top: 46cqi;
+    transform: translate(-50%, 0) scale(0.4);
+    opacity: 0;
+  }
+
+  /* Loot tooltip, as in an MMO: what it is and what it gives */
+  .tooltip {
+    --px-step: 0.6cqi;
+    position: absolute;
+    left: 50%;
+    top: 24cqi;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4cqi;
+    padding: 1.4cqi 3cqi 1.8cqi;
+    background: var(--surface-card);
+    white-space: nowrap;
+    transform: translate(-50%, 1.6cqi);
+    opacity: 0;
+    transition:
+      opacity 0.2s steps(2, end),
+      transform 0.2s steps(2, end);
+  }
+  [data-state='rise'] .tooltip {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    transition-delay: 0.3s;
+  }
+  .tooltip-bank {
+    font-family: var(--font-pixel);
+    font-size: max(12px, 3cqi);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .tooltip-idea {
+    font-size: max(13px, 3.8cqi);
+    font-weight: var(--fw-semibold);
+    color: var(--text-primary);
+  }
+</style>

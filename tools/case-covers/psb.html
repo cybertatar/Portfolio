@@ -6,7 +6,7 @@
   Screens: frames from the "mockup for claude" section of the PSB Figma file, cropped to the
   first 874pt of each frame and exported at 2x (tools/case-covers/psb/*.png). The iPhone 17 Pro
   body is the hidden "bezel" layer from the same file (450×920pt, screen inset 24/23pt).
-  Easter egg: the site's gauntlet cursor (src/assets/cursors) taps the QR button on the main screen.
+  Background: a faint tile pattern of pixel coins and hearts.
   Colours mirror src/styles/tokens/colors.css. The card zooms the cover on hover,
   so keep the key content away from the edges.
 -->
@@ -34,16 +34,16 @@
         position: relative;
         background: var(--paper-3);
       }
-      /* Pixel grid: 4px dots every 32px, like tiles on a game map; fades out toward the top */
+      /* Barely-there pattern of pixel coins and hearts, like tiles on a game map.
+         Each tile is 32×32 game pixels drawn at 3px; fades out toward the top. */
       body::before {
         content: '';
         position: absolute;
         inset: 0;
-        background-image: conic-gradient(from 270deg at 4px 4px, var(--line-2) 25%, transparent 0);
-        background-size: 32px 32px;
-        background-position: 14px 14px;
-        mask-image: linear-gradient(to bottom, transparent 10%, #000 90%);
-        opacity: 0.8;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' shape-rendering='crispEdges'%3E%3Cpath fill='%23cfc6b2' d='M7 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM9 6h1v1h-1zM10 6h1v1h-1zM5 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM11 7h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM9 8h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM5 9h1v1h-1zM6 9h1v1h-1zM7 9h1v1h-1zM9 9h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM7 11h1v1h-1zM8 11h1v1h-1zM9 11h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM20 23h1v1h-1zM21 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM23 26h1v1h-1z'/%3E%3C/svg%3E");
+        background-size: 96px 96px;
+        mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.35), #000 85%);
+        opacity: 0.5;
       }
       /* Stepped corners, same shape as .px-clip on the site */
       .px {
@@ -119,26 +119,6 @@
         --a: 18deg;
         z-index: 1;
       }
-
-      /* Easter egg: the site's gauntlet cursor taps the QR button on the main screen */
-      .tap {
-        position: absolute;
-        z-index: 5;
-        left: 831px;
-        top: 596px;
-        width: 64px;
-        height: 64px;
-        image-rendering: pixelated;
-        filter: drop-shadow(2px 2px 0 rgb(0 0 0 / 0.35));
-      }
-      .spark {
-        position: absolute;
-        z-index: 5;
-        left: 827px;
-        top: 556px;
-        width: 48px;
-        height: 32px;
-      }
     </style>
   </head>
   <body>
@@ -162,11 +142,5 @@
       <img class="screen" src="psb/cb-on.png" alt="" />
       <img class="body" src="psb/iphone-17-pro.png" alt="" />
     </div>
-
-    <!-- Click spark: three pixel strokes above the fingertip -->
-    <svg class="spark" viewBox="0 0 12 8" shape-rendering="crispEdges" aria-hidden="true">
-      <path fill="#f7f3ea" d="M1 3h1v1H1zM2 4h1v1H2zM5 0h1v3H5zM9 4h1v1H9zM10 3h1v1h-1z" />
-    </svg>
-    <img class="tap" src="psb/gauntlet.png" alt="" />
   </body>
 </html>

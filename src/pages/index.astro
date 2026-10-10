@@ -134,7 +134,11 @@ import { levelOn } from '../scripts/level';
     margin: 24px 0 24px calc(var(--side) + 24px);
     display: flex;
     flex-direction: column;
-    padding: clamp(24px, 1.2vw, 28px);
+    padding: 24px;
+    /* Empty space above and below the text in a contact row (rows are tall for tapping);
+       subtracted so gaps around the contacts read the same as the others */
+    --row-inset: calc((var(--control-h) - var(--t-body-sm) * var(--lh-normal)) / 2);
+    --cta-gap: 24px;
     background: var(--surface-card);
   }
   .head {
@@ -265,6 +269,7 @@ import { levelOn } from '../scripts/level';
   }
   .zone-contacts {
     gap: 2px;
+    margin-top: calc(var(--row-inset) * -1);
   }
 
   .cta {
@@ -272,7 +277,8 @@ import { levelOn } from '../scripts/level';
     align-items: center;
     gap: 8px;
     flex: none;
-    margin-top: clamp(24px, 1.8vw, 32px);
+    /* Closer to the contacts than the zones are to each other: CV and Telegram are contacts too */
+    margin-top: calc(var(--cta-gap) - var(--row-inset));
   }
 
   /* Height fit, stage 1+: tighter rhythm */
@@ -282,8 +288,8 @@ import { levelOn } from '../scripts/level';
   .aside:not([data-stage='0']) .zone {
     padding-top: 24px;
   }
-  .aside:not([data-stage='0']) .cta {
-    margin-top: 16px;
+  .aside:not([data-stage='0']) {
+    --cta-gap: 16px;
   }
 
   /* Stage 2+: compact header in a row with a small square portrait */
@@ -349,7 +355,7 @@ import { levelOn } from '../scripts/level';
     width: 100%;
     max-width: var(--layout-feed-max);
     margin: 0 auto;
-    padding: 24px 40px 0;
+    padding: 24px 24px 0;
   }
   .list {
     display: flex;
@@ -394,6 +400,8 @@ import { levelOn } from '../scripts/level';
       max-height: none;
       overflow: visible;
       margin: 16px auto 0;
+      /* Inner padding no larger than the 16px screen margin and gaps */
+      padding: 16px;
     }
     .feed {
       height: auto;

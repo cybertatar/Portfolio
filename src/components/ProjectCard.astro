@@ -174,4 +174,12 @@ const linkProps = soon
     line-height: var(--lh-normal);
     color: var(--text-secondary);
   }
+
+  /* Mobile: inner padding no larger than the 16px gaps around the card */
+  @media (max-width: 960px) {
+    .card {
+      gap: 16px;
+      padding: 16px;
+    }
+  }
 </style>

@@ -73,8 +73,8 @@ import { levelOn } from '../scripts/level';
     <main class="feed" data-feed>
       <div class="inner">
         <div class="list">
-          {cases.map((item, i) => (
-            <article class:list={['slot', { last: i === cases.length - 1 }]} data-slot>
+          {cases.map((item) => (
+            <article class="slot" data-slot>
               <ProjectCard item={item} />
             </article>
           ))}
@@ -86,7 +86,6 @@ import { levelOn } from '../scripts/level';
             {ui.footer.ru}
           </Eyebrow>
         </footer>
-        <div class="spacer" aria-hidden="true" data-spacer></div>
       </div>
     </main>
   </div>
@@ -110,7 +109,7 @@ import { levelOn } from '../scripts/level';
     initCardStack(
       feed,
       [...document.querySelectorAll<HTMLElement>('[data-slot]')],
-      document.querySelector<HTMLElement>('[data-spacer]'),
+      document.querySelector<HTMLElement>('[data-footer]'),
     );
   }
 </script>
@@ -350,18 +349,15 @@ import { levelOn } from '../scripts/level';
     top: 24px;
     will-change: transform;
   }
-  .last {
-    height: 86vh;
-    min-height: 600px;
-  }
   .footer {
     display: flex;
     flex-direction: column;
     gap: 24px;
-    height: clamp(280px, 26vw, 360px);
-    padding: 24px 0 36px;
+    /* Height is set by initCardStack: whatever the last card leaves of the screen */
+    min-height: 160px;
+    padding: 24px 0 32px;
     border-top: var(--border-width-hair) solid var(--border-subtle);
-    margin-top: 48px;
+    margin-top: 24px;
   }
 
   /* Flower field seen from above (src/scripts/meadow.ts); a click anywhere on the footer
@@ -378,9 +374,6 @@ import { levelOn } from '../scripts/level';
   }
   .meadow :global(svg) {
     display: block;
-  }
-  .spacer {
-    height: 0;
   }
 
   /* ---------- Mobile / tablet portrait ---------- */
@@ -417,9 +410,10 @@ import { levelOn } from '../scripts/level';
     .slot {
       top: 16px;
     }
-    .last {
-      height: auto;
-      min-height: 0;
+    .footer {
+      min-height: 200px;
+      padding: 16px 0 24px;
+      margin-top: 16px;
     }
   }
 </style>

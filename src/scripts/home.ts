@@ -37,8 +37,12 @@ export function initProfileFit(aside: HTMLElement) {
   document.fonts?.ready.then(fit);
 }
 
-/** Each card recedes (lifts, shrinks, fades) as the next sticky card slides over it. */
-export function initCardStack(feed: HTMLElement, slots: HTMLElement[], spacer: HTMLElement | null) {
+/**
+ * Each card recedes (lifts, shrinks, fades) as the next sticky card slides over it.
+ * The footer fills what the last card leaves of the screen, so the scroll ends exactly with
+ * the last card at its sticky top and the footer on the bottom edge.
+ */
+export function initCardStack(feed: HTMLElement, slots: HTMLElement[], footer: HTMLElement | null) {
   let ticking = false;
 
   const update = () => {
@@ -50,14 +54,12 @@ export function initCardStack(feed: HTMLElement, slots: HTMLElement[], spacer: H
     const visible = slots.filter((el) => el.offsetParent !== null);
     const last = visible[visible.length - 1];
 
-    // Mobile: room after the footer so the last card can reach the top and cover the previous one.
-    if (spacer) {
-      // The footer and its 48px top margin sit between the last card and the spacer
-      const footer = (spacer.previousElementSibling as HTMLElement | null)?.offsetHeight ?? 0;
-      spacer.style.height =
-        mob && last
-          ? `${Math.max(0, innerHeight - 16 - last.offsetHeight - footer - 48)}px`
-          : '0px';
+    if (footer && last) {
+      const lastTop = parseFloat(getComputedStyle(last).top) || 0;
+      const gap = parseFloat(getComputedStyle(footer).marginTop) || 0;
+      // CSS min-height wins when the screen is too short for both
+      const h = `${Math.floor(innerHeight - lastTop - last.offsetHeight - gap)}px`;
+      if (footer.style.height !== h) footer.style.height = h;
     }
 
     visible.forEach((slot, i) => {

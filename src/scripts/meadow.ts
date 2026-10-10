@@ -1,7 +1,7 @@
 /**
  * A flower field in the footer, seen from above, after Frieren's favourite spell: when the reader
- * reaches the end of the feed, flowers bloom in a wave spreading from one spot; a click casts
- * the spell again around the cursor.
+ * reaches the end of the feed, flowers bloom in a wave spreading from one spot; more open
+ * under the mouse cursor, or around a tap on touch screens.
  */
 
 /** Size of one sprite pixel, px. */
@@ -153,20 +153,38 @@ export function initMeadow(footer: HTMLElement, meadow: HTMLElement) {
     { threshold: 0.4 },
   ).observe(meadow);
 
-  /** A click casts the spell: a small ring of flowers opens around the cursor. */
-  footer.addEventListener('click', (e) => {
+  /** Casts the spell at a point: flowers open in a ring around it, nearest first. */
+  const cast = (x: number, y: number, radius: number) => {
     const box = meadow.getBoundingClientRect();
     const { cols, rows } = grid();
-    const cx = (e.clientX - box.left) / CELL;
-    const cy = (e.clientY - box.top) / CELL;
-    for (let col = Math.floor(cx - 3); col <= cx + 3; col++) {
-      for (let row = Math.floor(cy - 3); row <= cy + 3; row++) {
+    const cx = (x - box.left) / CELL;
+    const cy = (y - box.top) / CELL;
+    for (let col = Math.floor(cx - radius); col <= cx + radius; col++) {
+      for (let row = Math.floor(cy - radius); row <= cy + radius; row++) {
         if (col < 0 || row < 0 || col >= cols || row >= rows) continue;
         const d = Math.hypot(col + 0.5 - cx, row + 0.5 - cy);
-        if (d > 2.6 || Math.random() > 1 - d / 4) continue;
+        if (d > radius || Math.random() > 1 - d / (radius + 1.4)) continue;
         const kind: Kind = d < 1.2 || Math.random() < 0.7 ? 'flower' : 'bud';
         plant(col, row, kind, d * 90, true);
       }
     }
+  };
+
+  /** Mouse: flowers open under the cursor as it wanders over the field, a cell at a time. */
+  let cell = '';
+  footer.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const box = meadow.getBoundingClientRect();
+    const key = `${Math.floor((e.clientX - box.left) / CELL)}:${Math.floor((e.clientY - box.top) / CELL)}`;
+    if (key === cell) return;
+    cell = key;
+    cast(e.clientX, e.clientY, 1.6);
+  });
+  footer.addEventListener('pointerleave', () => (cell = ''));
+
+  /** Touch: a tap opens a wider ring. A swipe that scrolls the page cancels the pointer
+      and never reaches pointerup, so scrolling past the field plants nothing. */
+  footer.addEventListener('pointerup', (e) => {
+    if (e.pointerType !== 'mouse') cast(e.clientX, e.clientY, 2.6);
   });
 }

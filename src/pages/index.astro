@@ -81,7 +81,12 @@ import { levelOn } from '../scripts/level';
 
         <footer class="footer" data-footer>
           <div class="meadow" aria-hidden="true" data-meadow></div>
-          <nav class="socials" aria-label="Соцсети" data-en-label="Social links">
+          <nav
+            class="socials"
+            aria-label="Соцсети"
+            data-en-label="Social links"
+            style={{ '--count': profile.socials.length }}
+          >
             {profile.socials.map((s) => (
               <IconButton
                 href={s.href}
@@ -367,10 +372,17 @@ import { levelOn } from '../scripts/level';
     margin-top: 24px;
   }
 
+  /* One row always: buttons keep their size and shrink only when a narrow phone can't fit
+     them all, staying square */
   .socials {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(var(--count), minmax(0, var(--control-h)));
     gap: 8px;
+  }
+  .socials :global(.icon-button) {
+    width: auto;
+    height: auto;
+    aspect-ratio: 1;
   }
 
   /* Flower field seen from above (src/scripts/meadow.ts); more flowers open under the cursor,

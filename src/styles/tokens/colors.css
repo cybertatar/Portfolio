@@ -51,6 +51,15 @@
   --accent-soft: var(--sky-300);
   --status-online: #2e9466; /* availability dot only */
 
+  /* Footer flower field only: muted, like pressed flowers on parchment */
+  --flora-stem: #6f8a5c;
+  --flora-leaf: #8fa577;
+  --flora-heart: #d6ae55;
+  --flora-petal-sky: var(--sky-300);
+  --flora-petal-deep: var(--sky-400);
+  --flora-petal-white: #fbf8f1;
+  --flora-petal-lilac: #b7a6d2;
+
   /* Borders */
   --border-subtle: var(--line-1);
   --border-default: var(--line-2);

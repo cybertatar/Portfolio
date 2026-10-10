@@ -80,7 +80,8 @@ import { levelOn } from '../scripts/level';
           ))}
         </div>
 
-        <footer class="footer">
+        <footer class="footer" data-footer>
+          <div class="meadow" aria-hidden="true" data-meadow></div>
           <Eyebrow tone="secondary" data-en={ui.footer.en}>
             {ui.footer.ru}
           </Eyebrow>
@@ -94,6 +95,7 @@ import { levelOn } from '../scripts/level';
 <script>
   import { profile, ui } from '../content/site';
   import { initCardStack, initLevel, initLocked, initProfileFit } from '../scripts/home';
+  import { initMeadow } from '../scripts/meadow';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
@@ -101,6 +103,9 @@ import { levelOn } from '../scripts/level';
   const level = document.querySelector<HTMLElement>('[data-level]');
   if (level) initLevel(level, profile.birthday, ui.levelUp);
   initLocked([...document.querySelectorAll<HTMLElement>('[data-locked]')]);
+  const footer = document.querySelector<HTMLElement>('[data-footer]');
+  const meadow = document.querySelector<HTMLElement>('[data-meadow]');
+  if (footer && meadow) initMeadow(footer, meadow);
   if (feed) {
     initCardStack(
       feed,
@@ -355,8 +360,59 @@ import { levelOn } from '../scripts/level';
     justify-content: space-between;
     gap: 24px;
     height: 96px;
+    position: relative;
     border-top: var(--border-width-hair) solid var(--border-subtle);
     margin-top: 48px;
+  }
+
+  /* Flower field on the footer line (src/scripts/meadow.ts); clicks anywhere on it plant more */
+  .meadow {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 48px;
+    overflow: hidden;
+  }
+  .meadow :global(.plant) {
+    position: absolute;
+    bottom: 0;
+    line-height: 0;
+    animation: sprout calc(var(--rows) * 70ms) steps(var(--rows), end) var(--delay) both;
+  }
+  .meadow :global(svg) {
+    display: block;
+    overflow: visible;
+  }
+  /* Grows one pixel row at a time, from the ground up */
+  @keyframes sprout {
+    from {
+      clip-path: inset(100% 0 0 0);
+    }
+    to {
+      clip-path: inset(0);
+    }
+  }
+  /* A two-frame idle, like sprites in old RPGs: the head leans one pixel and back */
+  .meadow :global(.sways .head) {
+    animation: sway var(--sway) steps(1, end) var(--sway-delay) infinite;
+  }
+  @keyframes sway {
+    82% {
+      transform: none;
+    }
+    86% {
+      transform: translateX(1px);
+    }
+    94% {
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .meadow :global(.plant),
+    .meadow :global(.head) {
+      animation: none !important;
+    }
   }
   .spacer {
     height: 0;

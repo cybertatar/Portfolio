@@ -375,6 +375,26 @@ import { levelOn } from '../scripts/level';
   .meadow :global(svg) {
     display: block;
   }
+  /* The frog turns to face where it hops (quarter turns keep the pixels crisp) and hops
+     a cell at a time in a few stepped frames */
+  .meadow :global(.frog) {
+    position: absolute;
+    z-index: 1;
+    line-height: 0;
+    transform: rotate(var(--turn));
+    transition:
+      left 240ms steps(4, end),
+      top 240ms steps(4, end),
+      opacity 300ms steps(3, end);
+  }
+  .meadow :global(.frog.gone) {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .meadow :global(.frog) {
+      transition: none;
+    }
+  }
 
   /* ---------- Mobile / tablet portrait ---------- */
 

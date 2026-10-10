@@ -1,0 +1,134 @@
+<!doctype html>
+<!--
+  Link-preview image (Open Graph), 1200×630 → public/assets/og-cover.png.
+  Render: open this file in a browser at a 1200×630 viewport and take a screenshot,
+  e.g. with Playwright: page.setViewportSize({ width: 1200, height: 630 }); page.screenshot().
+  Colours mirror src/styles/tokens/colors.css. Nothing time-bound here (no level, no status):
+  messengers cache the image for a long time.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&family=Fira+Mono&family=Handjet:wght@600;700&display=block"
+    />
+    <style>
+      :root {
+        --page: #e7e0d0;
+        --card: #f7f3ea;
+        --raised: #e8e1d2;
+        --ink-1: #29251e;
+        --ink-2: #585143;
+        --ink-3: #665e4f;
+        --sky-600: #2f5f93;
+        --s: 8px; /* pixel corner step, scaled up for a 1200px image */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        background: var(--page);
+        overflow: hidden;
+      }
+      /* Stepped corners, same shape as .px-clip on the site */
+      .px {
+        clip-path: polygon(
+          0 calc(var(--s) * 2),
+          var(--s) calc(var(--s) * 2),
+          var(--s) var(--s),
+          calc(var(--s) * 2) var(--s),
+          calc(var(--s) * 2) 0,
+          calc(100% - var(--s) * 2) 0,
+          calc(100% - var(--s) * 2) var(--s),
+          calc(100% - var(--s)) var(--s),
+          calc(100% - var(--s)) calc(var(--s) * 2),
+          100% calc(var(--s) * 2),
+          100% calc(100% - var(--s) * 2),
+          calc(100% - var(--s)) calc(100% - var(--s) * 2),
+          calc(100% - var(--s)) calc(100% - var(--s)),
+          calc(100% - var(--s) * 2) calc(100% - var(--s)),
+          calc(100% - var(--s) * 2) 100%,
+          calc(var(--s) * 2) 100%,
+          calc(var(--s) * 2) calc(100% - var(--s)),
+          var(--s) calc(100% - var(--s)),
+          var(--s) calc(100% - var(--s) * 2),
+          0 calc(100% - var(--s) * 2)
+        );
+      }
+      .card {
+        position: absolute;
+        inset: 40px;
+        display: flex;
+        gap: 56px;
+        padding: 40px;
+        background: var(--card);
+      }
+      .portrait {
+        flex: 0 0 400px;
+        height: 100%;
+        --s: 6px;
+        background: var(--raised) url('../../public/assets/portrait.jpg') 28% center / cover
+          no-repeat;
+      }
+      .text {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        padding: 8px 0;
+      }
+      .eyebrow {
+        font:
+          600 26px/1 'Handjet',
+          monospace;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--sky-600);
+      }
+      h1 {
+        margin: 28px 0 0;
+        font:
+          700 104px/0.95 'Handjet',
+          monospace;
+        color: var(--ink-1);
+      }
+      .role {
+        margin: 20px 0 0;
+        font:
+          500 36px/1.2 'Fira Sans',
+          sans-serif;
+        color: var(--ink-2);
+      }
+      .bio {
+        margin: 18px 0 0;
+        font:
+          400 28px/1.35 'Fira Sans',
+          sans-serif;
+        color: var(--ink-2);
+      }
+      .url {
+        margin-top: auto;
+        font:
+          400 24px/1 'Fira Mono',
+          monospace;
+        color: var(--ink-3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card px">
+      <div class="portrait px" role="img" aria-label="Портрет"></div>
+      <div class="text">
+        <span class="eyebrow">Портфолио</span>
+        <h1>Даниил Тынчеров</h1>
+        <p class="role">Product designer</p>
+        <p class="bio">Проектирую мобильные приложения и&nbsp;веб-сервисы</p>
+        <span class="url">cybertatar.github.io/Portfolio</span>
+      </div>
+    </div>
+  </body>
+</html>

@@ -82,6 +82,7 @@ export const cases: CaseItem[] = [
     tags: ['B2C', '2026'],
     status: 'default',
     href: '#',
+    cover: 'assets/cases/bittvpn-cover.webp',
     coverLabel: { ru: 'Обложка — BittVPN', en: 'Cover — BittVPN' },
   },
   {

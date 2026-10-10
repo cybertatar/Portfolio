@@ -1,0 +1,349 @@
+<!doctype html>
+<!--
+  Case cover for BittVPN client, 1920×1080 (16:9) → public/assets/cases/bittvpn-cover.webp.
+  Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
+  as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
+  Idea: a VPN connection as a trip, so the cover shows a boarding pass from Russia to
+  Germany next to the app. Big codes and the logo are dot-matrix, drawn from the 5×7 glyphs in
+  bittvpn/glyphs.js (the app's own dotted display face is Nothing Font, which we can't ship; Ы is six dots wide);
+  small text is Martian Mono, a sibling of the app's Martian Grotesk. Details on the pass come
+  from the app's mock data; the QR code is a rickroll.
+  Background: parchment like the PSB cover, with a faint pattern of dotted globes and planes.
+  Screen: the main screen ("t-main") of the BittVPN Figma file, exported at 3x, cropped to
+  the first 874pt, with the floating tab bar and home indicator from the end of the frame
+  pasted over the bottom; saved at 2x (bittvpn/main.png). The iPhone 17 Pro body is shared
+  with the PSB cover (iphone-17-pro.png, 450×920pt, screen inset 24/23pt).
+  App background: #0A0C0F. Parchment colours mirror
+  src/styles/tokens/colors.css. The card zooms the cover on hover, so keep the key content
+  away from the edges.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Martian+Mono:wght@400;500&display=block"
+    />
+    <style>
+      :root {
+        --paper-3: #e8e1d2;
+        --line-2: #cfc6b2;
+        --ink-1: #29251e;
+        --ink-3: #847c6c;
+        --ticket: #fbf8f1;
+        --app-bg: #0a0c0f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: var(--paper-3);
+        font-family: 'Martian Mono', monospace;
+        color: var(--ink-1);
+      }
+      /* Barely-there pattern of dotted globes and planes; same strength and fade as the
+         coins on the PSB cover. The tile is drawn by the script below. */
+      .pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 96px 96px;
+        mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.35), #000 85%);
+        opacity: 0.5;
+      }
+
+      /* Boarding pass */
+      .pass {
+        --stub: 300px;
+        --notch: 22px;
+        position: absolute;
+        left: 168px;
+        top: 318px;
+        width: 1040px;
+        height: 460px;
+        transform: rotate(-3deg);
+        filter: drop-shadow(0 24px 32px rgb(41 37 30 / 0.2));
+      }
+      .pass-paper {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--stub);
+        grid-template-rows: 88px 1fr;
+        border-radius: 28px;
+        background: var(--ticket);
+        overflow: hidden;
+        /* Notches where the stub tears off */
+        mask:
+          radial-gradient(
+              circle at calc(100% - var(--stub)) 0,
+              #0000 var(--notch),
+              #000 calc(var(--notch) + 0.5px)
+            )
+            top / 100% 51% no-repeat,
+          radial-gradient(
+              circle at calc(100% - var(--stub)) 100%,
+              #0000 var(--notch),
+              #000 calc(var(--notch) + 0.5px)
+            )
+            bottom / 100% 51% no-repeat;
+      }
+      .band {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        background: var(--app-bg);
+      }
+      .band .kind {
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        color: #8b8d90;
+      }
+      .main {
+        display: flex;
+        flex-direction: column;
+        padding: 44px 48px 40px;
+      }
+      .route {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: start;
+        column-gap: 28px;
+      }
+      .route .path {
+        width: 100%;
+        margin-top: 28px;
+      }
+      .place {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .place.to {
+        align-items: flex-end;
+        text-align: right;
+      }
+      .caption {
+        font-size: 17px;
+        color: var(--ink-3);
+      }
+      .fields {
+        display: flex;
+        justify-content: space-between;
+        margin-top: auto;
+        padding-top: 28px;
+        border-top: 2px dashed var(--line-2);
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .label {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+      }
+      .value {
+        font-size: 22px;
+        font-weight: 500;
+      }
+      .stub {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        border-left: 3px dotted var(--line-2);
+      }
+
+      .phone {
+        --k: 0.96; /* scale from Figma points */
+        position: absolute;
+        left: 1300px;
+        top: 98px;
+        width: calc(450px * var(--k));
+        height: calc(920px * var(--k));
+        filter: drop-shadow(0 24px 32px rgb(41 37 30 / 0.22));
+      }
+      .phone .screen {
+        position: absolute;
+        left: calc(24px * var(--k));
+        top: calc(23px * var(--k));
+        width: calc(402px * var(--k));
+        height: calc(874px * var(--k));
+        border-radius: calc(60px * var(--k));
+      }
+      .phone .body {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <script src="bittvpn/glyphs.js"></script>
+  </head>
+  <body>
+    <div class="pattern"></div>
+
+    <div class="pass">
+      <div class="pass-paper">
+        <div class="band">
+          <canvas data-dots="BITTVPN" data-pitch="4.5" data-ink="#f4f5f6"></canvas>
+          <span class="kind">ПОСАДОЧНЫЙ ТАЛОН</span>
+        </div>
+        <div class="main">
+          <div class="route">
+            <div class="place">
+              <canvas data-dots="RU" data-pitch="12"></canvas>
+              <span class="caption">Россия, Москва</span>
+            </div>
+            <canvas class="path" data-path></canvas>
+            <div class="place to">
+              <canvas data-dots="DE" data-pitch="12"></canvas>
+              <span class="caption">Германия, Франкфурт</span>
+            </div>
+          </div>
+          <div class="fields">
+            <div class="field">
+              <span class="label">Пассажир</span><span class="value">iPhone_DE</span>
+            </div>
+            <div class="field">
+              <span class="label">Задержка</span><span class="value">10 мс</span>
+            </div>
+            <div class="field">
+              <span class="label">Доступ до</span><span class="value">30.09</span>
+            </div>
+            <div class="field">
+              <span class="label">Устройства</span><span class="value">3/5</span>
+            </div>
+          </div>
+        </div>
+        <div class="stub">
+          <canvas data-qr></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <img class="screen" src="bittvpn/main.png" alt="" />
+      <img class="body" src="iphone-17-pro.png" alt="" />
+    </div>
+
+    <script>
+      const PLANE = ['...#...', '...##..', '#..###.', '#######', '#..###.', '...##..', '...#...'];
+      const GLOBE = ['..###..', '.#.#.#.', '#..#..#', '#######', '#..#..#', '.#.#.#.', '..###..'];
+      // Rickroll: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+      const QR = [
+        '#######...#....#.###..#######',
+        '#.....#.###..######.#.#.....#',
+        '#.###.#.#.....#..#.##.#.###.#',
+        '#.###.#..#..#..##.....#.###.#',
+        '#.###.#.###.#..#.##...#.###.#',
+        '#.....#.#.#.########..#.....#',
+        '#######.#.#.#.#.#.#.#.#######',
+        '........#.##..#..###.........',
+        '##.#..##...##.#.......###.##.',
+        '###.#....#.####.###.#.#..#..#',
+        '..#######..##...##.##.#..###.',
+        '.##....#######.#..#....##.##.',
+        '.#..###.#.##.#...#.####..#.##',
+        '###..#...#.#...#.#.#.#.#.....',
+        '.##.#.##.###.##.###.##...####',
+        '...###.##..#.########.#..#.#.',
+        '.#######..#.##...#.###.#...#.',
+        '.#.#...#..#.#...#.#...##.#..#',
+        '#.#.#.#....##.#.....####...##',
+        '.....#..###.#..#.#.#..#....##',
+        '#..#.##.###..###....#####.#..',
+        '........####.#...#.##...#.###',
+        '#######.###...#..##.#.#.#..#.',
+        '#.....#...#..#..#.#.#...###.#',
+        '#.###.#..#..#....#..#####....',
+        '#.###.#.#####.#....#..#.####.',
+        '#.###.#...#.#....###.#..###.#',
+        '#.....#.#...###.##..#...#..#.',
+        '#######.#..########.#..##..#.',
+      ];
+      const css = getComputedStyle(document.documentElement);
+      const INK = css.getPropertyValue('--ink-1').trim();
+      const LINE = '#b9af99';
+
+      // Pattern tile: 32×32 cells, one dot per cell.
+      const tile = [
+        [5, 5, GLOBE],
+        [20, 20, PLANE],
+      ]
+        .flatMap(([ox, oy, rows]) =>
+          rows.flatMap((line, y) =>
+            [...line].flatMap((c, x) =>
+              c === '#' ? [`<circle cx='${ox + x + 0.5}' cy='${oy + y + 0.5}' r='0.42'/>`] : [],
+            ),
+          ),
+        )
+        .join('');
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='#cfc6b2'>${tile}</svg>`;
+      document.querySelector('.pattern').style.backgroundImage =
+        `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+
+      /** Draws a bitmap as round dots onto a canvas at 2x: "#" in ink, "+" in the line colour. */
+      function paint(cv, rows, pitch, ink, size = 0.36) {
+        const s = 2;
+        const w = rows[0].length * pitch;
+        const h = rows.length * pitch;
+        cv.width = w * s;
+        cv.height = h * s;
+        cv.style.width = `${w}px`;
+        cv.style.height = `${h}px`;
+        const ctx = cv.getContext('2d');
+        ctx.scale(s, s);
+        rows.forEach((line, y) =>
+          [...line].forEach((c, x) => {
+            if (c === '.') return;
+            ctx.fillStyle = c === '+' ? LINE : ink;
+            ctx.beginPath();
+            ctx.arc((x + 0.5) * pitch, (y + 0.5) * pitch, pitch * size, 0, Math.PI * 2);
+            ctx.fill();
+          }),
+        );
+      }
+      /** Text → bitmap rows from the 5×7 glyphs, one blank column between letters. */
+      const bitmap = (str) =>
+        Array.from({ length: 7 }, (_, y) => [...str].map((ch) => GLYPHS[ch][y]).join('.'));
+
+      for (const cv of document.querySelectorAll('[data-dots]'))
+        paint(cv, bitmap(cv.dataset.dots), +cv.dataset.pitch, cv.dataset.ink ?? INK);
+
+      paint(document.querySelector('[data-qr]'), QR, 7, INK, 0.48);
+
+      // Route between the codes: a dotted line with a plane in the middle.
+      const path = document.querySelector('[data-path]');
+      const pitch = 6;
+      const cells = Math.floor(path.clientWidth / pitch);
+      const mid = Math.floor((cells - 7) / 2);
+      paint(
+        path,
+        PLANE.map((line, y) =>
+          Array.from({ length: cells }, (_, x) => {
+            if (x >= mid && x < mid + 7) return line[x - mid];
+            return y === 3 && x % 2 === 0 && Math.abs(x - mid - 3) > 6 ? '+' : '.';
+          }).join(''),
+        ),
+        pitch,
+        INK,
+      );
+    </script>
+  </body>
+</html>

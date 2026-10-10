@@ -1,0 +1,333 @@
+<!doctype html>
+<!--
+  Case cover for Mouette online clothing store, 1920×1080 (16:9) →
+  public/assets/cases/mouette-cover.webp.
+  Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
+  as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
+  The case is under NDA, so there are no screens: only brand bits on the parchment of the other
+  covers. A hang tag on a red thread carries the logo (mouette/logo.svg, exported from the
+  Figma file, Cover page) and the size chips and colour swatches of the store's design system;
+  a woven neck label lies behind it. The background is a faint pixel pattern of thread spools,
+  needles and coats. Brand colours: ink #424242, accent #E91616, greys #F2F2F2 / #969696.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600&display=block"
+    />
+    <style>
+      :root {
+        --paper-3: #e8e1d2;
+        --ink: #424242;
+        --accent: #e91616;
+        --grey-50: #f2f2f2;
+        --caption: #969696;
+        --tag: #fbfaf6;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: var(--paper-3);
+        font-family: Inter, sans-serif;
+        color: var(--ink);
+      }
+      /* Same strength and fade as the patterns on the other covers. Each tile is 40×40 game
+         pixels drawn at 3px; the script below fills it in. */
+      .pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 120px 120px;
+        mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.35), #000 85%);
+        opacity: 0.5;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+      }
+      .shadow {
+        filter: drop-shadow(0 2px 3px rgb(66 52 30 / 0.12))
+          drop-shadow(0 24px 40px rgb(66 52 30 / 0.16));
+      }
+
+      /* Woven neck label: dark band, white logo, red stitches along the folded ends */
+      .woven {
+        position: absolute;
+        left: 880px;
+        top: 640px;
+        width: 760px;
+        height: 190px;
+        transform: rotate(7deg);
+      }
+      .woven-band {
+        position: absolute;
+        inset: 0;
+        background:
+          repeating-linear-gradient(0deg, rgb(255 255 255 / 0.035) 0 2px, transparent 2px 4px),
+          var(--ink);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 84px;
+      }
+      .woven-band img {
+        height: 92px;
+        filter: brightness(0) invert(0.95);
+      }
+      .stitch {
+        position: absolute;
+        top: 14px;
+        bottom: 14px;
+        width: 0;
+        border-left: 4px dashed var(--accent);
+      }
+      .stitch.l {
+        left: 34px;
+      }
+      .stitch.r {
+        right: 34px;
+      }
+
+      /* Hang tag on a thread */
+      .tag-wrap {
+        position: absolute;
+        left: 470px;
+        top: 150px;
+        width: 520px;
+        height: 830px;
+        transform: rotate(-6deg);
+        transform-origin: 50% 0;
+      }
+      .tag {
+        position: absolute;
+        inset: 0;
+        background: var(--tag);
+        clip-path: polygon(22% 0, 78% 0, 100% 13%, 100% 100%, 0 100%, 0 13%);
+        border-radius: 0 0 28px 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 150px 56px 56px;
+        box-sizing: border-box;
+      }
+      .hole {
+        position: absolute;
+        left: 50%;
+        top: 46px;
+        width: 44px;
+        height: 44px;
+        margin-left: -22px;
+        border-radius: 50%;
+        background: var(--paper-3);
+        box-shadow:
+          inset 0 2px 4px rgb(0 0 0 / 0.18),
+          0 0 0 7px #cfcac0;
+      }
+      .mark {
+        width: 220px;
+        height: 220px;
+        overflow: hidden;
+        flex: none;
+      }
+      /* The logo SVG is 1540 wide; the circle sits in its first 300px */
+      .mark img {
+        height: 220px;
+        transform: translateX(-4px);
+      }
+      .word {
+        margin-top: 36px;
+        width: 340px;
+        height: 72px;
+        overflow: hidden;
+        flex: none;
+        position: relative;
+      }
+      .word img {
+        position: absolute;
+        height: 72px;
+        left: -94px;
+      }
+      .rule {
+        align-self: stretch;
+        height: 2px;
+        background: var(--grey-50);
+        margin: 48px 0 36px;
+      }
+      .label {
+        align-self: flex-start;
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--caption);
+        margin-bottom: 16px;
+      }
+      .chips {
+        align-self: flex-start;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 36px;
+      }
+      .chip {
+        height: 52px;
+        min-width: 52px;
+        padding: 0 18px;
+        box-sizing: border-box;
+        border-radius: 999px;
+        background: var(--grey-50);
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        font-weight: 500;
+      }
+      .chip.on {
+        background: var(--ink);
+        color: var(--grey-50);
+      }
+      .swatches {
+        align-self: flex-start;
+        display: flex;
+        gap: 14px;
+      }
+      .sw {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.08);
+      }
+      .sw.on {
+        outline: 3px solid var(--ink);
+        outline-offset: 4px;
+      }
+      .new {
+        position: absolute;
+        right: 40px;
+        top: 150px;
+        display: none;
+      }
+      .thread {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pattern"></div>
+    <div class="scene">
+      <div class="woven shadow">
+        <div class="woven-band">
+          <img src="mouette/logo.svg" alt="" />
+        </div>
+        <span class="stitch l"></span>
+        <span class="stitch r"></span>
+      </div>
+      <div class="tag-wrap shadow">
+        <div class="tag">
+          <div class="mark"><img src="mouette/logo.svg" alt="" /></div>
+          <div class="word"><img src="mouette/logo.svg" alt="" /></div>
+          <div class="rule"></div>
+          <div class="label">Размер</div>
+          <div class="chips">
+            <span class="chip">XS</span><span class="chip">S</span><span class="chip on">M</span
+            ><span class="chip">L</span><span class="chip">XL</span>
+          </div>
+          <div class="label">Цвет</div>
+          <div class="swatches">
+            <span class="sw on" style="background: #424242"></span>
+            <span class="sw" style="background: #e8dccb"></span>
+            <span class="sw" style="background: #e91616"></span>
+            <span class="sw" style="background: #0062ff"></span>
+            <span class="sw" style="background: #71be41"></span>
+          </div>
+        </div>
+        <span class="hole"></span>
+      </div>
+      <!-- Red thread through the tag's hole, running off the top edge -->
+      <svg class="thread" viewBox="0 0 1920 1080">
+        <path
+          d="M770 -20 C 785 60, 744 120, 740 199"
+          fill="none"
+          stroke="#e91616"
+          stroke-width="5"
+          stroke-linecap="round"
+        />
+        <path
+          d="M740 199 C 716 150, 676 80, 706 -20"
+          fill="none"
+          stroke="#c41010"
+          stroke-width="5"
+          stroke-linecap="round"
+        />
+      </svg>
+    </div>
+    <script>
+      // Thread spool with a wound, striped core.
+      const SPOOL = [
+        '#########',
+        '.#######.',
+        '.##.##.#.',
+        '.#.##.##.',
+        '.##.##.#.',
+        '.#.##.##.',
+        '.#######.',
+        '#########',
+      ];
+      // Needle: an eye at the top with a thread through it, waving down beside the shaft.
+      const NEEDLE = [
+        '.###.......',
+        '.#.#.##....',
+        '.#.##..#...',
+        '.#.#....#..',
+        '.###.....#.',
+        '..#......#.',
+        '..#.....#..',
+        '..#....#...',
+        '..#....#...',
+        '..#.....#..',
+        '..#......#.',
+        '..#......#.',
+        '.........#.',
+        '........#..',
+      ];
+      // Coat: collar, lapels meeting at the buttons, sleeves.
+      const COAT = [
+        '...###.###...',
+        '..#..#.#..#..',
+        '.##...#...##.',
+        '#.#...#...#.#',
+        '#.#..##...#.#',
+        '#.#...#...#.#',
+        '#.#..##...#.#',
+        '#.#...#...#.#',
+        '#.#..##...#.#',
+        '#.#...#...#.#',
+        '###...#...###',
+        '..#...#...#..',
+        '..#########..',
+      ];
+      const path = [
+        [4, 3, COAT],
+        [14, 27, SPOOL],
+        [27, 6, NEEDLE],
+      ]
+        .flatMap(([ox, oy, rows]) =>
+          rows.flatMap((line, y) =>
+            [...line].flatMap((c, x) => (c === '#' ? [`M${ox + x} ${oy + y}h1v1h-1z`] : [])),
+          ),
+        )
+        .join('');
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40' shape-rendering='crispEdges'><path fill='#cfc6b2' d='${path}'/></svg>`;
+      document.querySelector('.pattern').style.backgroundImage =
+        `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    </script>
+  </body>
+</html>

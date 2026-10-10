@@ -2,72 +2,109 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Button from '../components/ui/Button.astro';
-import Chip from '../components/ui/Chip.astro';
 import ContactRow from '../components/ui/ContactRow.astro';
 import Eyebrow from '../components/ui/Eyebrow.astro';
 import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
+import PixelIcon from '../components/ui/PixelIcon.astro';
 import { cases, profile, ui } from '../content/site';
-import { withBase } from '../scripts/url';
+
+const upcoming = cases.filter((c) => c.status === 'soon').length;
+const done = cases.length - upcoming;
 ---
 
 <BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
   <div class="root">
-    <aside class="aside" data-stage="0" data-profile>
-      <div class="head">
-        <div class="portrait">
-          <div class="portrait-media">
-            <Media src={profile.portrait} label={ui.portrait} />
+    <aside class="aside px-frame" data-stage="0" data-profile>
+      <div class="aside-body" data-profile-body>
+        <div class="head">
+          <div class="portrait">
+            <div class="portrait-media px-clip">
+              <Media src={profile.portrait} label={ui.portrait} />
+            </div>
+            <span class="lvl px-frame">
+              <span class="lvl-num">{profile.level}</span>
+              <span class="lvl-label" data-en={ui.level.en}>
+                {ui.level.ru}
+              </span>
+            </span>
           </div>
-          <span class="lvl">{profile.level}</span>
+          <div class="name">
+            <h1 data-en={profile.name.en}>{profile.name.ru}</h1>
+            <p class="role">
+              <span class="role-label" data-en={ui.class.en}>
+                {ui.class.ru}
+              </span>
+              <span>{profile.role}</span>
+            </p>
+          </div>
         </div>
-        <div class="name">
-          <h1 data-en={profile.name.en}>{profile.name.ru}</h1>
-          <p class="role">{profile.role}</p>
+
+        <div class="bio">
+          <p data-en={profile.bio.en}>{profile.bio.ru}</p>
         </div>
-      </div>
 
-      <div class="bio">
-        <p data-en={profile.bio.en}>{profile.bio.ru}</p>
-      </div>
+        <div class="zone zone-gear">
+          <Eyebrow data-en={ui.equipment.en}>{ui.equipment.ru}</Eyebrow>
+          <ul class="gear">
+            {profile.tools.map((tool) => (
+              <li
+                class="gear-item px-frame"
+                tabindex="0"
+                data-tip={tool.name}
+                data-tip-type={ui.tool.ru}
+                data-tip-type-en={ui.tool.en}
+                data-tip-text={tool.kind.ru}
+                data-tip-text-en={tool.kind.en}
+              >
+                <PixelIcon name={tool.icon} />
+                <span class="gear-name">{tool.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <div class="zone zone-skills">
-        <Eyebrow data-en={ui.skills.en}>{ui.skills.ru}</Eyebrow>
-        <div class="chips">
-          {profile.skills.map((skill) => (
-            <Chip>{skill}</Chip>
+        <div class="zone zone-contacts">
+          {profile.contacts.map((c, i) => (
+            <ContactRow
+              href={c.href}
+              value={c.value}
+              label={c.label}
+              icon={c.icon}
+              external={c.external}
+              divider={i < profile.contacts.length - 1}
+            />
           ))}
         </div>
-      </div>
 
-      <div class="zone zone-contacts">
-        {profile.contacts.map((c, i) => (
-          <ContactRow
-            href={c.href}
-            value={c.value}
-            label={c.label}
-            external={c.external}
-            divider={i < profile.contacts.length - 1}
-          />
-        ))}
-      </div>
-
-      <div class="cta">
-        <Button href={profile.cvHref} full>
-          CV
-        </Button>
-        <IconButton href={profile.telegramHref} label="Telegram" target="_blank" rel="noopener">
-          <img src={withBase('assets/telegram.png')} alt="" class="telegram" />
-        </IconButton>
+        <div class="cta">
+          <Button href={profile.cvHref} full>
+            CV
+          </Button>
+          <IconButton href={profile.telegramHref} label="Telegram" target="_blank" rel="noopener">
+            <PixelIcon name="telegram" />
+          </IconButton>
+        </div>
       </div>
     </aside>
 
     <main class="feed" data-feed>
       <div class="inner">
+        <header class="log-head">
+          <Eyebrow data-en={ui.questLog.en}>{ui.questLog.ru}</Eyebrow>
+          <span class="log-count">
+            <span data-en={`${ui.completed.en}: ${done}`}>{`${ui.completed.ru}: ${done}`}</span>
+            <span aria-hidden="true">·</span>
+            <span
+              data-en={`${ui.upcoming.en}: ${upcoming}`}
+            >{`${ui.upcoming.ru}: ${upcoming}`}</span>
+          </span>
+        </header>
+
         <div class="list">
           {cases.map((item, i) => (
             <article class:list={['slot', { last: i === cases.length - 1 }]} data-slot>
-              <ProjectCard item={item} />
+              <ProjectCard item={item} number={i + 1} />
             </article>
           ))}
         </div>
@@ -84,11 +121,13 @@ import { withBase } from '../scripts/url';
 </BaseLayout>
 
 <script>
-  import { initCardStack, initProfileFit } from '../scripts/home';
+  import { initCardStack, initProfileFit, initTooltips } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
+  const asideBody = document.querySelector<HTMLElement>('[data-profile-body]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
-  if (aside) initProfileFit(aside);
+  if (aside && asideBody) initProfileFit(aside, asideBody);
+  initTooltips();
   if (feed) {
     initCardStack(
       feed,
@@ -112,19 +151,26 @@ import { withBase } from '../scripts/url';
   /* ---------- Profile aside ---------- */
 
   .aside {
+    --px-fill: var(--surface-card);
+    --px-border: var(--border-default);
     flex: 0 0 25%;
     min-width: var(--layout-sidebar-min);
     max-width: var(--layout-sidebar-max);
     align-self: flex-start;
+    display: flex;
     max-height: calc(100vh - 48px);
+    margin: 24px 0 24px calc(var(--side) + 24px);
+  }
+  /* The frame can't scroll (its fill would scroll away), so the body inside it does. */
+  .aside-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
     overflow-y: auto;
     overflow-x: hidden;
-    margin: 24px 0 24px calc(var(--side) + 24px);
     display: flex;
     flex-direction: column;
     padding: clamp(24px, 1.2vw, 28px);
-    background: var(--surface-card);
-    border-radius: var(--r-shell);
   }
   .head {
     display: flex;
@@ -138,55 +184,75 @@ import { withBase } from '../scripts/url';
     width: 100%;
     aspect-ratio: 5 / 4;
     flex: none;
-    border-radius: 8px;
   }
   .portrait-media {
     position: absolute;
     inset: 0;
     overflow: hidden;
-    border-radius: inherit;
     color: var(--text-tertiary);
   }
+
+  /* Level badge: sits on the portrait's bottom edge, like a unit frame in an MMO */
   .lvl {
+    --px-step: 2px;
+    --px-border: var(--accent);
+    --px-fill: var(--ink-0);
     position: absolute;
     left: 12px;
-    bottom: 12px;
+    bottom: -14px;
     display: flex;
-    align-items: center;
-    height: clamp(26px, 1.6vw, 32px);
+    align-items: baseline;
+    gap: 5px;
+    height: 32px;
     padding: 0 10px;
-    background: var(--surface-glass);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-radius: 6px;
-    font-family: var(--font-mono);
-    font-size: clamp(12px, 0.62vw, 15px);
+    font-family: var(--font-pixel);
+    line-height: 32px;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .lvl-num {
+    font-size: 26px;
+    font-weight: var(--fw-bold);
+  }
+  .lvl-label {
+    font-size: 15px;
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
-    white-space: nowrap;
-    color: var(--text-on-glass);
+    color: var(--text-secondary);
   }
+
   .name {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     flex: 1 1 auto;
     min-width: 0;
-    margin-top: clamp(16px, 1vw, 20px);
+    margin-top: clamp(28px, 1.8vw, 34px);
   }
   h1 {
     margin: 0;
-    font-size: var(--t-name);
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-name) * 1.25);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
-    letter-spacing: var(--ls-tight);
     color: var(--text-primary);
   }
   .role {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px;
     margin: 0;
     font-size: var(--t-button);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
+  }
+  .role-label {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
   }
   .bio {
     flex: none;
@@ -205,30 +271,58 @@ import { withBase } from '../scripts/url';
     flex: none;
     padding-top: var(--space-zone);
   }
-  .zone-skills {
+  .zone-gear {
     gap: 12px;
   }
   .zone-contacts {
     gap: 2px;
   }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
+
+  /* Equipment: tools as inventory slots */
+  .gear {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
+  .gear-item {
+    --px-step: 2px;
+    --px-border: var(--border-subtle);
+    --px-fill: var(--ink-1);
+    --px-bevel: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    height: var(--chip-h);
+    padding: 0 10px;
+    color: var(--text-primary);
+    cursor: default;
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .gear-item:hover,
+  .gear-item:focus-visible {
+    --px-border: var(--border-strong);
+    --px-fill: var(--surface-raised);
+    outline: none;
+  }
+  .gear-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: var(--t-chip);
+  }
+
   .cta {
     display: flex;
     align-items: center;
     gap: 8px;
     flex: none;
     margin-top: clamp(24px, 1.8vw, 32px);
-  }
-  .telegram {
-    display: block;
-    width: 20px;
-    height: 20px;
-    object-fit: contain;
-    filter: brightness(0) invert(1);
   }
 
   /* Height fit, stage 1+: tighter rhythm */
@@ -242,42 +336,43 @@ import { withBase } from '../scripts/url';
     margin-top: 16px;
   }
 
-  /* Stage 2+: compact header in a row with a round 70px portrait */
+  /* Stage 2+: compact header in a row with a small square portrait */
   .aside:is([data-stage='2'], [data-stage='3']) .head {
     flex-direction: row;
     align-items: center;
     gap: 20px;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .portrait {
-    width: 70px;
-    height: 70px;
+    width: 72px;
+    height: 72px;
     aspect-ratio: auto;
-    flex: 0 0 70px;
-    border-radius: 50%;
+    flex: 0 0 72px;
   }
-  /* The round crop zooms in on the face: its centre lands at ~34% / 37% of the circle. */
+  /* The square crop zooms in on the face: its centre lands at ~34% / 37% of the frame. */
   .aside:is([data-stage='2'], [data-stage='3']) .portrait-media :global(img) {
     transform-origin: 34% 37%;
     transform: translate(16%, 13%) scale(1.8);
   }
   .aside:is([data-stage='2'], [data-stage='3']) .lvl {
     left: auto;
-    right: -8px;
-    bottom: -4px;
-    height: 22px;
-    padding: 0 7px;
-    border-radius: var(--r-pill);
-    background: var(--surface-raised);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    color: var(--text-primary);
-    font-size: 11px;
+    right: -10px;
+    bottom: -8px;
+    height: 24px;
+    padding: 0 6px;
+    line-height: 24px;
+    gap: 3px;
+  }
+  .aside:is([data-stage='2'], [data-stage='3']) .lvl-num {
+    font-size: 19px;
+  }
+  .aside:is([data-stage='2'], [data-stage='3']) .lvl-label {
+    font-size: 13px;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .name {
     margin-top: 0;
   }
   .aside:is([data-stage='2'], [data-stage='3']) h1 {
-    font-size: 22px;
+    font-size: 27px;
   }
   .aside:is([data-stage='2'], [data-stage='3']) .role {
     font-size: 14px;
@@ -305,6 +400,23 @@ import { withBase } from '../scripts/url';
     max-width: var(--layout-feed-max);
     margin: 0 auto;
     padding: 24px 40px 0;
+  }
+  .log-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 32px;
+    margin-bottom: 16px;
+  }
+  .log-count {
+    display: flex;
+    gap: 8px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
   }
   .list {
     display: flex;
@@ -347,8 +459,10 @@ import { withBase } from '../scripts/url';
       max-width: 640px;
       min-width: 0;
       max-height: none;
-      overflow: visible;
       margin: 16px auto 0;
+    }
+    .aside-body {
+      overflow: visible;
     }
     .feed {
       height: auto;

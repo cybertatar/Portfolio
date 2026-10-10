@@ -6,17 +6,16 @@ const STACK = {
   mobile: { travel: 320, lift: 24, scale: 0.03, fade: 0 },
 };
 
-/** Shrink the profile card in stages (0→3) until it fits the viewport height. Desktop only. */
-export function initProfileFit(aside: HTMLElement) {
+/** Shrink the profile card in stages (0→3) until its body fits the viewport height. Desktop only. */
+export function initProfileFit(aside: HTMLElement, body: HTMLElement) {
   const fit = () => {
     if (matchMedia(MOBILE).matches) {
       aside.dataset.stage = '0';
       return;
     }
-    const room = Math.max(0, innerHeight - 48);
     for (const n of [0, 1, 2, 3]) {
       aside.dataset.stage = String(n);
-      if (aside.scrollHeight <= Math.min(room, aside.clientHeight) + 8) return;
+      if (body.scrollHeight <= body.clientHeight + 8) return;
     }
   };
 
@@ -78,4 +77,59 @@ export function initCardStack(feed: HTMLElement, slots: HTMLElement[], spacer: H
   addEventListener('scroll', onScroll, { passive: true });
   addEventListener('resize', onScroll);
   update();
+}
+
+/**
+ * Item tooltip for elements with `data-tip` (title), `data-tip-type` and `data-tip-text`
+ * (plus `-en` variants). One fixed element, so the sidebar's overflow doesn't clip it.
+ */
+export function initTooltips() {
+  const items = [...document.querySelectorAll<HTMLElement>('[data-tip]')];
+  if (!items.length) return;
+
+  const tip = document.createElement('div');
+  tip.className = 'px-tip px-frame';
+  tip.setAttribute('role', 'tooltip');
+  tip.hidden = true;
+  document.body.append(tip);
+
+  const show = (el: HTMLElement) => {
+    const en = document.documentElement.lang === 'en';
+    const d = el.dataset;
+    tip.replaceChildren(
+      ...[
+        ['px-tip-title', d.tip],
+        ['px-tip-type', en ? d.tipTypeEn : d.tipType],
+        ['px-tip-text', en ? d.tipTextEn : d.tipText],
+      ]
+        .filter(([, text]) => text)
+        .map(([cls, text]) => {
+          const line = document.createElement('span');
+          line.className = cls!;
+          line.textContent = text!;
+          return line;
+        }),
+    );
+    tip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const t = tip.getBoundingClientRect();
+    const left = Math.min(
+      Math.max(8, r.left + r.width / 2 - t.width / 2),
+      innerWidth - t.width - 8,
+    );
+    const above = r.top - t.height - 8;
+    tip.style.left = `${left}px`;
+    tip.style.top = `${above >= 8 ? above : r.bottom + 8}px`;
+  };
+  const hide = () => {
+    tip.hidden = true;
+  };
+
+  items.forEach((el) => {
+    el.addEventListener('pointerenter', () => show(el));
+    el.addEventListener('pointerleave', hide);
+    el.addEventListener('focus', () => show(el));
+    el.addEventListener('blur', hide);
+  });
+  addEventListener('scroll', hide, { passive: true, capture: true });
 }

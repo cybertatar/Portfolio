@@ -1,9 +1,10 @@
-/* Tyncherov Portfolio DS — global entry. Fira Sans / Fira Mono are linked in BaseLayout. */
+/* Tyncherov Portfolio DS — global entry. Fira Sans / Fira Mono / Handjet are linked in BaseLayout. */
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
 @import './tokens/radius.css';
 @import './tokens/effects.css';
+@import './pixel.css';
 
 *,
 *::before,

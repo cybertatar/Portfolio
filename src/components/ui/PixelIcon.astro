@@ -1,0 +1,52 @@
+---
+import { pixelIcons, type PixelIconName } from '../../content/pixel-icons';
+
+interface Props {
+  name: PixelIconName;
+  /** Rendered size in px; multiples of 12 keep pixels crisp. */
+  size?: number;
+}
+
+const { name, size = 24 } = Astro.props;
+
+const SHADE: Record<string, { fill: string; opacity?: number }> = {
+  '#': { fill: 'currentColor' },
+  '+': { fill: 'currentColor', opacity: 0.55 },
+  '-': { fill: 'currentColor', opacity: 0.28 },
+  o: { fill: 'var(--accent)' },
+};
+
+// One rect per horizontal run of the same character.
+const runs: { x: number; y: number; w: number; c: string }[] = [];
+pixelIcons[name].forEach((row, y) => {
+  let x = 0;
+  while (x < row.length) {
+    const c = row[x];
+    let w = 1;
+    while (row[x + w] === c) w++;
+    if (c in SHADE) runs.push({ x, y, w, c });
+    x += w;
+  }
+});
+---
+
+<svg
+  viewBox="0 0 12 12"
+  width={size}
+  height={size}
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+  style="display: block; flex: none"
+>
+  {runs.map((r) => (
+    <rect
+      x={r.x}
+      y={r.y}
+      width={r.w}
+      height="1"
+      fill={SHADE[r.c].fill}
+      opacity={SHADE[r.c].opacity}
+    />
+  ))}
+</svg>

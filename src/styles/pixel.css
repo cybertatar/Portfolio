@@ -1,0 +1,94 @@
+/*
+ * Pixel game-UI shapes: stepped corners instead of rounded ones.
+ *
+ * .px-clip  — clips the element to a stepped-corner shape (images, buttons, tags).
+ * .px-frame — the same shape with a 2px pixel border: the element paints the border
+ *             colour, ::before paints the fill. Not for scroll containers: the fill
+ *             would scroll with the content.
+ *
+ * Knobs: --px-step (corner step, default 4px), --px-border, --px-fill, --px-bw.
+ */
+.px-clip,
+.px-frame {
+  --px-step: 4px;
+  --px-clip: polygon(
+    0 calc(var(--px-step) * 2),
+    var(--px-step) calc(var(--px-step) * 2),
+    var(--px-step) var(--px-step),
+    calc(var(--px-step) * 2) var(--px-step),
+    calc(var(--px-step) * 2) 0,
+    calc(100% - var(--px-step) * 2) 0,
+    calc(100% - var(--px-step) * 2) var(--px-step),
+    calc(100% - var(--px-step)) var(--px-step),
+    calc(100% - var(--px-step)) calc(var(--px-step) * 2),
+    100% calc(var(--px-step) * 2),
+    100% calc(100% - var(--px-step) * 2),
+    calc(100% - var(--px-step)) calc(100% - var(--px-step) * 2),
+    calc(100% - var(--px-step)) calc(100% - var(--px-step)),
+    calc(100% - var(--px-step) * 2) calc(100% - var(--px-step)),
+    calc(100% - var(--px-step) * 2) 100%,
+    calc(var(--px-step) * 2) 100%,
+    calc(var(--px-step) * 2) calc(100% - var(--px-step)),
+    var(--px-step) calc(100% - var(--px-step)),
+    var(--px-step) calc(100% - var(--px-step) * 2),
+    0 calc(100% - var(--px-step) * 2)
+  );
+  clip-path: var(--px-clip);
+}
+
+.px-frame {
+  --px-bw: 2px;
+  --px-border: var(--border-default);
+  --px-fill: var(--surface-card);
+  position: relative;
+  isolation: isolate;
+  background: var(--px-border);
+}
+.px-frame::before {
+  content: '';
+  position: absolute;
+  inset: var(--px-bw);
+  z-index: -1;
+  background: var(--px-fill);
+  /* Bevel: a faint lit edge along the top, like a game panel */
+  box-shadow: inset 0 2px 0 var(--px-bevel, rgba(255, 255, 255, 0.04));
+  clip-path: var(--px-clip);
+  transition: background var(--dur-fast) var(--ease-standard);
+}
+
+/* Item tooltip (created by initTooltips in scripts/home.ts) */
+.px-tip {
+  --px-step: 2px;
+  --px-border: var(--border-strong);
+  --px-fill: var(--ink-1);
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 240px;
+  padding: 10px 12px 11px;
+  pointer-events: none;
+}
+.px-tip[hidden] {
+  display: none;
+}
+.px-tip-title {
+  font-family: var(--font-pixel);
+  font-size: 22px;
+  font-weight: var(--fw-semibold);
+  color: var(--text-primary);
+}
+.px-tip-type {
+  font-family: var(--font-pixel);
+  font-size: 14px;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  color: var(--text-accent);
+}
+.px-tip-text {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: var(--lh-snug);
+  color: var(--text-secondary);
+}

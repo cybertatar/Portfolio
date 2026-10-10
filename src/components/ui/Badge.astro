@@ -4,7 +4,7 @@ import type { HTMLAttributes } from 'astro/types';
 type Props = HTMLAttributes<'span'>;
 ---
 
-<span class="badge" {...Astro.props}>
+<span class="badge px-clip" {...Astro.props}>
   <slot />
 </span>
 
@@ -17,9 +17,10 @@ type Props = HTMLAttributes<'span'>;
     background: var(--surface-raised);
     color: var(--text-secondary);
     border: var(--border-width-hair) solid var(--border-default);
-    border-radius: var(--r-xs);
-    font-size: 11px;
-    font-weight: var(--fw-bold);
+    --px-step: 2px;
+    font-family: var(--font-pixel);
+    font-size: 15px;
+    font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
   }

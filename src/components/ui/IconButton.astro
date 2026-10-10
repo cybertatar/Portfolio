@@ -3,13 +3,18 @@ import type { HTMLAttributes } from 'astro/types';
 
 type Props = HTMLAttributes<'a'> & {
   label?: string;
-  shape?: 'square' | 'circle';
+  /** `large` is the card's open-case button. */
+  shape?: 'square' | 'large';
   tone?: 'raised' | 'inverse';
 };
 
 /** Renders <a> when href is set; otherwise a decorative <span> (e.g. the arrow inside a card link). */
 const { label, shape = 'square', tone = 'raised', href, ...rest } = Astro.props;
-const classes = ['icon-button', { circle: shape === 'circle', inverse: tone === 'inverse' }];
+const classes = [
+  'icon-button',
+  'px-clip',
+  { large: shape === 'large', inverse: tone === 'inverse' },
+];
 ---
 
 {href ? (
@@ -33,17 +38,16 @@ const classes = ['icon-button', { circle: shape === 'circle', inverse: tone === 
     background: var(--surface-raised);
     color: var(--text-primary);
     border: 0;
-    border-radius: var(--r-control);
+    box-shadow: inset 0 -4px 0 rgba(8, 8, 10, 0.3);
     transition: background var(--dur-fast) var(--ease-standard);
   }
   a.icon-button:hover {
     background: var(--surface-active);
     color: var(--text-primary);
   }
-  .circle {
+  .large {
     width: var(--arrow-btn);
     height: var(--arrow-btn);
-    border-radius: var(--r-circle);
     color: var(--text-secondary);
   }
   .inverse {

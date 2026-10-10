@@ -1,12 +1,16 @@
 ---
+import type { PixelIconName } from '../../content/pixel-icons';
+import PixelIcon from './PixelIcon.astro';
+
 interface Props {
   href: string;
   value: string;
   label: string;
   divider?: boolean;
   external?: boolean;
+  icon?: PixelIconName;
 }
-const { href, value, label, divider = true, external = false } = Astro.props;
+const { href, value, label, divider = true, external = false, icon } = Astro.props;
 ---
 
 <a
@@ -14,6 +18,7 @@ const { href, value, label, divider = true, external = false } = Astro.props;
   class:list={['contact-row', { divider }]}
   {...(external ? { target: '_blank', rel: 'noopener' } : {})}
 >
+  {icon && <PixelIcon name={icon} />}
   <span class="value">{value}</span>
   <span class="label">{label}</span>
 </a>
@@ -37,6 +42,7 @@ const { href, value, label, divider = true, external = false } = Astro.props;
     border-bottom: var(--border-width-hair) solid var(--border-subtle);
   }
   .value {
+    flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -44,7 +50,8 @@ const { href, value, label, divider = true, external = false } = Astro.props;
   }
   .label {
     flex: none;
-    font-size: var(--t-chip);
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
     color: var(--text-tertiary);

@@ -51,10 +51,6 @@
   --accent-soft: var(--sky-300);
   --status-online: #2e9466; /* availability dot only */
 
-  /* Bevels: the shaded bottom edge of pixel buttons */
-  --bevel-shade: rgba(41, 37, 30, 0.1);
-  --bevel-shade-inverse: rgba(0, 0, 0, 0.35);
-
   /* Borders */
   --border-subtle: var(--line-1);
   --border-default: var(--line-2);

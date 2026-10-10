@@ -55,6 +55,20 @@ export const profile = {
   }[],
   cvHref: '#',
   telegramHref: 'https://t.me/everlastinghate',
+  /** Every place to find me, as a row of icons at the bottom of the footer. */
+  socials: [
+    { label: 'Telegram', icon: 'telegram', href: 'https://t.me/everlastinghate' },
+    { label: 'Instagram', icon: 'instagram', href: '#' },
+    { label: 'Discord', icon: 'discord', href: '#' },
+    {
+      label: 'LinkedIn',
+      icon: 'linkedin',
+      href: 'https://www.linkedin.com/in/daniil-tyncherov-455b713a8',
+    },
+    { label: 'Email', icon: 'mail', href: 'mailto:tyncherovmail@icloud.com' },
+    { label: 'GitHub', icon: 'github', href: 'https://github.com/cybertatar' },
+    { label: 'Figma', icon: 'figma', href: '#' },
+  ] satisfies { label: string; icon: PixelIconName; href: string }[],
 };
 
 export const cases: CaseItem[] = [
@@ -104,7 +118,6 @@ export const ui = {
     en: 'Not enough mana. This case unlocks later.',
   },
   levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now {n} lvl.' },
-  footer: { ru: 'Даниил Тынчеров — 2026', en: 'Daniil Tyncherov — 2026' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
 } satisfies Record<string, Localized>;

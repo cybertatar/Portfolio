@@ -15,7 +15,7 @@ const soon = item.status === 'soon';
 const Tag = soon ? 'div' : 'a';
 // A locked case is a button that answers with a "not enough mana" dialog (initLocked in home.ts).
 const linkProps = soon
-  ? {
+  ? ({
       role: 'button',
       tabindex: 0,
       'data-locked': '',
@@ -23,7 +23,7 @@ const linkProps = soon
       'data-msg-en': ui.noMana.en,
       'aria-label': `${item.title}: ${ui.locked.ru}`,
       'data-en-label': `${item.title}: ${ui.locked.en}`,
-    } as const
+    } as const)
   : {
       href: item.href ?? '#',
       'aria-label': `${ui.openCase.ru}: ${item.title}`,

@@ -3,20 +3,26 @@
   Case cover for BittVPN client, 1920×1080 (16:9) → public/assets/cases/bittvpn-cover.webp.
   Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
   as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
-  Idea: an airport departure board, but the "flights" are VPN locations. The whole cover is
-  one LED matrix; letters are lit dots, drawn from the 5×7 glyphs in bittvpn/glyphs.js
-  (the app's own dotted display face is Nothing Font, which we can't ship).
+  Idea: an airport departure board, but the "flights" are VPN locations. A small dark LED
+  board sits on the same parchment as the PSB cover, letters are lit dots drawn from the
+  5×7 glyphs in bittvpn/glyphs.js (the app's own dotted display face is Nothing Font, which
+  we can't ship). Background: a faint tile pattern of dotted globes and planes.
   Screen: the main screen ("t-main") of the BittVPN Figma file, exported at 3x, cropped to
   the first 874pt, with the floating tab bar and home indicator from the end of the frame
   pasted over the bottom; saved at 2x (bittvpn/main.png). The iPhone 17 Pro body is shared
   with the PSB cover (iphone-17-pro.png, 450×920pt, screen inset 24/23pt).
-  Colours are the app's: background #0A0C0F, online green #72D769, warning amber #C59908.
+  Board colours are the app's: background #0A0C0F, online green #72D769, warning amber #C59908.
+  Parchment colours mirror src/styles/tokens/colors.css.
   The card zooms the cover on hover, so keep the key content away from the edges.
 -->
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
     <style>
+      :root {
+        --paper-3: #e8e1d2;
+        --line-2: #cfc6b2;
+      }
       * {
         box-sizing: border-box;
       }
@@ -29,20 +35,32 @@
       }
       body {
         position: relative;
-        background: #0a0c0f;
+        background: var(--paper-3);
       }
-      canvas {
+      /* Barely-there pattern of dotted globes and planes; same strength and fade as the
+         coins on the PSB cover. The tile is drawn by the script below. */
+      .pattern {
         position: absolute;
         inset: 0;
+        background-size: 96px 96px;
+        mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.35), #000 85%);
+        opacity: 0.5;
+      }
+      .board {
+        position: absolute;
+        left: 224px;
+        top: 382px;
+        border-radius: 28px;
+        box-shadow: 0 24px 48px rgb(41 37 30 / 0.22);
       }
       .phone {
         --k: 0.96; /* scale from Figma points */
         position: absolute;
-        left: 1404px;
+        left: 1265px;
         top: 98px;
         width: calc(450px * var(--k));
         height: calc(920px * var(--k));
-        filter: drop-shadow(0 40px 60px rgb(0 0 0 / 0.7));
+        filter: drop-shadow(0 24px 32px rgb(41 37 30 / 0.22));
       }
       .phone .screen {
         position: absolute;
@@ -62,132 +80,96 @@
     <script src="bittvpn/glyphs.js"></script>
   </head>
   <body>
-    <canvas id="board" width="1920" height="1080"></canvas>
+    <div class="pattern"></div>
+    <canvas class="board" id="board"></canvas>
     <div class="phone">
       <img class="screen" src="bittvpn/main.png" alt="" />
       <img class="body" src="iphone-17-pro.png" alt="" />
     </div>
     <script>
-      const W = 1920;
-      const H = 1080;
+      // Pattern tile: 32×32 cells, a dotted globe and a dotted plane, one dot per cell.
+      const TILE = [
+        [5, 5, ['..###..', '.#.#.#.', '#..#..#', '#######', '#..#..#', '.#.#.#.', '..###..']],
+        [20, 20, ['...#...', '...##..', '#..###.', '#######', '#..###.', '...##..', '...#...']],
+      ];
+      const circles = TILE.flatMap(([ox, oy, rows]) =>
+        rows.flatMap((line, y) =>
+          [...line].flatMap((c, x) =>
+            c === '#' ? [`<circle cx='${ox + x + 0.5}' cy='${oy + y + 0.5}' r='0.42'/>`] : [],
+          ),
+        ),
+      ).join('');
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='#cfc6b2'>${circles}</svg>`;
+      document.querySelector('.pattern').style.backgroundImage =
+        `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+
+      // Board: three "flights", lit dots on an LED matrix.
       const P = 7; // dot pitch, px
       const R = 2.3; // dot radius, px
-      const COLS = Math.floor(W / P);
-      const ROWS = Math.floor(H / P);
-      const OX = (W - COLS * P) / 2 + P / 2;
-      const OY = (H - ROWS * P) / 2 + P / 2;
+      const PAD = 6; // padding, in cells
+      const INK = { white: '#f4f5f6', green: '#72d769', amber: '#c59908' };
+      const flights = [
+        ['DE', 'ГЕРМАНИЯ', 'ОНЛАЙН', INK.green],
+        ['JP', 'ЯПОНИЯ', 'ДОСТУПНА', INK.white],
+        ['LT', 'ЛИТВА', 'ТЕХРАБОТЫ', INK.amber],
+      ];
+      const colName = 6 * 3 + 3;
+      const colStatus = colName + 6 * 9 + 3;
+      const COLS = colStatus + 6 * 9 - 1 + PAD * 2;
+      const ROWS = flights.length * 13 - 6 + PAD * 2;
 
-      const INK = {
-        white: '#f4f5f6',
-        dim: '#5d6066',
-        mute: '#8b8d90',
-        green: '#72d769',
-        amber: '#c59908',
-      };
-
-      /** Lit dots: key "col,row" → colour */
       const lit = new Map();
-
-      function text(str, col, row, ink, scale = 1) {
-        let c = col;
-        for (const ch of str) {
+      function text(str, col, row, ink) {
+        [...str].forEach((ch, i) => {
           const g = GLYPHS[ch];
           if (!g) throw new Error('No glyph for ' + ch);
-          g.forEach((line, y) => {
+          g.forEach((line, y) =>
             [...line].forEach((cell, x) => {
-              if (cell !== '#') return;
-              for (let dy = 0; dy < scale; dy++)
-                for (let dx = 0; dx < scale; dx++)
-                  lit.set(`${c + x * scale + dx},${row + y * scale + dy}`, ink);
-            });
-          });
-          c += 6 * scale;
-        }
-        return c;
+              if (cell === '#') lit.set(`${col + i * 6 + x},${row + y}`, ink);
+            }),
+          );
+        });
       }
-      const width = (str, scale = 1) => (str.length * 6 - 1) * scale;
-      const pad = (s, n) => s + ' '.repeat(Math.max(0, n - s.length));
-      const padL = (s, n) => ' '.repeat(Math.max(0, n - s.length)) + s;
+      flights.forEach(([code, name, status, ink], i) => {
+        const row = PAD + i * 13;
+        text(code, PAD, row, INK.white);
+        text(name, PAD + colName, row, INK.white);
+        text(status, PAD + colStatus, row, ink);
+      });
 
-      // Board layout, in dot cells. Columns: code, location, ping, status.
-      const L = 16; // left edge
-      const colCode = L;
-      const colName = colCode + 6 * 3 + 3;
-      const colPing = colName + 6 * 10 + 3;
-      const colStatus = colPing + 6 * 5;
-      const right = colStatus + width('ТЕХРАБОТЫ');
-
-      let row = 22;
-      text('BITTVPN', L, row, INK.white, 2);
-      text('09:41', right - width('09:41', 2), row, INK.white, 2);
-      row += 14 + 9;
-
-      text('КОД', colCode, row, INK.dim);
-      text('ЛОКАЦИЯ', colName, row, INK.dim);
-      text(padL('МС', 3), colPing, row, INK.dim);
-      text('СТАТУС', colStatus, row, INK.dim);
-      row += 7 + 4;
-      for (let c = L; c <= right; c += 2) lit.set(`${c},${row}`, INK.dim);
-      row += 6;
-
-      const flights = [
-        ['DE', 'ГЕРМАНИЯ', '10', 'ОНЛАЙН', INK.green],
-        ['JP', 'ЯПОНИЯ', '33', 'ДОСТУПНА', INK.white],
-        ['RU', 'РОССИЯ', '923', 'ДОСТУПНА', INK.white],
-        ['KZ', 'КАЗАХСТАН', '930', 'ОНЛАЙН', INK.green],
-        ['LT', 'ЛИТВА', '-', 'ТЕХРАБОТЫ', INK.amber],
-        ['ES', 'ИСПАНИЯ', '-', 'НА ПАУЗЕ', INK.mute],
-      ];
-      for (const [code, name, ping, status, ink] of flights) {
-        const paused = ink === INK.mute;
-        const base = paused ? INK.mute : INK.white;
-        text(code, colCode, row, base);
-        text(name, colName, row, base);
-        text(padL(ping, 3), colPing, row, base);
-        text(status, colStatus, row, ink);
-        row += 7 + 6;
-      }
-
-      // Draw: unlit grid first, then glow, then lit dots on top.
       const cv = document.getElementById('board');
+      cv.width = COLS * P;
+      cv.height = ROWS * P;
       const ctx = cv.getContext('2d');
       ctx.fillStyle = '#0a0c0f';
-      ctx.fillRect(0, 0, W, H);
-
-      const dot = (x, y, r) => {
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      const at = (c) => c * P + P / 2;
+      const dot = (x, y) => {
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.arc(x, y, R, 0, Math.PI * 2);
         ctx.fill();
       };
-      ctx.fillStyle = 'rgb(255 255 255 / 0.055)';
+      ctx.fillStyle = 'rgb(255 255 255 / 0.06)';
       for (let r = 0; r < ROWS; r++)
-        for (let c = 0; c < COLS; c++) if (!lit.has(`${c},${r}`)) dot(OX + c * P, OY + r * P, R);
-
+        for (let c = 0; c < COLS; c++) if (!lit.has(`${c},${r}`)) dot(at(c), at(r));
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       for (const [key, ink] of lit) {
         const [c, r] = key.split(',').map(Number);
-        const x = OX + c * P;
-        const y = OY + r * P;
-        const g = ctx.createRadialGradient(x, y, 0, x, y, P * 1.6);
+        const g = ctx.createRadialGradient(at(c), at(r), 0, at(c), at(r), P * 1.6);
         g.addColorStop(0, ink + '2c');
         g.addColorStop(1, ink + '00');
         ctx.fillStyle = g;
-        ctx.fillRect(x - P * 1.6, y - P * 1.6, P * 3.2, P * 3.2);
+        ctx.fillRect(at(c) - P * 1.6, at(r) - P * 1.6, P * 3.2, P * 3.2);
       }
       ctx.restore();
       for (const [key, ink] of lit) {
         const [c, r] = key.split(',').map(Number);
         ctx.fillStyle = ink;
-        dot(OX + c * P, OY + r * P, R);
+        dot(at(c), at(r));
       }
-
-      // Soft vignette so the matrix sinks into the edges.
-      const v = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.62);
-      v.addColorStop(0, 'rgb(10 12 15 / 0)');
-      v.addColorStop(1, 'rgb(10 12 15 / 0.85)');
-      ctx.fillStyle = v;
-      ctx.fillRect(0, 0, W, H);
+      // Centre the board vertically on the phone.
+      cv.style.top = `${540 - cv.height / 2}px`;
     </script>
   </body>
 </html>

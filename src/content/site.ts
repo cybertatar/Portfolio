@@ -107,6 +107,7 @@ export const cases: CaseItem[] = [
     },
     tags: ['B2B', '2025'],
     status: 'soon',
+    cover: 'assets/cases/wb-cover.webp',
     coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
   },
 ];

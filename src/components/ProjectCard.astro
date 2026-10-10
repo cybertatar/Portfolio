@@ -37,7 +37,7 @@ const linkProps = soon
       <Media src={item.cover} label={item.coverLabel} />
     </div>
     {soon && (
-      <div class="locked">
+      <div class:list={['locked', { 'over-cover': item.cover }]}>
         <span class="lock" data-lock>
           <PixelIcon name="lock" size={48} />
         </span>
@@ -113,6 +113,10 @@ const linkProps = soon
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
     color: var(--text-tertiary);
+  }
+  /* A locked case with its own cover shows the lock on top of it */
+  .locked.over-cover {
+    background: none;
   }
   .lock {
     display: block;

@@ -1,0 +1,80 @@
+<!doctype html>
+<!--
+  Case cover for WB Bank moneybox concept, 1920×1080 (16:9) → public/assets/cases/wb-cover.webp.
+  Render: open this file in a browser at a 1920×1080 viewport, take a screenshot and save it
+  as WebP (quality ~88), e.g. Playwright page.screenshot() + any converter.
+  The case is still early in design, so the cover is only the parchment of the PSB cover with
+  a faint tile pattern of pixel piggy banks and banknotes. The card is locked: its lock and
+  "unlocks later" label sit on top of this cover.
+  Colours mirror src/styles/tokens/colors.css.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root {
+        --paper-3: #e8e1d2;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: var(--paper-3);
+      }
+      /* Same strength and fade as the coins on the PSB cover. Each tile is 32×32 game pixels
+         drawn at 3px; the script below fills it in. */
+      .pattern {
+        position: absolute;
+        inset: 0;
+        background-size: 96px 96px;
+        mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.35), #000 85%);
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pattern"></div>
+    <script>
+      // Piggy bank facing right: coin slot on the back, ear, eye, snout, legs, tail.
+      const PIG = [
+        '..........#...',
+        '....####.##...',
+        '..##########..',
+        '.########.####',
+        '##############',
+        '.############.',
+        '..##########..',
+        '..##......##..',
+        '..##......##..',
+      ];
+      // Banknote with a round seal in the middle.
+      const NOTE = [
+        '#############',
+        '#...........#',
+        '#....###....#',
+        '#.#.#...#.#.#',
+        '#....###....#',
+        '#...........#',
+        '#############',
+      ];
+      const path = [
+        [4, 5, PIG],
+        [18, 21, NOTE],
+      ]
+        .flatMap(([ox, oy, rows]) =>
+          rows.flatMap((line, y) =>
+            [...line].flatMap((c, x) => (c === '#' ? [`M${ox + x} ${oy + y}h1v1h-1z`] : [])),
+          ),
+        )
+        .join('');
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' shape-rendering='crispEdges'><path fill='#cfc6b2' d='${path}'/></svg>`;
+      document.querySelector('.pattern').style.backgroundImage =
+        `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    </script>
+  </body>
+</html>

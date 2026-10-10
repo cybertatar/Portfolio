@@ -99,6 +99,18 @@ export const cases: CaseItem[] = [
     coverLabel: { ru: 'Обложка — PSB', en: 'Cover — PSB' },
   },
   {
+    id: 'ozon-sticker',
+    title: 'Ozon Bank payment sticker reimagined',
+    description: {
+      ru: 'Переосмысление платёжного стикера Ozon Банка',
+      en: "Reimagining Ozon Bank's payment sticker",
+    },
+    tags: ['Suppose', '2026'],
+    status: 'soon',
+    cover: 'assets/cases/ozon-cover.webp',
+    coverLabel: { ru: 'Обложка кейса', en: 'Case cover' },
+  },
+  {
     id: 'wb-moneybox',
     title: 'WB Bank moneybox concept',
     description: {

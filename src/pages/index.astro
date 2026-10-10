@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Button from '../components/ui/Button.astro';
 import ContactRow from '../components/ui/ContactRow.astro';
-import Eyebrow from '../components/ui/Eyebrow.astro';
 import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
 import PixelIcon from '../components/ui/PixelIcon.astro';
@@ -82,9 +81,17 @@ import { levelOn } from '../scripts/level';
 
         <footer class="footer" data-footer>
           <div class="meadow" aria-hidden="true" data-meadow></div>
-          <Eyebrow tone="secondary" data-en={ui.footer.en}>
-            {ui.footer.ru}
-          </Eyebrow>
+          <nav class="socials" aria-label="Соцсети" data-en-label="Social links">
+            {profile.socials.map((s) => (
+              <IconButton
+                href={s.href}
+                label={s.label}
+                {...(s.href.startsWith('http') && { target: '_blank', rel: 'noopener' })}
+              >
+                <PixelIcon name={s.icon} />
+              </IconButton>
+            ))}
+          </nav>
         </footer>
       </div>
     </main>
@@ -358,6 +365,13 @@ import { levelOn } from '../scripts/level';
     padding: 24px 0 32px;
     border-top: var(--border-width-hair) solid var(--border-subtle);
     margin-top: 24px;
+  }
+
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
   }
 
   /* Flower field seen from above (src/scripts/meadow.ts); more flowers open under the cursor,

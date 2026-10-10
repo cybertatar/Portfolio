@@ -58,8 +58,8 @@ export const profile = {
   /** Every place to find me, as a row of icons at the bottom of the footer. */
   socials: [
     { label: 'Telegram', icon: 'telegram', href: 'https://t.me/everlastinghate' },
-    { label: 'Instagram', icon: 'instagram', href: '#' },
-    { label: 'Discord', icon: 'discord', href: '#' },
+    { label: 'Instagram', icon: 'instagram', href: 'https://www.instagram.com/daniil.tyncherov/' },
+    { label: 'Discord', icon: 'discord', href: 'https://discord.com/users/1100882718578978886' },
     {
       label: 'LinkedIn',
       icon: 'linkedin',
@@ -67,7 +67,7 @@ export const profile = {
     },
     { label: 'Email', icon: 'mail', href: 'mailto:tyncherovmail@icloud.com' },
     { label: 'GitHub', icon: 'github', href: 'https://github.com/cybertatar' },
-    { label: 'Figma', icon: 'figma', href: '#' },
+    { label: 'Figma', icon: 'figma', href: 'https://www.figma.com/@daniiltyncherov' },
   ] satisfies { label: string; icon: PixelIconName; href: string }[],
 };
 

@@ -52,7 +52,6 @@
   --status-online: #2e9466; /* availability dot only */
 
   /* Footer flower field only: muted, like pressed flowers on parchment */
-  --flora-stem: #6f8a5c;
   --flora-leaf: #8fa577;
   --flora-heart: #d6ae55;
   --flora-petal-sky: var(--sky-300);

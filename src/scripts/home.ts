@@ -52,8 +52,12 @@ export function initCardStack(feed: HTMLElement, slots: HTMLElement[], spacer: H
 
     // Mobile: room after the footer so the last card can reach the top and cover the previous one.
     if (spacer) {
+      // The footer and its 48px top margin sit between the last card and the spacer
+      const footer = (spacer.previousElementSibling as HTMLElement | null)?.offsetHeight ?? 0;
       spacer.style.height =
-        mob && last ? `${Math.max(0, innerHeight - 16 - last.offsetHeight - 144)}px` : '0px';
+        mob && last
+          ? `${Math.max(0, innerHeight - 16 - last.offsetHeight - footer - 48)}px`
+          : '0px';
     }
 
     visible.forEach((slot, i) => {

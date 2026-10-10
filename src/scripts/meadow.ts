@@ -1,33 +1,48 @@
 /**
- * A flower field along the footer line, after Frieren's favourite spell: when the reader
- * reaches the end of the feed, pixel flowers sprout from left to right; a click plants more.
+ * A flower field in the footer, seen from above, after Frieren's favourite spell: when the reader
+ * reaches the end of the feed, flowers bloom in a wave spreading from one spot; a click casts
+ * the spell again around the cursor.
  */
 
 /** Size of one sprite pixel, px. */
 const U = 3;
-/** Sprite width in pixels; the stem runs up column 2. */
-const W = 5;
+/** Sprites are N×N pixels; plants sit on a grid of CELL px so they never overlap. */
+const N = 7;
+const CELL = (N + 2) * U;
 
-/** Flower heads. `p` petal, `c` heart. */
-const HEADS = [
-  ['.ppp.', 'ppcpp', '.ppp.'],
-  ['..p..', '.pcp.', '..p..'],
-  ['p.p.p', 'ppppp', '.ppp.'],
-  ['p.p.p', '.pcp.', 'p.p.p'],
-  ['.p.p.', 'ppcpp', '.ppp.'],
+/** Pixel rows. `p` petal, `c` heart, `l` leaf. */
+type Sprite = string[];
+
+const SPROUT: Sprite = [
+  '.......',
+  '.......',
+  '...l...',
+  '..l.l..',
+  '...l...',
+  '.......',
+  '.......',
+];
+const BUD: Sprite = ['.......', '.......', '...l...', '..lpl..', '...l...', '.......', '.......'];
+const HALF: Sprite = ['.......', '...p...', '..lpl..', '.ppcpp.', '..lpl..', '...p...', '.......'];
+
+/** Open flowers; a leaf peeks out on one side, never a full ring of them. */
+const BLOOMS: Sprite[] = [
+  ['...p...', '.p.p.p.', '..ppp..', 'pppcppp', '..ppp..', '.p.p.p.', '...p...'],
+  ['.......', '..ppp..', '.ppppp.', '.ppcpp.', '.ppppp.', 'l.ppp..', 'll.....'],
+  ['.....ll', '..p.p.l', '.ppppp.', '..pcp..', '.ppppp.', '..p.p..', '.......'],
+  ['.......', '.pp.pp.', '.ppppp.', '..pcp..', '.ppppp.', '.pp.pp.', 'll.....'],
 ];
 
-/** Grass tufts. `l` leaf. */
-const TUFTS = [
-  ['l...l', '.l.l.', '.l.l.'],
-  ['..l..', 'l.l..', '.ll.l', '.lll.'],
-  ['.l...', '.l..l', '..ll.'],
+/** Grass seen from above. */
+const TUFTS: Sprite[] = [
+  ['.......', '.......', '.l...l.', '..l.l..', '...l...', '.......', '.......'],
+  ['.......', '..l....', '...l.l.', '.l..l..', '..l....', '.......', '.......'],
+  ['.......', '.......', '...l...', '.l.l.l.', '..lll..', '.......', '.......'],
 ];
 
 const FILL: Record<string, string> = {
   p: 'var(--petal)',
   c: 'var(--flora-heart)',
-  g: 'var(--flora-stem)',
   l: 'var(--flora-leaf)',
 };
 
@@ -36,83 +51,96 @@ const PETALS = ['sky', 'sky', 'sky', 'white', 'white', 'white', 'deep', 'lilac',
   (n) => `var(--flora-petal-${n})`,
 );
 
+/** Time per bloom frame, ms. */
+const FRAME = 110;
+
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
 const pick = <T>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 
-/** Stem rows under a head: a straight stem with one or two leaves. */
-function stem(length: number) {
-  const rows = Array.from({ length }, () => '..g..');
-  const leaves = length > 3 ? 2 : 1;
-  for (let n = 0; n < leaves; n++) {
-    const y = 1 + Math.floor(Math.random() * (length - 1));
-    rows[y] = Math.random() < 0.5 ? '.lg..' : '..gl.';
-  }
-  return rows;
-}
-
-function svg(head: string[], body: string[]) {
-  const rect = (row: string, y: number) =>
-    [...row]
-      .map((c, x) =>
+function svg(rows: Sprite) {
+  const rects = rows
+    .flatMap((row, y) =>
+      [...row].map((c, x) =>
         c in FILL ? `<rect x="${x}" y="${y}" width="1" height="1" fill="${FILL[c]}"/>` : '',
-      )
-      .join('');
-  const h = head.length + body.length;
-  const top = head.map(rect).join('');
-  const bottom = body.map((row, i) => rect(row, head.length + i)).join('');
-  return {
-    rows: h,
-    html:
-      `<svg viewBox="0 0 ${W} ${h}" width="${W * U}" height="${h * U}" shape-rendering="crispEdges">` +
-      `<g class="head">${top}</g>${bottom}</svg>`,
-  };
+      ),
+    )
+    .join('');
+  return `<svg viewBox="0 0 ${N} ${N}" width="${N * U}" height="${N * U}" shape-rendering="crispEdges">${rects}</svg>`;
 }
 
 type Kind = 'flower' | 'bud' | 'tuft';
 
-function sprite(kind: Kind) {
-  if (kind === 'tuft') return svg([], pick(TUFTS));
-  const head = kind === 'bud' ? HEADS[1] : pick(HEADS);
-  const length = kind === 'bud' ? Math.round(rand(1, 3)) : Math.round(rand(3, 8));
-  return svg(head, stem(length));
-}
-
 export function initMeadow(footer: HTMLElement, meadow: HTMLElement) {
-  const plants: HTMLElement[] = [];
+  const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /** Occupied cells, "col:row" → plant; the oldest come first. */
+  const cells = new Map<string, HTMLElement>();
 
-  const plant = (x: number, kind: Kind, delay = 0) => {
-    const { rows, html } = sprite(kind);
+  const grid = () => ({
+    cols: Math.floor(meadow.clientWidth / CELL),
+    rows: Math.floor(meadow.clientHeight / CELL),
+  });
+
+  /** `over`: replace grass or a bud already in the cell (a click always gets its flowers). */
+  const plant = (col: number, row: number, kind: Kind, delay: number, over = false) => {
+    const key = `${col}:${row}`;
+    const taken = cells.get(key);
+    if (taken) {
+      if (!over || taken.dataset.kind === 'flower') return;
+      taken.remove();
+      cells.delete(key);
+    }
+    const frames =
+      kind === 'tuft'
+        ? [pick(TUFTS)]
+        : kind === 'bud'
+          ? [SPROUT, BUD]
+          : [SPROUT, BUD, HALF, pick(BLOOMS)];
     const el = document.createElement('span');
     el.className = 'plant';
-    el.innerHTML = html;
-    // Snap to the sprite grid so every plant shares crisp pixel edges
-    const left =
-      Math.round(Math.min(Math.max(x - (W * U) / 2, 0), meadow.clientWidth - W * U) / U) * U;
-    el.style.left = `${left}px`;
+    el.dataset.kind = kind;
+    // A pixel or two of jitter inside the cell, still on the sprite grid
+    el.style.left = `${col * CELL + Math.round(rand(0, 2)) * U}px`;
+    el.style.top = `${row * CELL + Math.round(rand(0, 2)) * U}px`;
     el.style.setProperty('--petal', pick(PETALS));
-    el.style.setProperty('--rows', String(rows));
-    el.style.setProperty('--delay', `${Math.round(delay)}ms`);
-    if (kind === 'flower' && Math.random() < 0.6) {
-      el.classList.add('sways');
-      el.style.setProperty('--sway', `${rand(4, 9).toFixed(1)}s`);
-      el.style.setProperty('--sway-delay', `${rand(-9, 0).toFixed(1)}s`);
-    }
     meadow.append(el);
-    plants.push(el);
+    cells.set(key, el);
+
+    if (still()) {
+      el.innerHTML = svg(frames[frames.length - 1]);
+    } else {
+      frames.forEach((f, i) => setTimeout(() => (el.innerHTML = svg(f)), delay + i * FRAME));
+    }
 
     // Keep the field from turning into a hedge: the oldest plants wilt away
-    const cap = Math.max(12, Math.floor(meadow.clientWidth / 8));
-    while (plants.length > cap) plants.shift()?.remove();
+    const { cols, rows } = grid();
+    const cap = Math.max(16, Math.floor(cols * rows * 0.45));
+    for (const [k, old] of cells) {
+      if (cells.size <= cap) break;
+      old.remove();
+      cells.delete(k);
+    }
   };
 
-  /** The first bloom: a wave that sweeps across the line, flowers in loose clumps. */
+  /** The first bloom: loose patches, opening in a wave from one spot of the field. */
   const bloom = () => {
-    const width = meadow.clientWidth;
-    const slot = W * U + U;
-    for (let x = slot / 2; x < width; x += slot) {
-      const r = Math.random();
-      const kind: Kind | null = r < 0.32 ? 'flower' : r < 0.42 ? 'bud' : r < 0.6 ? 'tuft' : null;
-      if (kind) plant(x + rand(-U, U), kind, (x / width) * 1400 + rand(0, 300));
+    const { cols, rows } = grid();
+    const patches = Array.from({ length: Math.max(2, Math.round(cols / 8)) }, () => ({
+      x: rand(0, cols),
+      y: rand(0, rows),
+      r: rand(3, 6),
+    }));
+    const origin = pick(patches);
+    for (let col = 0; col < cols; col++) {
+      for (let row = 0; row < rows; row++) {
+        const near = Math.max(
+          ...patches.map((p) => 1 - Math.hypot(col - p.x, (row - p.y) * 1.4) / p.r),
+        );
+        const chance = 0.1 + Math.max(0, near) * 0.5;
+        const r = Math.random();
+        if (r > chance) continue;
+        const kind: Kind = r < chance * 0.55 ? 'flower' : r < chance * 0.7 ? 'bud' : 'tuft';
+        plant(col, row, kind, Math.hypot(col - origin.x, row - origin.y) * 70 + rand(0, 120));
+      }
     }
   };
 
@@ -122,13 +150,23 @@ export function initMeadow(footer: HTMLElement, meadow: HTMLElement) {
       io.disconnect();
       bloom();
     },
-    { threshold: 0.5 },
-  ).observe(footer);
+    { threshold: 0.4 },
+  ).observe(meadow);
 
+  /** A click casts the spell: a small ring of flowers opens around the cursor. */
   footer.addEventListener('click', (e) => {
-    const x = e.clientX - meadow.getBoundingClientRect().left;
-    plant(x, 'flower');
-    plant(x - rand(4, 7) * U, Math.random() < 0.5 ? 'bud' : 'tuft', 120);
-    plant(x + rand(4, 7) * U, Math.random() < 0.5 ? 'bud' : 'tuft', 220);
+    const box = meadow.getBoundingClientRect();
+    const { cols, rows } = grid();
+    const cx = (e.clientX - box.left) / CELL;
+    const cy = (e.clientY - box.top) / CELL;
+    for (let col = Math.floor(cx - 3); col <= cx + 3; col++) {
+      for (let row = Math.floor(cy - 3); row <= cy + 3; row++) {
+        if (col < 0 || row < 0 || col >= cols || row >= rows) continue;
+        const d = Math.hypot(col + 0.5 - cx, row + 0.5 - cy);
+        if (d > 2.6 || Math.random() > 1 - d / 4) continue;
+        const kind: Kind = d < 1.2 || Math.random() < 0.7 ? 'flower' : 'bud';
+        plant(col, row, kind, d * 90, true);
+      }
+    }
   });
 }

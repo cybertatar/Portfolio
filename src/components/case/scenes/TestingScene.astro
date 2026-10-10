@@ -8,10 +8,10 @@ import { withBase } from '../../../scripts/url';
  */
 const log = [
   { t: '+00:00.0', kind: 'start', what: 'Первое подключение кешбэка' },
-  { t: '+00:04.2', kind: 'tap', what: 'Хочу подключить' },
-  { t: '+00:09.8', kind: 'tap', what: '7% Деливери' },
-  { t: '+00:12.1', kind: 'tap', what: '3% На бензин' },
-  { t: '+00:15.5', kind: 'tap', what: 'Подключить' },
+  { t: '+00:04.3', kind: 'tap', what: 'Хочу подключить' },
+  { t: '+00:08.1', kind: 'tap', what: '7% Деливери' },
+  { t: '+00:11.1', kind: 'tap', what: '3% На бензин' },
+  { t: '+00:14.1', kind: 'tap', what: 'Подключить' },
   { t: '+00:18.3', kind: 'finish', what: 'Кешбэк подключён' },
 ];
 const rows = [
@@ -33,11 +33,13 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     <span class="kicker">PSB usability test</span>
     <span class="card-title">Начать тест</span>
     <span class="field-label">Ваше имя</span>
-    <span class="field px-clip">
+    <span class="field px-clip" data-target="field">
       <span data-type="Участник 12"></span>
       <i class="caret"></i>
     </span>
-    <span class="btn px-clip">Начать тест</span>
+    <span class="btn px-clip" data-target="start">
+      Начать тест
+    </span>
   </div>
 
   <!-- 2. Task -->
@@ -45,14 +47,21 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     <span class="kicker">Задание</span>
     <span class="card-title">Первое подключение кешбэка</span>
     <span class="card-text">Подключите кешбэк и выберите три категории на этот месяц.</span>
-    <span class="btn px-clip">Старт</span>
+    <span class="btn px-clip" data-target="go">
+      Старт
+    </span>
   </div>
 
   <!-- 3. Session replay: the phone and the log of what the participant does -->
   <div class="session">
     <div class="mini-phone px-clip">
       {screens.map((s, i) => (
-        <img class={`screen s${i}`} src={withBase(`assets/cases/psb/${s}.webp`)} alt="" />
+        <img
+          class:list={['screen', { on: i === 0 }]}
+          src={withBase(`assets/cases/psb/${s}.webp`)}
+          alt=""
+          data-screen={i}
+        />
       ))}
     </div>
     <div class="log px-clip">
@@ -65,7 +74,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       </span>
       <ol>
         {log.map((e, i) => (
-          <li style={`--i: ${i}`}>
+          <li data-row={i}>
             <span class="log-t">{e.t}</span>
             <span class:list={['log-kind', e.kind]}>{e.kind}</span>
             <span class="log-what">{e.what}</span>
@@ -80,7 +89,9 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     <span class="card-title">Насколько легко было выполнить задание?</span>
     <span class="scale">
       {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-        <span class:list={['pick px-clip', { on: n === 6 }]}>{n}</span>
+        <span class="pick px-clip" data-pick={n}>
+          {n}
+        </span>
       ))}
     </span>
     <span class="scale-ends">
@@ -135,29 +146,123 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     <span class="card-text">Запись сохранена. Спасибо за участие!</span>
   </div>
 
-  <img class="cursor" src={gauntlet.src} alt="" width="22" height="22" />
+  <img class="cursor" src={gauntlet.src} alt="" width="32" height="32" data-cursor />
 </div>
 
 <script>
   import { runScene, typeOut } from '../../../scripts/scenes';
 
+  /**
+   * Taps on the phone, as fractions of the 804×1748 screen exports (measured on the orange
+   * buttons and checkboxes in tools/case-covers/psb/*.png).
+   */
+  const TAPS = {
+    want: [0.5, 0.514], // cb-off: «Хочу подключить»
+    delivery: [0.925, 0.79], // cb-connect: «7% Деливери»
+    fuel: [0.925, 0.862], // cb-connect: «3% На бензин»
+    connect: [0.5, 0.918], // cb-connect: «Подключить»
+    ok: [0.5, 0.898], // success: «Хорошо!»
+  } as const;
+  const SCREEN = { w: 804, h: 1748 };
+  // The gauntlet's fingertip, as in the site cursor (hotspot 10, 2 of 32)
+  const HOT = { x: 10 / 32, y: 2 / 32 };
+  // Replay clock: the 18.3-second session plays in 4.3 seconds
+  const SPEED = 4.26;
+
   document.querySelectorAll<HTMLElement>('[data-scene="testing"]').forEach((root) => {
     const name = root.querySelector<HTMLElement>('[data-type]');
     const timer = root.querySelector<HTMLElement>('[data-timer]');
-    let tick: ReturnType<typeof setInterval> | undefined;
+    const cursor = root.querySelector<HTMLElement>('[data-cursor]')!;
+    const screens = [...root.querySelectorAll<HTMLElement>('[data-screen]')];
+    const rows = [...root.querySelectorAll<HTMLElement>('[data-row]')];
+    const q = (sel: string) => root.querySelector<HTMLElement>(sel);
 
-    // The replay clock runs ~4× faster than the 18-second session it shows
-    const runTimer = () => {
+    let timers: ReturnType<typeof setTimeout>[] = [];
+    let tick: ReturnType<typeof setInterval> | undefined;
+    const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
+    const reset = () => {
+      timers.forEach(clearTimeout);
+      timers = [];
       clearInterval(tick);
-      const t0 = performance.now();
-      tick = setInterval(() => {
-        const s = Math.min(18.3, ((performance.now() - t0) / 1000) * 4.2);
-        if (timer) timer.textContent = `+00:${s.toFixed(1).padStart(4, '0')}`;
-        if (s >= 18.3) clearInterval(tick);
-      }, 50);
     };
 
+    // Moves the fingertip to a point in stage pixels
+    const point = (x: number, y: number) => {
+      const w = cursor.offsetWidth;
+      cursor.style.left = `${x - w * HOT.x}px`;
+      cursor.style.top = `${y - w * HOT.y}px`;
+    };
+    const toElement = (el: HTMLElement | null) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const s = root.getBoundingClientRect();
+      point(r.left - s.left + r.width / 2, r.top - s.top + r.height / 2);
+    };
+    // The screen fills the phone with object-fit: cover from the top
+    const toScreen = ([fx, fy]: readonly [number, number]) => {
+      const r = screens[0].getBoundingClientRect();
+      const s = root.getBoundingClientRect();
+      const k = Math.max(r.width / SCREEN.w, r.height / SCREEN.h);
+      const dx = (r.width - SCREEN.w * k) / 2;
+      point(r.left - s.left + dx + fx * SCREEN.w * k, r.top - s.top + fy * SCREEN.h * k);
+    };
+    const rest = () => point(root.clientWidth * 0.86, root.clientHeight * 0.86);
+    const press = () => {
+      cursor.classList.remove('press');
+      void cursor.offsetWidth;
+      cursor.classList.add('press');
+    };
+    const show = (i: number) => screens.forEach((el, n) => el.classList.toggle('on', n === i));
+    const logRow = (i: number) => rows[i]?.classList.add('on');
+
+    const start = () => {
+      reset();
+      rest();
+      at(150, () => toElement(q('[data-target="field"]')));
+      at(550, press);
+      at(650, () => typeOut(name, 60));
+      at(1500, () => toElement(q('[data-target="start"]')));
+      at(2000, press);
+    };
+    const task = () => {
+      reset();
+      // wait for the card to settle before aiming at its button
+      at(300, () => toElement(q('[data-target="go"]')));
+      at(900, press);
+    };
+    const session = () => {
+      reset();
+      show(0);
+      rows.forEach((r) => r.classList.remove('on'));
+      logRow(0);
+      const t0 = performance.now();
+      tick = setInterval(() => {
+        const sec = Math.min(18.3, ((performance.now() - t0) / 1000) * SPEED);
+        if (timer) timer.textContent = `+00:${sec.toFixed(1).padStart(4, '0')}`;
+      }, 50);
+      at(300, () => toScreen(TAPS.want));
+      at(1000, () => (press(), logRow(1)));
+      at(1150, () => show(1));
+      at(1450, () => toScreen(TAPS.delivery));
+      at(1900, () => (press(), logRow(2)));
+      at(2150, () => toScreen(TAPS.fuel));
+      at(2600, () => (press(), logRow(3)));
+      at(2850, () => toScreen(TAPS.connect));
+      at(3300, () => (press(), logRow(4)));
+      at(3450, () => show(2));
+      at(3850, () => toScreen(TAPS.ok));
+      at(4300, () => (press(), logRow(5)));
+    };
+    const seq = () => {
+      reset();
+      const six = q('[data-pick="6"]');
+      six?.classList.remove('on');
+      at(300, () => toElement(six));
+      at(800, () => (press(), six?.classList.add('on')));
+    };
     const count = () => {
+      reset();
+      rest();
       root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
         const to = Number(el.dataset.count);
         const t0 = performance.now();
@@ -170,19 +275,26 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       });
       root.querySelectorAll<HTMLElement>('[data-final]').forEach((el) => {
         el.textContent = '0,0';
-        setTimeout(() => (el.textContent = el.dataset.final ?? ''), 900);
+        at(900, () => (el.textContent = el.dataset.final ?? ''));
       });
     };
+
+    // With reduced motion the scene holds on the summary: show its final numbers
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      root.querySelectorAll<HTMLElement>('[data-count], [data-final]').forEach((el) => {
+        el.textContent = el.dataset.count ?? el.dataset.final ?? '';
+      });
+    }
 
     runScene(
       root,
       [
-        { state: 'start', ms: 2200, enter: () => typeOut(name, 70) },
-        { state: 'task', ms: 1800 },
-        { state: 'session', ms: 4600, enter: runTimer },
-        { state: 'seq', ms: 1800 },
+        { state: 'start', ms: 2500, enter: start },
+        { state: 'task', ms: 1500, enter: task },
+        { state: 'session', ms: 4900, enter: session },
+        { state: 'seq', ms: 1800, enter: seq },
         { state: 'summary', ms: 2800, enter: count },
-        { state: 'done', ms: 1600 },
+        { state: 'done', ms: 1600, enter: reset },
       ],
       'summary',
     );
@@ -322,35 +434,8 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     object-position: top;
     opacity: 0;
   }
-  .s0 {
+  .screen.on {
     opacity: 1;
-  }
-  [data-state='session'] .s1 {
-    animation: show-from 4.6s steps(1, end) forwards;
-    --at: 34%;
-  }
-  [data-state='session'] .s2 {
-    animation: show-from-late 4.6s steps(1, end) forwards;
-  }
-  @keyframes show-from {
-    0%,
-    33% {
-      opacity: 0;
-    }
-    34%,
-    100% {
-      opacity: 1;
-    }
-  }
-  @keyframes show-from-late {
-    0%,
-    79% {
-      opacity: 0;
-    }
-    80%,
-    100% {
-      opacity: 1;
-    }
   }
   .log {
     --px-step: 0.8cqi;
@@ -406,13 +491,8 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     white-space: nowrap;
     opacity: 0;
   }
-  [data-state='session'] .log li {
-    animation: appear 0.01s calc(var(--i) * 0.75s) forwards;
-  }
-  @keyframes appear {
-    to {
-      opacity: 1;
-    }
+  .log li.on {
+    opacity: 1;
   }
   .log-t {
     font-family: var(--font-mono);
@@ -455,18 +535,9 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     font-weight: var(--fw-bold);
     color: var(--text-secondary);
   }
-  [data-state='seq'] .pick.on {
-    animation: choose 1.8s steps(1, end) forwards;
-  }
-  @keyframes choose {
-    55% {
-      background: var(--accent);
-      color: var(--text-inverse);
-    }
-    100% {
-      background: var(--accent);
-      color: var(--text-inverse);
-    }
+  .pick.on {
+    background: var(--accent);
+    color: var(--text-inverse);
   }
   .scale-ends {
     display: flex;
@@ -537,80 +608,34 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     height: 6cqi;
   }
 
-  /* The pixel gauntlet from the site cursor taps through the flow */
+  /* The pixel gauntlet from the site cursor; the script aims it at what is tapped */
   .cursor {
     position: absolute;
     z-index: 10;
+    left: 86%;
+    top: 86%;
     width: 5cqi;
     height: auto;
     image-rendering: pixelated;
-    left: 70cqi;
-    top: 62cqi;
     transition:
-      left 0.5s steps(5, end),
-      top 0.5s steps(5, end);
+      left 0.4s steps(5, end),
+      top 0.4s steps(5, end);
   }
-  [data-state='start'] .cursor {
-    animation: tap-start 2.2s steps(1, end) forwards;
+  .cursor.press {
+    animation: press 0.25s steps(2, end);
   }
-  @keyframes tap-start {
-    0% {
-      left: 70cqi;
-      top: 62cqi;
+  @keyframes press {
+    50% {
+      transform: scale(0.82) translateY(0.4cqi);
     }
-    60% {
-      left: 52cqi;
-      top: 54cqi;
-    }
-    80% {
-      left: 52cqi;
-      top: 55cqi;
-    }
-    100% {
-      left: 52cqi;
-      top: 54cqi;
-    }
-  }
-  [data-state='task'] .cursor {
-    left: 50cqi;
-    top: 48cqi;
-  }
-  [data-state='session'] .cursor {
-    animation: tap-phone 4.6s steps(1, end) forwards;
-  }
-  @keyframes tap-phone {
-    0% {
-      left: 26cqi;
-      top: 38cqi;
-    }
-    30% {
-      left: 22cqi;
-      top: 30cqi;
-    }
-    48% {
-      left: 30cqi;
-      top: 52cqi;
-    }
-    62% {
-      left: 30cqi;
-      top: 60cqi;
-    }
-    76% {
-      left: 24cqi;
-      top: 66cqi;
-    }
-    100% {
-      left: 26cqi;
-      top: 60cqi;
-    }
-  }
-  [data-state='seq'] .cursor {
-    left: 62cqi;
-    top: 52cqi;
   }
   [data-state='summary'] .cursor,
   [data-state='done'] .cursor {
-    left: 104cqi;
-    top: 80cqi;
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      display: none;
+    }
   }
 </style>

@@ -124,9 +124,9 @@ import { levelOn } from '../scripts/level';
   /* ---------- Profile aside ---------- */
 
   .aside {
-    flex: 0 0 25%;
-    min-width: var(--layout-sidebar-min);
-    max-width: var(--layout-sidebar-max);
+    /* One clamped basis, not 25% + min/max-width: Safari split the row by the raw 25%
+       and pushed the feed past the right edge whenever the 280px minimum kicked in */
+    flex: 0 0 clamp(var(--layout-sidebar-min), 25vw, var(--layout-sidebar-max));
     align-self: flex-start;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
@@ -320,7 +320,7 @@ import { levelOn } from '../scripts/level';
   /* ---------- Feed ---------- */
 
   .feed {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-width: 0;
     height: 100vh;
     /* Padding, not margin: the feed scrolls, so its scrollbar and wheel area

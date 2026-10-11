@@ -926,7 +926,8 @@ const home = withBase('/');
   .results {
     display: flex;
     flex-direction: column;
-    gap: var(--space-grid);
+    /* Heading closer to its content than the cards are to each other (24px) */
+    gap: 16px;
   }
   .results-title {
     display: flex;
@@ -1254,6 +1255,12 @@ const home = withBase('/');
     }
     .sheet > * + * {
       margin-top: 24px;
+    }
+    /* Sub-articles keep clearly more room than the 24px between a sheet's parts */
+    .sheet > .sub-title,
+    .sheet > .quests,
+    .sheet > .results {
+      margin-top: 48px;
     }
     .title {
       font-size: 30px;

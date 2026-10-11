@@ -60,7 +60,8 @@ const { quests } = Astro.props;
   .deck {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-grid);
+    /* The site's 24px frame between cards, more than a card's inner padding */
+    gap: 24px;
     margin: 0;
     padding: 0;
     list-style: none;

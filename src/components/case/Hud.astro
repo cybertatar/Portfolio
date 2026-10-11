@@ -3,7 +3,8 @@ import { heartPaths } from '../../content/pixel-heart';
 
 /**
  * Results as a row of game HUD stats, after Zelda. Every stat has the same build: a title, the
- * big number, a line of context and one gauge under it, so the row reads as one rhythm.
+ * big number, its gauge right under it and the context below, so the row reads as one rhythm
+ * and each gauge stays next to its number (proximity) while the gauges still line up.
  * Gauges: time is a bar whose light track is the old time and whose fill is the new one (it
  * shrinks from the old length on view); first click success is a mana bar; the ease score is
  * a row of heart containers. They play once when scrolled into view (initHud in
@@ -45,9 +46,6 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
           {s.value}
           {s.unit && <span class="unit">{s.unit}</span>}
         </span>
-        {s.notes.map((n) => (
-          <span class="note-line">{n}</span>
-        ))}
 
         <span class="gauge" aria-hidden="true">
           {s.gauge.kind === 'time' && (
@@ -92,6 +90,9 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
             </span>
           )}
         </span>
+        {s.notes.map((n) => (
+          <span class="note-line">{n}</span>
+        ))}
       </li>
     ))}
   </ul>
@@ -99,17 +100,19 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
 </div>
 
 <style>
+  /* The note is about the whole row, so it sits at least a row's distance away */
   .hud-wrap {
     display: flex;
     flex-direction: column;
-    gap: var(--space-stack);
+    gap: 40px;
     container-type: inline-size;
   }
   /* One row of four on the sheet itself, no panels: like Zelda's HUD over the world */
   .hud {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 40px var(--space-grid);
+    /* Columns well apart from each other, more than any gap inside a stat */
+    gap: 40px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -117,6 +120,7 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
   @container (max-width: 720px) {
     .hud {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 40px 24px;
     }
   }
   .stat {
@@ -151,14 +155,9 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
     line-height: var(--lh-normal);
     color: var(--text-tertiary);
   }
-  .value + .note-line {
-    margin-top: 6px;
-  }
-  /* Gauges sit on one line across the row */
   .gauge {
     display: block;
-    margin-top: auto;
-    padding-top: 16px;
+    margin: 12px 0 10px;
   }
 
   /* Bars: the track is a light step of the same sky, the fill the stronger one */

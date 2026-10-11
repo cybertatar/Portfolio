@@ -11,11 +11,11 @@ interface Props {
 
 /**
  * The clickable PSB prototype inside the iPhone 17 Pro body. The app is built from the PSB repo
- * by tools/psb-prototype into public/assets/cases/psb/prototype and is loaded when the phone
+ * by tools/psb-prototype into public/assets/cases/psb/live and is loaded when the phone
  * comes near the screen. It renders a 402×874 viewport in a shadow root, scaled to the screen.
  */
 const { poster, alt, route = '/' } = Astro.props;
-const base = withBase('assets/cases/psb/prototype/');
+const base = withBase('assets/cases/psb/live/');
 ---
 
 <div class="phone" data-live-phone data-base={base}>

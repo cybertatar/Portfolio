@@ -8,7 +8,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 export const project = path.resolve(process.env.PSB_DIR || path.join(root, '../../../PSB'));
 const modules = path.join(root, 'node_modules');
 const shim = path.join(root, 'src', 'shims');
-export const outDir = path.resolve(root, '../../public/assets/cases/psb/prototype');
+export const outDir = path.resolve(root, '../../public/assets/cases/psb/live');
 
 const portfolioViewport = {
   name: 'portfolio-viewport-adapter',

@@ -332,3 +332,47 @@ export function initDeck(root: HTMLElement) {
   );
   seen.observe(root);
 }
+
+type Mood = { rest: string; blink: string; alt?: string[] };
+
+const wait = (min: number, max: number) => min + Math.random() * (max - min);
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Quiet life for the decor around the front phone: a blink every few seconds, now and then a
+ * different face for a moment, and a rare small hop of the frog. Only the shown set moves, and
+ * nothing at all with reduced motion.
+ */
+export function initMoods(root: HTMLElement) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (const item of root.querySelectorAll<HTMLElement>('[data-mood]')) {
+    const mood = JSON.parse(item.dataset.mood!) as Mood;
+    // Faces render in the order rest, blink, ...alt
+    const names = [mood.rest, mood.blink, ...(mood.alt ?? [])];
+    const faces = [...item.querySelectorAll('.face')];
+    const show = (name: string) =>
+      faces.forEach((f, i) => f.classList.toggle('on', names[i] === name));
+    const shown = () => item.closest('[data-deck-decor]')?.classList.contains('is-active');
+
+    const tick = async () => {
+      if (shown() && !document.hidden) {
+        const roll = Math.random();
+        if (roll < 0.7 || !mood.alt?.length) {
+          show(mood.blink);
+          await pause(140);
+          show(mood.rest);
+        } else if (roll < 0.92 || !item.classList.contains('hop')) {
+          show(mood.alt[Math.floor(Math.random() * mood.alt.length)]);
+          await pause(wait(1400, 2600));
+          show(mood.rest);
+        } else {
+          item.classList.add('is-hopping');
+          await pause(200);
+          item.classList.remove('is-hopping');
+        }
+      }
+      setTimeout(tick, wait(2800, 6500));
+    };
+    setTimeout(tick, wait(1500, 5000));
+  }
+}

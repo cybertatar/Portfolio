@@ -25,8 +25,15 @@ const { prototypes } = Astro.props;
 
 type Item = {
   sprite: MascotSpriteName;
-  /** Face drawn over the sprite, like in the scenes. */
-  face?: MascotSpriteName;
+  /**
+   * Faces drawn over the sprite, like in the scenes: `rest` most of the time, now and then a
+   * blink, and once in a while one of `alt` for a moment (the deck script picks them).
+   */
+  mood?: { rest: MascotSpriteName; blink: MascotSpriteName; alt?: readonly MascotSpriteName[] };
+  /** Hops in place once in a while (the frog). */
+  hop?: boolean;
+  /** Turned to face the other way (sprites face left). */
+  mirror?: boolean;
   x: number;
   y: number;
   size: number;
@@ -34,11 +41,22 @@ type Item = {
 };
 type Hint = { text: string; kind: 'swipe' | 'click'; x: number; y: number; rot: number };
 
+const swordsman = {
+  rest: 'swordsman-happy',
+  blink: 'swordsman-blink',
+  alt: ['swordsman-calm', 'swordsman-wow'],
+} as const;
+const mage = { rest: 'mage-happy', blink: 'mage-blink', alt: ['mage-calm', 'mage-wow'] } as const;
+const elder = { rest: 'elder-calm', blink: 'elder-blink', alt: ['elder-talk'] } as const;
+const frog = { rest: 'frog-eye', blink: 'frog-blink', alt: ['frog-croak'] } as const;
+/** Small loot drifts; characters and big props stand still. */
+const LOOT: MascotSpriteName[] = ['coin', 'heart', 'spark', 'quest'];
+
 const decor: { items: Item[]; hints?: Hint[] }[] = [
   {
     items: [
-      { sprite: 'swordsman', face: 'swordsman-happy', x: -0.78, y: 0.52, size: 0.42, rot: -6 },
-      { sprite: 'mage', face: 'mage-happy', x: 0.8, y: -0.5, size: 0.4, rot: 6 },
+      { sprite: 'swordsman', mood: swordsman, x: -0.78, y: 0.52, size: 0.42, rot: -6 },
+      { sprite: 'mage', mood: mage, x: 0.8, y: -0.5, size: 0.4, rot: 6 },
       { sprite: 'coin', x: -0.72, y: -0.62, size: 0.1, rot: -12 },
       { sprite: 'coin', x: -0.6, y: -0.45, size: 0.07, rot: 10 },
       { sprite: 'spark', x: 0.66, y: 0.4, size: 0.07 },
@@ -54,9 +72,10 @@ const decor: { items: Item[]; hints?: Hint[] }[] = [
       { sprite: 'card', x: -0.8, y: -0.44, size: 0.4, rot: -12 },
       { sprite: 'spark', x: -0.6, y: -0.66, size: 0.08 },
       { sprite: 'spark', x: -0.98, y: -0.3, size: 0.06 },
-      { sprite: 'elder', face: 'elder-talk', x: 0.8, y: 0.5, size: 0.42, rot: 5 },
+      { sprite: 'elder', mood: elder, x: 0.8, y: 0.5, size: 0.42, rot: 5 },
       { sprite: 'quest', x: 0.8, y: 0.2, size: 0.05 },
       { sprite: 'card', x: 0.78, y: -0.5, size: 0.3, rot: 14 },
+      { sprite: 'frog', mood: frog, hop: true, mirror: true, x: -0.84, y: 0.66, size: 0.22 },
     ],
   },
   {
@@ -66,7 +85,7 @@ const decor: { items: Item[]; hints?: Hint[] }[] = [
       { sprite: 'coin', x: -0.72, y: 0.26, size: 0.11, rot: 8 },
       { sprite: 'coin', x: -0.82, y: 0.12, size: 0.07, rot: 20 },
       { sprite: 'spark', x: -0.62, y: 0.42, size: 0.06 },
-      { sprite: 'mage', face: 'mage-happy', x: 0.8, y: -0.48, size: 0.4, rot: 6 },
+      { sprite: 'mage', mood: mage, x: 0.8, y: -0.48, size: 0.4, rot: 6 },
       { sprite: 'heart', x: 0.7, y: 0.3, size: 0.11, rot: -8 },
       { sprite: 'heart', x: 0.88, y: 0.48, size: 0.07, rot: 10 },
     ],
@@ -82,9 +101,16 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     {decor.map((set, i) => (
       <div class="decor" data-deck-decor={i} aria-hidden="true">
         {set.items.map((d, k) => (
-          <span class="item" style={`${place(d.x, d.y, d.size, d.rot)}; --k: ${k}`}>
+          <span
+            class:list={['item', { loot: LOOT.includes(d.sprite), hop: d.hop, mirror: d.mirror }]}
+            style={`${place(d.x, d.y, d.size, d.rot)}; --k: ${k}`}
+            data-mood={d.mood && JSON.stringify(d.mood)}
+          >
             <Sprite name={d.sprite} />
-            {d.face && <Sprite name={d.face} class="face" />}
+            {d.mood &&
+              [d.mood.rest, d.mood.blink, ...(d.mood.alt ?? [])].map((f) => (
+                <Sprite name={f} class={f === d.mood?.rest ? 'face on' : 'face'} />
+              ))}
           </span>
         ))}
       </div>
@@ -215,6 +241,20 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     width: 100%;
     height: auto;
   }
+  /* One face at a time; the deck script swaps them */
+  .item > :global(.face:not(.on)) {
+    visibility: hidden;
+  }
+  .mirror > :global(svg) {
+    transform: scaleX(-1);
+  }
+  /* The frog's rare hop: a small lift and back, nothing more */
+  .hop > :global(svg) {
+    transition: translate 0.18s ease-out;
+  }
+  .hop.is-hopping > :global(svg) {
+    translate: 0 -18%;
+  }
   /* Calm entrance: a soft fade and settle, one item after another */
   .is-active .item,
   .is-active .hint {
@@ -227,7 +267,7 @@ const place = (x: number, y: number, size: number, rot = 0) =>
       visibility 0s;
   }
   /* Small loot drifts slowly, like items on the ground in a game */
-  .is-active .item:nth-child(n + 3) {
+  .is-active .loot {
     animation: drift 6s ease-in-out calc(var(--k) * -1.3s) infinite;
   }
   @keyframes drift {
@@ -330,14 +370,17 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .is-active .item {
+    .is-active .loot {
       animation: none;
     }
   }
 </style>
 
 <script>
-  import { initDeck } from '../../scripts/deck';
+  import { initDeck, initMoods } from '../../scripts/deck';
 
-  document.querySelectorAll<HTMLElement>('[data-deck]').forEach(initDeck);
+  document.querySelectorAll<HTMLElement>('[data-deck]').forEach((deck) => {
+    initDeck(deck);
+    initMoods(deck);
+  });
 </script>

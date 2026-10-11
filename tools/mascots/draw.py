@@ -26,6 +26,8 @@ PAL = {
     # props: steel, wood, phone, dust
     's': '#c9ced6', 'S': '#9aa3b0', 't': '#a07850', 'k': '#3d382f', 'K': '#29251e', 'q': '#f7f3ea',
     'x': '#fbf8f1', 'y': '#e9e2d3', 'z': '#cbc1ab',
+    # frog, the same greens as the meadow's (--flora-frog*)
+    'a': '#80a35f', 'A': '#5d7d44', 'i': '#9cbd7a',
 }
 
 
@@ -185,6 +187,13 @@ sprites = {
                           (16, 19, ['d', 'd'])]),
     'elder-angry': face(26, [(7, 8, ['gg......gg', '.ggg..ggg.']), (9, 10, EYES)]),
     'elder-talk': face(26, [(7, 8, ['gg......gg', '.ggg..ggg.']), (9, 10, EYES), (10, 13, ['.mm.', 'mKKm', '.mm.'])]),
+    # quieter faces for the fan around the live prototypes: calm, surprised, the elder's blink
+    'swordsman-calm': face(26, [(9, 11, EYES), (7, 13, CHEEKS), (12, 14, ['m'])]),
+    'swordsman-wow': face(26, [(9, 11, EYES), (7, 13, CHEEKS), (11, 14, ['.m.', 'm.m', '.m.'])]),
+    'mage-calm': face(32, [(9, 17, EYES), (7, 19, CHEEKS), (11, 20, ['m'])]),
+    'mage-wow': face(32, [(9, 17, EYES), (7, 19, CHEEKS), (11, 20, ['mm', 'mm'])]),
+    'elder-calm': face(26, [(7, 9, ['.gg....gg.']), (9, 10, EYES)]),
+    'elder-blink': face(26, [(7, 9, ['.gg....gg.']), (9, 11, ['e....e'])]),
     # quest-giver mark over the elder's head
     'quest': ['.oo.', 'oooo', 'oooo', 'oooo', '.oo.', '.oo.', '....', '.oo.', '.oo.'],
     # arms: a hand and a sleeve, drawn pointing up; scenes rotate them
@@ -205,6 +214,12 @@ sprites = {
              'PppppppppppppppP', 'PppppppppppppppP', 'PpqqpqqpqqpqqppP', 'PppppppppppppppP',
              'PpqqqppppppppppP', '.PPPPPPPPPPPPPP.'],
     'spark': ['...o...', '...o...', '..ooo..', 'ooooooo', '..ooo..', '...o...', '...o...'],
+    # a frog sitting side-on, facing left; its eye and throat are overlays like the faces
+    'frog': ['...aa.........', '..aaaa........', '.aaaaaaaa.....', 'aaaaaaaaaaa...', 'iiaaaaaaaaaa..',
+             '.iiiaaaaaaaaa.', '..iiiaaAaaaaa.', '...AAaAAAaaAa.', '..AA.AA.AAAAAA', '.AA..A....AAA.'],
+    'frog-eye': ['...ww.........', '...wk.........'] + ['.' * 14] * 8,
+    'frog-blink': ['...aa.........', '...AA.........'] + ['.' * 14] * 8,
+    'frog-croak': ['.' * 14] * 4 + ['xx............', 'xxx...........', '.xx...........'] + ['.' * 14] * 3,
 }
 
 
@@ -250,6 +265,10 @@ html = ('<body style="background:#e7e0d0;display:flex;flex-wrap:wrap;gap:28px;al
         + ''.join(svg(n) for n in ['quest', 'arm-sword', 'arm-mage', 'arm-elder', 'phone',
                                    'chest', 'chest-open', 'cloud', 'puff', 'coin', 'heart',
                                    'card', 'spark'])
+        + stacked('frog', 'frog-eye') + stacked('frog', 'frog-blink', 'frog-croak')
+        + ''.join(stacked(b, f) for b, f in [('swordsman', 'swordsman-calm'), ('swordsman', 'swordsman-wow'),
+                                            ('mage', 'mage-calm'), ('mage', 'mage-wow'),
+                                            ('elder', 'elder-calm'), ('elder', 'elder-blink')])
         + '</body>')
 (ROOT / 'tools/mascots/preview.html').write_text(html)
 

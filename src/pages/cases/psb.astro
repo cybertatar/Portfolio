@@ -6,6 +6,7 @@ import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Phone from '../../components/case/Phone.astro';
+import QuestLog, { type Quest } from '../../components/case/QuestLog.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
@@ -36,6 +37,51 @@ const prototypes = [
   { route: '/', poster: 'assets/cases/psb/main.webp', caption: 'Главная' },
   { route: '/card', poster: 'assets/cases/psb/card.webp', caption: 'Данные карты' },
   { route: '/cashback', poster: 'assets/cases/psb/cb-off.webp', caption: 'Подключение кешбэка' },
+];
+
+/** Problems and solutions in short, one quest per solution section below */
+const quests: Quest[] = [
+  {
+    id: 'home',
+    title: 'Главная',
+    sprite: 'chest',
+    problem:
+      'Продукты банка отвлекали от повседневных действий, а связь карт и счёта не была обозначена: история операций была разбита по картам.',
+    solution:
+      'Пересобрал главную вокруг баланса и частых действий и перенёс карты внутрь их счетов. Предложения банка остались заметными, но их можно закрыть.',
+    reward: 'Кешбэк нашли 30 из 30',
+  },
+  {
+    id: 'card-data',
+    title: 'Данные карты',
+    sprite: 'card',
+    problem:
+      'Данные лежали на третьей вкладке «О карте», а CVV открывался только по коду из СМС, даже после входа по биометрии.',
+    solution: 'Собрал просмотр и копирование данных на одном экране, без кода из СМС.',
+    reward: '7 → 4 шага',
+    seq: 6.0,
+  },
+  {
+    id: 'cashback',
+    title: 'Подключение кешбэка',
+    sprite: 'coin',
+    problem:
+      'Подключение шло через почту и браузер, а подключённый кешбэк не открывался до обновления экрана.',
+    solution:
+      'Оставил одну кнопку рядом с условиями и объединил подключение с выбором категорий, чтобы кешбэк сразу заработал.',
+    reward: '12 → 5 шагов',
+    seq: 6.5,
+  },
+  {
+    id: 'categories',
+    title: 'Кешбэк после подключения',
+    sprite: 'spark',
+    problem:
+      'Категории нужно было выбирать каждый месяц, но приложение не напоминало об этом, а кнопка выбора была незаметной.',
+    solution: 'Категории на следующий месяц можно выбрать заранее и поменять до начала периода.',
+    reward: 'Выбор с первого клика у всех',
+    seq: 6.7,
+  },
 ];
 
 // Grouped by scenario: steps and time for each, then the overall test scores
@@ -305,44 +351,7 @@ const home = withBase('/');
             </dl>
           </div>
 
-          <div class="pair">
-            <div class="tile px-clip">
-              <span class="tile-icon px-clip">
-                <PixelIcon name="alert" />
-              </span>
-              <h2 class="tile-title">Проблемы</h2>
-              <ul class="list">
-                <li>На главной продукты банка отвлекали от повседневных действий.</li>
-                <li>
-                  Связь карт и счёта не была обозначена, история операций была разбита по картам.
-                </li>
-                <li>
-                  Данные карты лежали на третьей вкладке «О карте», CVV открывался только по коду из
-                  СМС.
-                </li>
-                <li>
-                  Кешбэк подключался через почту и браузер и после этого не открывался до обновления
-                  экрана.
-                </li>
-              </ul>
-            </div>
-            <div class="tile px-clip">
-              <span class="tile-icon px-clip">
-                <PixelIcon name="spark" />
-              </span>
-              <h2 class="tile-title">Решения</h2>
-              <ul class="list">
-                <li>
-                  Пересобрал иерархию главной вокруг баланса и повседневных действий, а предложения
-                  банка оставил заметными, но их можно закрыть.
-                </li>
-                <li>Перенёс карты внутрь их счетов и добавил копирование данных карты.</li>
-                <li>
-                  Объединил подключение кешбэка с выбором категорий, чтобы он сразу заработал.
-                </li>
-              </ul>
-            </div>
-          </div>
+          <QuestLog quests={quests} />
 
           <div class="results">
             <h2 class="results-title">
@@ -577,7 +586,13 @@ const home = withBase('/');
 </BaseLayout>
 
 <script>
-  import { initCaseMenu, initCompare, initHud, initScrollSpy } from '../../scripts/case';
+  import {
+    initCaseMenu,
+    initCompare,
+    initHud,
+    initQuestLog,
+    initScrollSpy,
+  } from '../../scripts/case';
 
   initScrollSpy(
     [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')],
@@ -587,6 +602,7 @@ const home = withBase('/');
   if (bar) initCaseMenu(bar);
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
+  document.querySelectorAll<HTMLElement>('[data-quest-log]').forEach(initQuestLog);
 </script>
 
 <style>
@@ -867,7 +883,6 @@ const home = withBase('/');
     color: var(--text-primary);
   }
 
-  .pair,
   .trio {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -899,31 +914,6 @@ const home = withBase('/');
     font-weight: var(--fw-bold);
     line-height: var(--lh-snug);
   }
-  .list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .list li {
-    position: relative;
-    padding-left: 18px;
-    font-size: var(--t-body);
-    line-height: var(--lh-normal);
-    color: var(--text-secondary);
-  }
-  .list li::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: calc(var(--t-body) * var(--lh-normal) / 2 - 3px);
-    width: 6px;
-    height: 6px;
-    background: var(--text-tertiary);
-  }
-
   .results {
     display: flex;
     flex-direction: column;
@@ -1260,7 +1250,6 @@ const home = withBase('/');
     .h2 {
       font-size: 26px;
     }
-    .pair,
     .trio,
     .psr {
       grid-template-columns: minmax(0, 1fr);

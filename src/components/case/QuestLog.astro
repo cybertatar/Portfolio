@@ -1,0 +1,382 @@
+---
+import Sprite from './scenes/Sprite.astro';
+import type { MascotSpriteName } from '../../content/mascots';
+
+/**
+ * Problems and solutions as a Zelda quest log: completed quests on the left, the open one on
+ * the right with what was in the way, what we did and the test's reward. On narrow screens it
+ * folds into an accordion: same DOM, each page follows its quest. One quest is always open
+ * (initQuestLog in scripts/case.ts); without JS the first one shows.
+ */
+export interface Quest {
+  /** Section id of the full write-up further down the page */
+  id: string;
+  title: string;
+  sprite: MascotSpriteName;
+  problem: string;
+  solution: string;
+  reward: string;
+  /** SEQ for the quest's test task, out of 7 */
+  seq?: number;
+}
+
+interface Props {
+  quests: Quest[];
+}
+
+const { quests } = Astro.props;
+
+// Small heart containers, as in the results HUD
+const HEART = [
+  '.RR...RR.',
+  'RrrR.RrrR',
+  'RqrrRrrrR',
+  'RqrrrrrrR',
+  '.RrrrrrR.',
+  '..RrrrR..',
+  '...RrR...',
+  '....R....',
+];
+const heartRuns: { x: number; y: number; w: number; c: string }[] = [];
+HEART.forEach((row, y) => {
+  let x = 0;
+  while (x < row.length) {
+    let end = x + 1;
+    while (end < row.length && row[end] === row[x]) end++;
+    if (row[x] !== '.') heartRuns.push({ x, y, w: end - x, c: row[x] });
+    x = end;
+  }
+});
+const CHECK = [
+  '..........##',
+  '.........##.',
+  '........##..',
+  '.##....##...',
+  '..##..##....',
+  '...####.....',
+  '....##......',
+];
+const checkRuns = CHECK.flatMap((row, y) =>
+  [...row].flatMap((c, x) => (c === '#' ? [{ x, y }] : [])),
+);
+
+const fmt = (n: number) => n.toFixed(1).replace('.', ',');
+let uid = 0;
+---
+
+<div class="log-wrap">
+  <div class="log" style={`--n: ${quests.length}`} data-quest-log>
+    {quests.map((q, i) => (
+      <>
+        <button
+          class="quest px-clip"
+          type="button"
+          id={`quest-${q.id}`}
+          aria-expanded={i === 0 ? 'true' : 'false'}
+          aria-controls={`quest-page-${q.id}`}
+          data-quest
+        >
+          <span class="check px-clip" aria-hidden="true">
+            <svg viewBox="0 0 12 7" shape-rendering="crispEdges" focusable="false">
+              {checkRuns.map((r) => (
+                <rect x={r.x} y={r.y} width="1" height="1" />
+              ))}
+            </svg>
+          </span>
+          <span class="quest-title">{q.title}</span>
+        </button>
+        <section
+          class="page px-clip"
+          id={`quest-page-${q.id}`}
+          aria-labelledby={`quest-${q.id}`}
+          hidden={i !== 0}
+          data-quest-page
+        >
+          <header class="page-head">
+            <span class="page-sprite">
+              <Sprite name={q.sprite} />
+            </span>
+            <div>
+              <h3 class="page-title">{q.title}</h3>
+              <p class="page-state">Выполнено</p>
+            </div>
+          </header>
+          <div class="page-body">
+            <p class="page-label">Что мешало</p>
+            <p class="page-problem">{q.problem}</p>
+            <p class="page-label">Что сделали</p>
+            <p class="page-solution">{q.solution}</p>
+          </div>
+          <footer class="reward">
+            <span class="reward-label">Награда</span>
+            <span class="reward-text">{q.reward}</span>
+            {q.seq !== undefined && (
+              <span class="reward-seq">
+                <span class="hearts" aria-hidden="true">
+                  {Array.from({ length: 7 }, (_, h) => {
+                    const px = Math.round(Math.max(0, Math.min(1, q.seq! - h)) * 9);
+                    const id = `quest-heart-${uid++}`;
+                    return (
+                      <svg viewBox="0 0 9 8" shape-rendering="crispEdges" focusable="false">
+                        <clipPath id={id}>
+                          <rect width={px} height="8" />
+                        </clipPath>
+                        {heartRuns.map((r) => (
+                          <rect class={`e-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                        ))}
+                        {px > 0 && (
+                          <g clip-path={`url(#${id})`}>
+                            {heartRuns.map((r) => (
+                              <rect class={`f-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                            ))}
+                          </g>
+                        )}
+                      </svg>
+                    );
+                  })}
+                </span>
+                <span class="seq">
+                  <b>{fmt(q.seq)}</b> из 7
+                </span>
+              </span>
+            )}
+            <a class="more" href={`#${q.id}`}>
+              Подробнее
+            </a>
+          </footer>
+        </section>
+      </>
+    ))}
+  </div>
+</div>
+
+<style>
+  .log-wrap {
+    container-type: inline-size;
+  }
+  /* Desktop: quests stack in the left column, the open page spans them on the right */
+  .log {
+    display: grid;
+    grid-template-columns: clamp(220px, 30%, 320px) minmax(0, 1fr);
+    /* Quests take their own height; the spare height of a tall page goes to the last row */
+    grid-template-rows: repeat(var(--n), min-content) 1fr;
+    column-gap: var(--space-grid);
+    row-gap: 8px;
+    align-items: start;
+  }
+  .quest {
+    --px-step: 3px;
+    grid-column: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    font: inherit;
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    text-align: left;
+    background: var(--surface-raised);
+    color: var(--text-secondary);
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .quest:hover {
+    background: var(--surface-active);
+  }
+  .quest[aria-expanded='true'] {
+    background: var(--surface-inverse);
+    color: var(--text-inverse);
+  }
+  .quest:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  .check {
+    --px-step: 2px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    background: var(--surface-card);
+    color: var(--stamina-text);
+  }
+  .check svg {
+    width: 18px;
+    fill: currentColor;
+  }
+
+  .page {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+  .page[hidden] {
+    display: none;
+  }
+  .page-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .page-sprite {
+    --px-step: 3px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 52px;
+    height: 52px;
+    background: var(--surface-card);
+    clip-path: var(--px-clip);
+  }
+  .page-sprite :global(svg) {
+    width: 32px;
+    height: auto;
+  }
+  .page-title {
+    margin: 0;
+    font-size: var(--t-lead);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+  }
+  .page-state {
+    margin: 2px 0 0;
+    font-family: var(--font-pixel);
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.03em;
+    color: var(--stamina-text);
+  }
+  .page-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .page-label {
+    margin: 10px 0 0;
+    font-family: var(--font-pixel);
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .page-label:first-child {
+    margin-top: 0;
+  }
+  .page-problem,
+  .page-solution {
+    margin: 0;
+    font-size: var(--t-body);
+    line-height: var(--lh-normal);
+  }
+  .page-problem {
+    color: var(--text-tertiary);
+  }
+
+  .reward {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 2px dashed var(--line-2);
+    font-size: var(--t-caption);
+    color: var(--text-secondary);
+  }
+  .reward-label {
+    font-family: var(--font-pixel);
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--loot-text);
+  }
+  .reward-text {
+    font-family: var(--font-mono);
+  }
+  .reward-seq {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hearts {
+    display: flex;
+    gap: 3px;
+  }
+  .hearts svg {
+    width: 18px;
+    height: 16px;
+  }
+  .e-R {
+    fill: var(--line-3);
+  }
+  .e-r,
+  .e-q {
+    fill: var(--paper-4);
+  }
+  .f-R {
+    fill: var(--heart-edge);
+  }
+  .f-r {
+    fill: var(--heart-fill);
+  }
+  .f-q {
+    fill: var(--paper-2);
+  }
+  .seq b {
+    font-family: var(--font-mono);
+    font-weight: var(--fw-medium);
+    color: var(--heart-text);
+  }
+  .more {
+    margin-left: auto;
+    font-weight: var(--fw-semibold);
+    color: var(--text-accent);
+    text-decoration: none;
+  }
+  .more:hover {
+    color: var(--text-accent-hover);
+    text-decoration: underline;
+  }
+
+  /* Opening a page: a short fade, like turning to a journal entry */
+  @media (prefers-reduced-motion: no-preference) {
+    .page:not([hidden]) {
+      animation: page-in var(--dur-slow) var(--ease-standard);
+    }
+    @keyframes page-in {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+    }
+  }
+
+  /* Narrow: an accordion, each page right under its quest */
+  @container (max-width: 640px) {
+    .log {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: none;
+    }
+    .quest,
+    .page {
+      grid-column: 1;
+      grid-row: auto;
+    }
+    .page {
+      margin-bottom: 8px;
+    }
+    /* The quest right above already names it */
+    .page-title {
+      display: none;
+    }
+  }
+</style>

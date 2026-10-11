@@ -31,7 +31,7 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
 ---
 
 <div class="deck-wrap" data-quest-deck>
-  <ul class="deck" data-hud data-quest-track tabindex="0" aria-label="Задания">
+  <ul class="deck" data-hud data-quest-track tabindex="0" aria-label="Проблемы и решения">
     {quests.map((q, i) => (
       <li class="quest px-clip" style={`--i: ${i}`} data-quest-card>
         <a class="title" href={`#${q.id}`}>

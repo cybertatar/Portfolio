@@ -78,3 +78,18 @@ export function initCompare(root: HTMLElement) {
   range.addEventListener('input', set);
   set();
 }
+
+/** Plays the results HUD once, when it comes into view (Hud.astro). */
+export function initHud(root: HTMLElement) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.dataset.armed = '';
+  const seen = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry.isIntersecting) return;
+      root.classList.add('is-on');
+      seen.disconnect();
+    },
+    { threshold: 0.4 },
+  );
+  seen.observe(root);
+}

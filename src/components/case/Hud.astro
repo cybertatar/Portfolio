@@ -1,0 +1,324 @@
+---
+/**
+ * Results as game HUD gauges, after Zelda: steps are slots that go out, time is a stamina bar
+ * that shrinks, first click success is a mana bar, the ease score is a row of heart containers.
+ * Gauges play once when scrolled into view (initHud in scripts/case.ts); without JS or with
+ * reduced motion they just show the end state.
+ */
+export type HudStat =
+  | { kind: 'steps'; label: string; from: number; to: number }
+  | { kind: 'time'; label: string; from: number; to: number; unit: string }
+  | { kind: 'mana'; label: string; value: number; note: string }
+  | { kind: 'hearts'; label: string; value: number; max: number };
+
+interface Props {
+  stats: HudStat[];
+  note?: string;
+}
+
+const { stats, note } = Astro.props;
+
+// Heart container, 9×8 pixels (the heart sprite from mascots.ts)
+const HEART = [
+  '.RR...RR.',
+  'RrrR.RrrR',
+  'RqrrRrrrR',
+  'RqrrrrrrR',
+  '.RrrrrrR.',
+  '..RrrrR..',
+  '...RrR...',
+  '....R....',
+];
+const heartRuns: { x: number; y: number; w: number; c: string }[] = [];
+HEART.forEach((row, y) => {
+  let x = 0;
+  while (x < row.length) {
+    let end = x + 1;
+    while (end < row.length && row[end] === row[x]) end++;
+    if (row[x] !== '.') heartRuns.push({ x, y, w: end - x, c: row[x] });
+    x = end;
+  }
+});
+
+const fmt = (n: number) => String(n).replace('.', ',');
+let uid = 0;
+---
+
+<div class="hud-wrap">
+  <ul class="hud" data-hud>
+    {stats.map((s) => (
+      <li class="gauge px-clip">
+        <span class="label">{s.label}</span>
+
+        {s.kind === 'steps' && (
+          <>
+            <span class="pips" style={`--n: ${s.from}`} aria-hidden="true">
+              {Array.from({ length: s.from }, (_, i) => (
+                <span
+                  class:list={['pip', i >= s.to && 'lost']}
+                  style={i >= s.to ? `--i: ${s.from - 1 - i}` : undefined}
+                />
+              ))}
+            </span>
+            <span class="value">
+              <b>{s.to}</b> вместо {s.from}
+            </span>
+          </>
+        )}
+
+        {s.kind === 'time' && (
+          <>
+            <span class="bars" aria-hidden="true">
+              <span class="bar-tag">было</span>
+              <span class="bar px-clip was" />
+              <span class="bar-tag">стало</span>
+              <span class="bar-track">
+                <span class="bar px-clip now" style={`--to: ${(s.to / s.from) * 100}%`} />
+              </span>
+            </span>
+            <span class="value">
+              <b>{s.to}</b> {s.unit} вместо {s.from}&nbsp;{s.unit}
+            </span>
+          </>
+        )}
+
+        {s.kind === 'mana' && (
+          <>
+            <span class="mana px-clip" aria-hidden="true">
+              <span class="mana-fill" style={`--to: ${s.value}%`} />
+            </span>
+            <span class="value">
+              <b>{s.value}%</b> {s.note}
+            </span>
+          </>
+        )}
+
+        {s.kind === 'hearts' && (
+          <>
+            <span class="hearts" aria-hidden="true">
+              {Array.from({ length: s.max }, (_, i) => {
+                // Fill snaps to whole pixels of the 9-pixel heart, like Zelda's partial hearts
+                const px = Math.round(Math.max(0, Math.min(1, s.value - i)) * 9);
+                const id = `hud-heart-${uid++}`;
+                return (
+                  <svg
+                    class="heart"
+                    style={`--i: ${i}`}
+                    viewBox="0 0 9 8"
+                    shape-rendering="crispEdges"
+                    focusable="false"
+                  >
+                    <clipPath id={id}>
+                      <rect width={px} height="8" />
+                    </clipPath>
+                    {heartRuns.map((r) => (
+                      <rect class={`e-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                    ))}
+                    {px > 0 && (
+                      <g class="heart-fill" clip-path={`url(#${id})`}>
+                        {heartRuns.map((r) => (
+                          <rect class={`f-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                        ))}
+                      </g>
+                    )}
+                  </svg>
+                );
+              })}
+            </span>
+            <span class="value">
+              <b>{fmt(s.value)}</b> из {s.max}
+            </span>
+          </>
+        )}
+      </li>
+    ))}
+  </ul>
+  {note && <p class="note">{note}</p>}
+</div>
+
+<style>
+  .hud-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-grid);
+    container-type: inline-size;
+  }
+  .hud {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-grid);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @container (max-width: 560px) {
+    .hud {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+  }
+  .gauge {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+  .label {
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+  .value {
+    margin-top: auto;
+    font-size: var(--t-caption);
+    color: var(--text-tertiary);
+  }
+  /* Fira Mono: Handjet's slashed zero makes 105 read as 185 */
+  .value b {
+    margin-right: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--t-stat);
+    font-weight: var(--fw-medium);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--text-accent);
+  }
+
+  /* Steps: slots, the dropped ones go out */
+  .pips {
+    display: flex;
+    gap: 4px;
+    height: 20px;
+  }
+  .pip {
+    flex: 1 1 0;
+    max-width: 26px;
+    background: var(--sky-400);
+    clip-path: polygon(
+      0 3px,
+      3px 3px,
+      3px 0,
+      calc(100% - 3px) 0,
+      calc(100% - 3px) 3px,
+      100% 3px,
+      100% calc(100% - 3px),
+      calc(100% - 3px) calc(100% - 3px),
+      calc(100% - 3px) 100%,
+      3px 100%,
+      3px calc(100% - 3px),
+      0 calc(100% - 3px)
+    );
+  }
+  .pip.lost {
+    background: var(--surface-active);
+  }
+
+  /* Time: stamina bars, before and after */
+  .bars {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 6px 10px;
+  }
+  .bar-tag {
+    font-family: var(--font-pixel);
+    font-size: var(--t-chip);
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .bar-track {
+    display: flex;
+  }
+  .bar {
+    --px-step: 3px;
+    display: block;
+    height: 14px;
+  }
+  .bar.was {
+    background: var(--surface-active);
+  }
+  .bar.now {
+    width: var(--to);
+    background: var(--sky-400);
+  }
+
+  /* First click success: mana */
+  .mana {
+    --px-step: 3px;
+    display: flex;
+    height: 20px;
+    background: var(--surface-active);
+  }
+  .mana-fill {
+    width: var(--to);
+    background: repeating-linear-gradient(90deg, var(--sky-400) 0 10px, var(--sky-500) 10px 12px);
+  }
+
+  /* Ease score: heart containers */
+  .hearts {
+    display: flex;
+    gap: 6px;
+  }
+  .heart {
+    flex: 0 1 36px;
+    min-width: 0;
+    aspect-ratio: 9 / 8;
+  }
+  .e-R {
+    fill: var(--line-3);
+  }
+  .e-r,
+  .e-q {
+    fill: var(--paper-4);
+  }
+  .f-R {
+    fill: #b0737c;
+  }
+  .f-r {
+    fill: #cc9097;
+  }
+  .f-q {
+    fill: var(--paper-2);
+  }
+
+  .note {
+    margin: 0;
+    font-size: var(--t-caption);
+    color: var(--text-tertiary);
+  }
+
+  /* Play once on view. Armed only by the script, so without JS the end state shows. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hud[data-armed] .pip.lost {
+      background: var(--sky-400);
+    }
+    .hud[data-armed] .bar.now {
+      width: 100%;
+    }
+    .hud[data-armed] .mana-fill {
+      width: 0;
+    }
+    .hud[data-armed] .heart-fill {
+      opacity: 0;
+    }
+    .hud.is-on .pip.lost {
+      background: var(--surface-active);
+      transition: background 0s calc(300ms + var(--i) * 70ms);
+    }
+    .hud.is-on .bar.now {
+      width: var(--to);
+      transition: width 700ms steps(10) 300ms;
+    }
+    .hud.is-on .mana-fill {
+      width: var(--to);
+      transition: width 800ms steps(12) 300ms;
+    }
+    .hud.is-on .heart-fill {
+      opacity: 1;
+      transition: opacity 0s calc(300ms + var(--i) * 110ms);
+    }
+  }
+</style>

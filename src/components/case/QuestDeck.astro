@@ -1,0 +1,194 @@
+---
+import Sprite from './scenes/Sprite.astro';
+import { mascotSprites, type MascotSpriteName } from '../../content/mascots';
+
+/**
+ * Problems and their solutions as a deck of quest cards that rhymes with the results HUD below:
+ * the same cards in the same 2×2 grid, a small label on top and the big value at the bottom.
+ * Here the label is the quest, the problem is struck out like a completed quest, and the
+ * solution is the value. The strike draws once on view (initHud in scripts/case.ts arms it);
+ * on phones the deck swipes one card at a time with dots below (initQuestDeck).
+ */
+export interface Quest {
+  /** Section id of the full write-up further down the page */
+  id: string;
+  title: string;
+  sprite: MascotSpriteName;
+  /** A few words each: the card is a glance, the section below has the detail */
+  problem: string;
+  solution: string;
+}
+
+interface Props {
+  quests: Quest[];
+}
+
+const { quests } = Astro.props;
+
+// One pixel scale for every sprite, so a coin and a chest have pixels of the same size
+const SCALE = 2;
+const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
+---
+
+<div class="deck-wrap" data-quest-deck>
+  <ul class="deck" data-hud data-quest-track tabindex="0" aria-label="Проблемы и решения">
+    {quests.map((q, i) => (
+      <li class="quest px-clip" style={`--i: ${i}`} data-quest-card>
+        <a class="title" href={`#${q.id}`}>
+          <span class="icon" aria-hidden="true">
+            <span style={`width: ${width(q.sprite)}px`}>
+              <Sprite name={q.sprite} />
+            </span>
+          </span>
+          {q.title}
+        </a>
+        <p class="problem">
+          <span class="visually-hidden">Было: </span>
+          <s>{q.problem}</s>
+        </p>
+        <p class="solution">
+          <span class="visually-hidden">Стало: </span>
+          {q.solution}
+        </p>
+      </li>
+    ))}
+  </ul>
+  <div class="dots" aria-hidden="true">
+    {quests.map((_, i) => (
+      <span class:list={['dot', i === 0 && 'is-on']} data-quest-dot />
+    ))}
+  </div>
+</div>
+
+<style>
+  .deck-wrap {
+    container-type: inline-size;
+  }
+  .deck {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-grid);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .quest {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+
+  /* Label, as on the HUD cards */
+  .title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .title:hover {
+    color: var(--text-accent);
+  }
+  .icon {
+    display: flex;
+    align-items: flex-end;
+    height: 20px;
+  }
+  .icon > span {
+    display: block;
+  }
+  .icon :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .problem,
+  .solution {
+    margin: 0;
+  }
+  .problem {
+    font-size: var(--t-body);
+    line-height: var(--lh-normal);
+    color: var(--text-tertiary);
+  }
+  /* The strike is a background line, so it can draw from left to right on every line of text */
+  .problem s {
+    text-decoration: none;
+    background: linear-gradient(var(--line-3), var(--line-3)) no-repeat 0 55% / 100% 2px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  /* The value, as the big number on the HUD cards */
+  .solution {
+    margin-top: auto;
+    font-size: var(--t-lead);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+
+  .dots {
+    display: none;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* Play once on view */
+  @media (prefers-reduced-motion: no-preference) {
+    .deck[data-armed] .problem s {
+      background-size: 0% 2px;
+    }
+    .deck.is-on .problem s {
+      background-size: 100% 2px;
+      transition: background-size 500ms steps(8) calc(300ms + var(--i, 0) * 150ms);
+    }
+  }
+
+  /* Phones: a deck that swipes one card at a time, the next one peeking in */
+  @container (max-width: 560px) {
+    .deck {
+      display: flex;
+      gap: 8px;
+      margin: 0 calc(-1 * var(--pad, 16px));
+      padding: 0 var(--pad, 16px);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding: 0 var(--pad, 16px);
+      scrollbar-width: none;
+    }
+    .deck::-webkit-scrollbar {
+      display: none;
+    }
+    .quest {
+      flex: 0 0 82%;
+      min-height: 200px;
+      scroll-snap-align: start;
+    }
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--surface-active);
+      transition: background var(--dur-fast) var(--ease-standard);
+    }
+    .dot.is-on {
+      background: var(--accent);
+    }
+  }
+</style>

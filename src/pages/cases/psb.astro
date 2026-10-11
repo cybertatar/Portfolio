@@ -68,27 +68,35 @@ const quests: Quest[] = [
   },
 ];
 
-// One card per scenario with its steps and time, then the overall test scores
+// One row of stats, all built the same: number, context, one gauge
 const stats: HudStat[] = [
   {
-    kind: 'flow',
     label: 'Подключение кешбэка',
-    steps: { from: 12, to: 5, unit: 'шагов' },
-    time: { from: 105, to: 23, unit: 'с' },
+    value: '23',
+    unit: 'с',
+    notes: ['вместо 105 с', '5 шагов вместо 12'],
+    gauge: { kind: 'time', from: 105, to: 23 },
   },
   {
-    kind: 'flow',
     label: 'Путь к данным карты',
-    steps: { from: 7, to: 4, unit: 'шага' },
-    time: { from: 42, to: 17, unit: 'с' },
+    value: '17',
+    unit: 'с',
+    notes: ['вместо 42 с', '4 шага вместо 7'],
+    gauge: { kind: 'time', from: 42, to: 17 },
   },
   {
-    kind: 'mana',
     label: 'First click success',
-    value: 89,
-    note: 'начали с правильного действия',
+    value: '89%',
+    notes: ['начали с правильного действия'],
+    gauge: { kind: 'mana', value: 89 },
   },
-  { kind: 'hearts', label: 'SEQ, оценка лёгкости', value: 6.4, max: 7 },
+  {
+    label: 'Оценка лёгкости',
+    value: '6,4',
+    unit: 'из 7',
+    notes: ['SEQ, среднее по задачам'],
+    gauge: { kind: 'hearts', value: 6.4, max: 7 },
+  },
 ];
 
 const steps = [

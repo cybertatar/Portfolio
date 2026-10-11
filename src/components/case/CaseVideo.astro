@@ -7,20 +7,27 @@ interface Props {
   /** Width / height, e.g. "16 / 9". */
   ratio: string;
   label: string;
+  /** English version of the video and its poster, swapped in by applyLang. */
+  enSrc?: string;
+  enPoster?: string;
+  enLabel?: string;
 }
 
 /** A video with sound that plays on demand, in the page's pixel frame. */
-const { src, poster, ratio, label } = Astro.props;
+const { src, poster, ratio, label, enSrc, enPoster, enLabel } = Astro.props;
 ---
 
 <div class="video px-clip" style={{ aspectRatio: ratio }}>
   <video
     src={withBase(src)}
     poster={withBase(poster)}
+    data-en-src={enSrc && withBase(enSrc)}
+    data-en-poster={enPoster && withBase(enPoster)}
     controls
     playsinline
     preload="none"
     aria-label={label}
+    data-en-label={enLabel}
   ></video>
 </div>
 

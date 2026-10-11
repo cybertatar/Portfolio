@@ -1,4 +1,6 @@
 ---
+import { heartPaths } from '../../content/pixel-heart';
+
 /**
  * Results as game HUD gauges, after Zelda: steps are slots that go out, time is a stamina bar
  * that shrinks, first click success is a mana bar, the ease score is a row of heart containers.
@@ -17,28 +19,6 @@ interface Props {
 }
 
 const { stats, note } = Astro.props;
-
-// Heart container, 9×8 pixels (the heart sprite from mascots.ts)
-const HEART = [
-  '.RR...RR.',
-  'RrrR.RrrR',
-  'RqrrRrrrR',
-  'RqrrrrrrR',
-  '.RrrrrrR.',
-  '..RrrrR..',
-  '...RrR...',
-  '....R....',
-];
-const heartRuns: { x: number; y: number; w: number; c: string }[] = [];
-HEART.forEach((row, y) => {
-  let x = 0;
-  while (x < row.length) {
-    let end = x + 1;
-    while (end < row.length && row[end] === row[x]) end++;
-    if (row[x] !== '.') heartRuns.push({ x, y, w: end - x, c: row[x] });
-    x = end;
-  }
-});
 
 const fmt = (n: number) => String(n).replace('.', ',');
 let uid = 0;
@@ -111,13 +91,13 @@ let uid = 0;
                     <clipPath id={id}>
                       <rect width={px} height="8" />
                     </clipPath>
-                    {heartRuns.map((r) => (
-                      <rect class={`e-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                    {heartPaths.map((p) => (
+                      <path class={`e-${p.c}`} d={p.d} />
                     ))}
                     {px > 0 && (
                       <g class="heart-fill" clip-path={`url(#${id})`}>
-                        {heartRuns.map((r) => (
-                          <rect class={`f-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                        {heartPaths.map((p) => (
+                          <path class={`f-${p.c}`} d={p.d} />
                         ))}
                       </g>
                     )}

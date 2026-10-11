@@ -1,4 +1,5 @@
 ---
+import { heartPaths } from '../../content/pixel-heart';
 import Sprite from './scenes/Sprite.astro';
 import type { MascotSpriteName } from '../../content/mascots';
 
@@ -26,27 +27,6 @@ interface Props {
 
 const { quests } = Astro.props;
 
-// Small heart containers, as in the results HUD
-const HEART = [
-  '.RR...RR.',
-  'RrrR.RrrR',
-  'RqrrRrrrR',
-  'RqrrrrrrR',
-  '.RrrrrrR.',
-  '..RrrrR..',
-  '...RrR...',
-  '....R....',
-];
-const heartRuns: { x: number; y: number; w: number; c: string }[] = [];
-HEART.forEach((row, y) => {
-  let x = 0;
-  while (x < row.length) {
-    let end = x + 1;
-    while (end < row.length && row[end] === row[x]) end++;
-    if (row[x] !== '.') heartRuns.push({ x, y, w: end - x, c: row[x] });
-    x = end;
-  }
-});
 const CHECK = [
   '..........##',
   '.........##.',
@@ -121,13 +101,13 @@ let uid = 0;
                         <clipPath id={id}>
                           <rect width={px} height="8" />
                         </clipPath>
-                        {heartRuns.map((r) => (
-                          <rect class={`e-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                        {heartPaths.map((p) => (
+                          <path class={`e-${p.c}`} d={p.d} />
                         ))}
                         {px > 0 && (
                           <g clip-path={`url(#${id})`}>
-                            {heartRuns.map((r) => (
-                              <rect class={`f-${r.c}`} x={r.x} y={r.y} width={r.w} height="1" />
+                            {heartPaths.map((p) => (
+                              <path class={`f-${p.c}`} d={p.d} />
                             ))}
                           </g>
                         )}

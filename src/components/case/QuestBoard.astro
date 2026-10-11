@@ -3,21 +3,16 @@ import Sprite from './scenes/Sprite.astro';
 import type { MascotSpriteName } from '../../content/mascots';
 
 /**
- * Problems and solutions as a guild quest board: four completed quests, all in view, laid out
- * on the sheet itself (no fills), so the block stays light next to the results HUD. Each quest
- * ends with its loot: a coin for what got shorter, a rupee for the task's ease score.
+ * What we did, as a guild quest board: four completed quests, all in view, laid out on the sheet
+ * itself (no fills). Only the solution: the problems are told in the intro and the numbers live
+ * in the results HUD, so nothing is said twice. Each title links to its full write-up.
  */
 export interface Quest {
   /** Section id of the full write-up further down the page */
   id: string;
   title: string;
   sprite: MascotSpriteName;
-  problem: string;
   solution: string;
-  /** What got shorter or easier, shown with a coin */
-  gain: string;
-  /** SEQ of the quest's test task, out of 7, shown with a rupee */
-  seq?: number;
 }
 
 interface Props {
@@ -25,82 +20,43 @@ interface Props {
 }
 
 const { quests } = Astro.props;
-const fmt = (n: number) => n.toFixed(1).replace('.', ',');
 ---
 
-<div class="board-wrap">
-  <ul class="board">
-    {quests.map((q) => (
-      <li class="quest">
-        <h3 class="title">
-          <span class="slot px-clip">
-            <Sprite name={q.sprite} />
-          </span>
+<ul class="board">
+  {quests.map((q) => (
+    <li class="quest">
+      <span class="slot px-clip" aria-hidden="true">
+        <Sprite name={q.sprite} />
+      </span>
+      <div class="text">
+        <a class="title" href={`#${q.id}`}>
           {q.title}
-        </h3>
-        <p class="problem">{q.problem}</p>
+        </a>
         <p class="solution">{q.solution}</p>
-        <div class="loot">
-          <span class="item">
-            <span class="icon coin">
-              <Sprite name="coin" />
-            </span>
-            {q.gain}
-          </span>
-          {q.seq !== undefined && (
-            <span class="item" title="SEQ, оценка лёгкости задачи в тесте">
-              <span class="icon rupee">
-                <Sprite name="rupee" />
-              </span>
-              лёгкость {fmt(q.seq)} из 7
-            </span>
-          )}
-          <a class="more" href={`#${q.id}`}>
-            Подробнее
-          </a>
-        </div>
-      </li>
-    ))}
-  </ul>
-</div>
+      </div>
+    </li>
+  ))}
+</ul>
 
 <style>
-  .board-wrap {
-    container-type: inline-size;
-  }
   .board {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: var(--space-split);
+    gap: 28px var(--space-split);
     margin: 0;
     padding: 0;
     list-style: none;
   }
+  @media (max-width: 640px) {
+    .board {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+  }
   .quest {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 24px 0;
-  }
-  /* Dashed rules between the rows, like lines on the board */
-  .quest:nth-child(n + 3) {
-    border-top: 2px dashed var(--line-2);
-  }
-  .quest:nth-child(-n + 2) {
-    padding-top: 0;
-  }
-  .quest:nth-last-child(-n + 2) {
-    padding-bottom: 0;
-  }
-
-  .title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 4px;
-    font-size: var(--t-lead);
-    font-weight: var(--fw-bold);
-    line-height: var(--lh-snug);
+    align-items: flex-start;
+    gap: 14px;
   }
   .slot {
     --px-step: 3px;
@@ -115,74 +71,26 @@ const fmt = (n: number) => n.toFixed(1).replace('.', ',');
     width: 24px;
     height: auto;
   }
-  .problem,
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 2px;
+  }
+  .title {
+    font-size: var(--t-lead);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .title:hover {
+    color: var(--text-accent);
+  }
   .solution {
     margin: 0;
     font-size: var(--t-body);
     line-height: var(--lh-normal);
-  }
-  .problem {
-    color: var(--text-tertiary);
-  }
-
-  .loot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 20px;
-    margin-top: auto;
-    padding-top: 6px;
-    font-family: var(--font-mono);
-    font-size: var(--t-caption);
     color: var(--text-secondary);
-  }
-  .item {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .icon {
-    display: block;
-    flex: none;
-  }
-  .icon :global(svg) {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .coin {
-    width: 16px;
-  }
-  .rupee {
-    width: 12px;
-  }
-  .more {
-    margin-left: auto;
-    font-family: var(--font-sans);
-    font-weight: var(--fw-semibold);
-    color: var(--text-accent);
-    text-decoration: none;
-  }
-  .more:hover {
-    color: var(--text-accent-hover);
-    text-decoration: underline;
-  }
-
-  /* Narrow: one column, a rule between every quest */
-  @container (max-width: 640px) {
-    .board {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .quest:nth-child(n) {
-      padding: 20px 0;
-      border-top: 2px dashed var(--line-2);
-    }
-    .quest:first-child {
-      padding-top: 0;
-      border-top: 0;
-    }
-    .quest:last-child {
-      padding-bottom: 0;
-    }
   }
 </style>

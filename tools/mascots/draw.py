@@ -214,9 +214,6 @@ sprites = {
              'PppppppppppppppP', 'PppppppppppppppP', 'PpqqpqqpqqpqqppP', 'PppppppppppppppP',
              'PpqqqppppppppppP', '.PPPPPPPPPPPPPP.'],
     'spark': ['...o...', '...o...', '..ooo..', 'ooooooo', '..ooo..', '...o...', '...o...'],
-    # a blue rupee, Zelda's gem: the quest board's reward for the ease score
-    'rupee': ['..UUU..', '.UppuU.', 'UpppuuU', 'UpwpuuU', 'UpwpuuU', 'UppppuU', 'UppuuuU', 'UuuuuuU',
-              '.UuuuU.', '..UUU..'],
     # a frog sitting side-on, facing left; its eye and throat are overlays like the faces
     'frog': ['...aa.........', '..aaaa........', '.aaaaaaaa.....', 'aaaaaaaaaaa...', 'iiaaaaaaaaaa..',
              '.iiiaaaaaaaaa.', '..iiiaaAaaaaa.', '...AAaAAAaaAa.', '..AA.AA.AAAAAA', '.AA..A....AAA.'],
@@ -267,7 +264,7 @@ html = ('<body style="background:#e7e0d0;display:flex;flex-wrap:wrap;gap:28px;al
                                                       ('elder', ['angry', 'talk'])] for f in fs)
         + ''.join(svg(n) for n in ['quest', 'arm-sword', 'arm-mage', 'arm-elder', 'phone',
                                    'chest', 'chest-open', 'cloud', 'puff', 'coin', 'heart',
-                                   'card', 'spark', 'rupee'])
+                                   'card', 'spark'])
         + stacked('frog', 'frog-eye') + stacked('frog', 'frog-blink', 'frog-croak')
         + ''.join(stacked(b, f) for b, f in [('swordsman', 'swordsman-calm'), ('swordsman', 'swordsman-wow'),
                                             ('mage', 'mage-calm'), ('mage', 'mage-wow'),

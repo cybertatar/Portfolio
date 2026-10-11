@@ -2,14 +2,20 @@
 import { heartPaths } from '../../content/pixel-heart';
 
 /**
- * Results as game HUD gauges, after Zelda: steps are slots that go out, time is a stamina bar
- * that shrinks, first click success is a mana bar, the ease score is a row of heart containers.
+ * Results as game HUD gauges, after Zelda. A scenario card holds both of its numbers: steps are
+ * slots that go out, time is a stamina bar that shrinks. First click success is a mana bar, the
+ * ease score is a row of heart containers.
  * Gauges play once when scrolled into view (initHud in scripts/case.ts); without JS or with
  * reduced motion they just show the end state.
  */
 export type HudStat =
-  | { kind: 'steps'; label: string; from: number; to: number }
-  | { kind: 'time'; label: string; from: number; to: number; unit: string }
+  | {
+      kind: 'flow';
+      label: string;
+      /** `unit` agrees with `to`: 5 шагов, 4 шага */
+      steps: { from: number; to: number; unit: string };
+      time: { from: number; to: number; unit: string };
+    }
   | { kind: 'mana'; label: string; value: number; note: string }
   | { kind: 'hearts'; label: string; value: number; max: number };
 
@@ -30,34 +36,36 @@ let uid = 0;
       <li class:list={['gauge px-clip', `is-${s.kind}`]}>
         <span class="label">{s.label}</span>
 
-        {s.kind === 'steps' && (
+        {s.kind === 'flow' && (
           <>
-            <span class="pips" style={`--n: ${s.from}`} aria-hidden="true">
-              {Array.from({ length: s.from }, (_, i) => (
-                <span
-                  class:list={['pip', i >= s.to && 'lost']}
-                  style={i >= s.to ? `--i: ${s.from - 1 - i}` : undefined}
-                />
-              ))}
-            </span>
-            <span class="value">
-              <b>{s.to}</b> вместо {s.from}
-            </span>
-          </>
-        )}
-
-        {s.kind === 'time' && (
-          <>
-            <span class="bars" aria-hidden="true">
-              <span class="bar-tag">было</span>
-              <span class="bar px-clip was" />
-              <span class="bar-tag">стало</span>
-              <span class="bar-track">
-                <span class="bar px-clip now" style={`--to: ${(s.to / s.from) * 100}%`} />
+            <span class="part">
+              <span class="pips" aria-hidden="true">
+                {Array.from({ length: s.steps.from }, (_, i) => (
+                  <span
+                    class:list={['pip', i >= s.steps.to && 'lost']}
+                    style={i >= s.steps.to ? `--i: ${s.steps.from - 1 - i}` : undefined}
+                  />
+                ))}
+              </span>
+              <span class="value is-steps">
+                <b>{s.steps.to}</b> {s.steps.unit} вместо {s.steps.from}
               </span>
             </span>
-            <span class="value">
-              <b>{s.to}</b> {s.unit} вместо {s.from}&nbsp;{s.unit}
+            <span class="part">
+              <span class="bars" aria-hidden="true">
+                <span class="bar-tag">было</span>
+                <span class="bar px-clip was" />
+                <span class="bar-tag">стало</span>
+                <span class="bar-track">
+                  <span
+                    class="bar px-clip now"
+                    style={`--to: ${(s.time.to / s.time.from) * 100}%`}
+                  />
+                </span>
+              </span>
+              <span class="value is-time">
+                <b>{s.time.to}</b> {s.time.unit} вместо {s.time.from}&nbsp;{s.time.unit}
+              </span>
             </span>
           </>
         )}
@@ -165,7 +173,18 @@ let uid = 0;
     color: var(--text-accent);
   }
 
-  .is-time .value b {
+  .part {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .part + .part {
+    margin-top: 8px;
+  }
+  .part .value {
+    margin-top: 0;
+  }
+  .value.is-time b {
     color: var(--stamina-text);
   }
   .is-hearts .value b {

@@ -625,18 +625,6 @@ export const mascotSprites = {
     '.PPPPPPPPPPPPPP.',
   ],
   spark: ['...o...', '...o...', '..ooo..', 'ooooooo', '..ooo..', '...o...', '...o...'],
-  rupee: [
-    '..UUU..',
-    '.UppuU.',
-    'UpppuuU',
-    'UpwpuuU',
-    'UpwpuuU',
-    'UppppuU',
-    'UppuuuU',
-    'UuuuuuU',
-    '.UuuuU.',
-    '..UUU..',
-  ],
   frog: [
     '...aa.........',
     '..aaaa........',

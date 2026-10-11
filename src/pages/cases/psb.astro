@@ -39,52 +39,48 @@ const prototypes = [
   { route: '/cashback', poster: 'assets/cases/psb/cb-off.webp', caption: 'Подключение кешбэка' },
 ];
 
-/** Problems and solutions in short, one quest per solution section below */
+/** What we did, one quest per solution section below; the problems are in the intro */
 const quests: Quest[] = [
   {
     id: 'home',
     title: 'Главная',
     sprite: 'chest',
-    problem:
-      'Продукты банка отвлекали от повседневных действий, история операций была разбита по картам.',
-    solution: 'Главная собрана вокруг баланса и частых действий, карты лежат внутри своих счетов.',
-    gain: 'кешбэк нашли 30 из 30',
+    solution: 'Собрал главную вокруг баланса и частых действий, карты положил внутрь счетов.',
   },
   {
     id: 'card-data',
     title: 'Данные карты',
     sprite: 'card',
-    problem: 'Данные на третьей вкладке, CVV только по коду из СМС даже после биометрии.',
     solution: 'Просмотр и копирование на одном экране, без кода из СМС.',
-    gain: '−3 шага',
-    seq: 6.0,
   },
   {
     id: 'cashback',
     title: 'Подключение кешбэка',
     sprite: 'coin',
-    problem: 'Почта и браузер, а подключённый кешбэк не открывался до обновления экрана.',
-    solution: 'Одна кнопка рядом с условиями, подключение вместе с выбором категорий.',
-    gain: '−7 шагов',
-    seq: 6.5,
+    solution: 'Одна кнопка рядом с условиями, сразу с выбором категорий.',
   },
   {
     id: 'categories',
     title: 'Кешбэк после подключения',
     sprite: 'spark',
-    problem: 'Категории нужно выбирать каждый месяц, без напоминания, а кнопка выбора незаметна.',
-    solution: 'Категории на следующий месяц можно выбрать заранее и поменять до начала периода.',
-    gain: '100% с первого клика',
-    seq: 6.7,
+    solution: 'Категории на следующий месяц можно выбрать заранее.',
   },
 ];
 
-// Grouped by scenario: steps and time for each, then the overall test scores
+// One card per scenario with its steps and time, then the overall test scores
 const stats: HudStat[] = [
-  { kind: 'steps', label: 'Шаги подключения кешбэка', from: 12, to: 5 },
-  { kind: 'time', label: 'Время подключения кешбэка', from: 105, to: 23, unit: 'с' },
-  { kind: 'steps', label: 'Шаги к данным карты', from: 7, to: 4 },
-  { kind: 'time', label: 'Время до данных карты', from: 42, to: 17, unit: 'с' },
+  {
+    kind: 'flow',
+    label: 'Подключение кешбэка',
+    steps: { from: 12, to: 5, unit: 'шагов' },
+    time: { from: 105, to: 23, unit: 'с' },
+  },
+  {
+    kind: 'flow',
+    label: 'Путь к данным карты',
+    steps: { from: 7, to: 4, unit: 'шага' },
+    time: { from: 42, to: 17, unit: 'с' },
+  },
   {
     kind: 'mana',
     label: 'First click success',

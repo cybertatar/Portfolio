@@ -198,13 +198,13 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     top: calc(var(--pw) * 0.06 + var(--pw) * 1.022 + var(--pw) * var(--y));
     translate: -50% -50%;
     rotate: var(--rot);
-    scale: 0.6;
+    scale: 0.94;
     opacity: 0;
     visibility: hidden;
     transition:
-      opacity 0.2s ease,
-      scale 0.2s ease,
-      visibility 0s linear 0.2s;
+      opacity 0.25s ease,
+      scale 0.25s ease,
+      visibility 0s linear 0.25s;
   }
   .item {
     display: grid;
@@ -215,23 +215,24 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     width: 100%;
     height: auto;
   }
+  /* Calm entrance: a soft fade and settle, one item after another */
   .is-active .item,
   .is-active .hint {
     scale: 1;
     opacity: 1;
     visibility: visible;
     transition:
-      opacity 0.3s ease calc(var(--k, 0) * 40ms),
-      scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--k, 0) * 40ms),
+      opacity 0.5s ease calc(var(--k, 0) * 70ms),
+      scale 0.6s ease-out calc(var(--k, 0) * 70ms),
       visibility 0s;
   }
-  /* Small loot bobs, like items on the ground in a game */
+  /* Small loot drifts slowly, like items on the ground in a game */
   .is-active .item:nth-child(n + 3) {
-    animation: bob 2.4s ease-in-out calc(var(--k) * -0.5s) infinite;
+    animation: drift 6s ease-in-out calc(var(--k) * -1.3s) infinite;
   }
-  @keyframes bob {
+  @keyframes drift {
     50% {
-      translate: -50% calc(-50% - var(--pw) * 0.02);
+      translate: -50% calc(-50% - var(--pw) * 0.008);
     }
   }
 

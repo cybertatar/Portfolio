@@ -1,8 +1,8 @@
 /**
  * A fan of live prototype phones that flips by swipe, by a click on a phone behind, by the
  * arrow buttons or the arrow keys. The motion follows the colleague's deck on
- * psb-portfolio-preview: spring physics, the front phone follows the pointer and flies off,
- * the next one comes forward.
+ * psb-portfolio-preview: spring physics, the front phone follows the pointer, then slides out
+ * and tucks under the deck while the next one comes forward.
  *
  * Markup: [data-deck] holds [data-deck-cards] with one [data-deck-card] per phone,
  * [data-deck-decor] sets (one per phone, shown with its phone), [data-deck-prev] /
@@ -13,10 +13,10 @@ type Spring = { position: number; velocity: number; target: number };
 type CardState = Record<'x' | 'y' | 'rot' | 'scale' | 'opacity', Spring>;
 type Params = { omega: number; zeta: number };
 
-const SP: Record<'layout' | 'snapBack' | 'exit' | 'intro', Params> = {
+const SP: Record<'layout' | 'snapBack' | 'lift' | 'intro', Params> = {
   layout: { omega: (2 * Math.PI) / 0.45, zeta: 0.85 },
   snapBack: { omega: (2 * Math.PI) / 0.4, zeta: 0.7 },
-  exit: { omega: Math.sqrt(150 / 0.6), zeta: 12 / (2 * Math.sqrt(150 * 0.6)) },
+  lift: { omega: (2 * Math.PI) / 0.4, zeta: 0.9 },
   intro: { omega: (2 * Math.PI) / 0.5, zeta: 0.94 },
 };
 
@@ -25,6 +25,8 @@ const DAMP = 0.5;
 const MAX_X = 70;
 const THRESHOLD = 60;
 const LOCK = 10;
+/** A phone pulled out of the deck goes under (or on top) once it is this far out, in widths. */
+const LIFT_OUT = -0.45;
 /** Carousels inside the app keep horizontal swipes to themselves. */
 const OWN_SWIPES =
   '[aria-label="Карты счёта"], [aria-label="Предложения"], [aria-label="Счета и продукты"]';
@@ -83,7 +85,9 @@ export function initDeck(root: HTMLElement) {
   });
   let revealed = false;
   let lock = false;
-  let exiting = -1;
+  /** Phone being pulled out of the deck, and whether it is above the others while it is. */
+  let lifted = -1;
+  let liftedOnTop = false;
   let raf = 0;
   let last = 0;
 
@@ -132,7 +136,7 @@ export function initDeck(root: HTMLElement) {
     order.forEach((ci, n) => {
       const s = state[ci];
       const top = n === 0;
-      if (ci !== exiting && revealed) {
+      if (ci !== lifted && revealed) {
         const here = slot(n, count);
         // While dragging, the phones behind move halfway to where the flip will put them
         const next = dx < 0 ? slot(n - 1, count) : slot((n + 1) % count, count);
@@ -143,14 +147,15 @@ export function initDeck(root: HTMLElement) {
         s.scale.target = mix(here.scale, next.scale);
         s.opacity.target = 1;
       }
-      const params =
-        ci === exiting ? SP.exit : !revealed ? SP.intro : top ? SP.snapBack : SP.layout;
+      const params = ci === lifted ? SP.lift : !revealed ? SP.intro : top ? SP.snapBack : SP.layout;
       for (const k of ['x', 'y', 'rot', 'scale', 'opacity'] as const) {
-        if (still.matches && ci !== exiting) {
+        if (still.matches) {
           s[k].position = s[k].target;
           s[k].velocity = 0;
         } else step(s[k], params, dt);
       }
+
+      if (ci === lifted && s.x.position <= LIFT_OUT) settleLift();
 
       const held = top && pointer !== null && dir === 'h';
       const x = held ? follow(dx) : s.x.position * w;
@@ -164,7 +169,7 @@ export function initDeck(root: HTMLElement) {
         ? 'none'
         : `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${rot.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
       if (el.style.transform !== transform) el.style.transform = transform;
-      const z = String(ci === exiting ? 0 : count - n);
+      const z = String(ci !== lifted ? count - n : liftedOnTop ? count + 1 : 0);
       if (el.style.zIndex !== z) el.style.zIndex = z;
       const op = s.opacity.position.toFixed(3);
       if (el.style.opacity !== op) el.style.opacity = op;
@@ -174,42 +179,43 @@ export function initDeck(root: HTMLElement) {
     if (busy) raf = requestAnimationFrame(render);
   }
 
-  /** Front phone flies off to the left (forward) or right (back), the neighbour comes forward. */
+  /**
+   * Flip like a deck of cards. Forward: the front phone slides out to the left on top of the
+   * others, then tucks under the deck into the last slot. Back: the bottom phone slides out from
+   * under the deck on the left, then lands on top.
+   */
   function flip(forward: boolean, fromX = 0, fromY = 0) {
     if (lock || !revealed) return;
     lock = true;
-    const out = order[0];
-    const s = state[out];
     const w = width();
-    s.x.position = fromX / w;
-    s.y.position = fromY / w;
-    s.rot.position = fromX / 20;
-    s.x.target = (forward ? -1 : 1) * 1.2;
-    s.rot.target = forward ? -16 : 16;
-    s.scale.target = 0.92;
-    s.opacity.target = 0;
-    exiting = out;
+    const top = state[order[0]];
+    top.x.position = fromX / w;
+    top.y.position = fromY / w;
+    top.rot.position = fromX / 20;
+    const moving = forward ? order[0] : order[count - 1];
+    const s = state[moving];
+    // Out to the side, clear of the phone in front
+    s.x.target = -0.62;
+    s.y.target = 0.02;
+    s.rot.target = -8;
+    s.scale.target = 0.96;
+    s.x.velocity = s.rot.velocity = 0;
+    lifted = moving;
+    liftedOnTop = forward;
     if (forward) order.push(order.shift()!);
     else order.unshift(order.pop()!);
     front(order[0]);
-    screens[out]?.setAttribute('inert', '');
     request();
-    setTimeout(
-      () => {
-        // The phone that left reappears in its new slot behind
-        const back = slot(order.indexOf(out), count);
-        s.x.position = s.x.target = back.x;
-        s.y.position = s.y.target = back.y;
-        s.rot.position = s.rot.target = back.rot;
-        s.scale.position = s.scale.target = back.scale;
-        s.x.velocity = s.y.velocity = s.rot.velocity = s.scale.velocity = 0;
-        s.opacity.target = 1;
-        exiting = -1;
-        lock = false;
-        request();
-      },
-      still.matches ? 0 : 260,
-    );
+    // Fallback for slow frames; normally render() tucks it once it is out far enough
+    setTimeout(settleLift, still.matches ? 0 : 450);
+  }
+
+  /** Tucked under (or laid on top): from here it springs into its slot like the rest. */
+  function settleLift() {
+    if (lifted < 0) return;
+    lifted = -1;
+    request();
+    setTimeout(() => (lock = false), still.matches ? 0 : 200);
   }
 
   function show(i: number) {

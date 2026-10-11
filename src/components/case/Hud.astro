@@ -39,6 +39,9 @@ let uid = 0;
         {s.kind === 'flow' && (
           <>
             <span class="part">
+              <span class="value is-steps">
+                <b>{s.steps.to}</b> {s.steps.unit} вместо {s.steps.from}
+              </span>
               <span class="pips" aria-hidden="true">
                 {Array.from({ length: s.steps.from }, (_, i) => (
                   <span
@@ -47,11 +50,11 @@ let uid = 0;
                   />
                 ))}
               </span>
-              <span class="value is-steps">
-                <b>{s.steps.to}</b> {s.steps.unit} вместо {s.steps.from}
-              </span>
             </span>
             <span class="part">
+              <span class="value is-time">
+                <b>{s.time.to}</b> {s.time.unit} вместо {s.time.from}&nbsp;{s.time.unit}
+              </span>
               <span class="bars" aria-hidden="true">
                 <span class="bar-tag">было</span>
                 <span class="bar px-clip was" />
@@ -63,58 +66,59 @@ let uid = 0;
                   />
                 </span>
               </span>
-              <span class="value is-time">
-                <b>{s.time.to}</b> {s.time.unit} вместо {s.time.from}&nbsp;{s.time.unit}
-              </span>
             </span>
           </>
         )}
 
         {s.kind === 'mana' && (
           <>
-            <span class="mana px-clip" aria-hidden="true">
-              <span class="mana-fill" style={`--to: ${s.value}%`} />
-            </span>
-            <span class="value">
-              <b>{s.value}%</b> {s.note}
+            <span class="part">
+              <span class="value">
+                <b>{s.value}%</b> {s.note}
+              </span>
+              <span class="mana px-clip" aria-hidden="true">
+                <span class="mana-fill" style={`--to: ${s.value}%`} />
+              </span>
             </span>
           </>
         )}
 
         {s.kind === 'hearts' && (
           <>
-            <span class="hearts" aria-hidden="true">
-              {Array.from({ length: s.max }, (_, i) => {
-                // Fill snaps to whole pixels of the 9-pixel heart, like Zelda's partial hearts
-                const px = Math.round(Math.max(0, Math.min(1, s.value - i)) * 9);
-                const id = `hud-heart-${uid++}`;
-                return (
-                  <svg
-                    class="heart"
-                    style={`--i: ${i}`}
-                    viewBox="0 0 9 8"
-                    shape-rendering="crispEdges"
-                    focusable="false"
-                  >
-                    <clipPath id={id}>
-                      <rect width={px} height="8" />
-                    </clipPath>
-                    {heartPaths.map((p) => (
-                      <path class={`e-${p.c}`} d={p.d} />
-                    ))}
-                    {px > 0 && (
-                      <g class="heart-fill" clip-path={`url(#${id})`}>
-                        {heartPaths.map((p) => (
-                          <path class={`f-${p.c}`} d={p.d} />
-                        ))}
-                      </g>
-                    )}
-                  </svg>
-                );
-              })}
-            </span>
-            <span class="value">
-              <b>{fmt(s.value)}</b> из {s.max}
+            <span class="part">
+              <span class="value">
+                <b>{fmt(s.value)}</b> из {s.max}
+              </span>
+              <span class="hearts" aria-hidden="true">
+                {Array.from({ length: s.max }, (_, i) => {
+                  // Fill snaps to whole pixels of the 9-pixel heart, like Zelda's partial hearts
+                  const px = Math.round(Math.max(0, Math.min(1, s.value - i)) * 9);
+                  const id = `hud-heart-${uid++}`;
+                  return (
+                    <svg
+                      class="heart"
+                      style={`--i: ${i}`}
+                      viewBox="0 0 9 8"
+                      shape-rendering="crispEdges"
+                      focusable="false"
+                    >
+                      <clipPath id={id}>
+                        <rect width={px} height="8" />
+                      </clipPath>
+                      {heartPaths.map((p) => (
+                        <path class={`e-${p.c}`} d={p.d} />
+                      ))}
+                      {px > 0 && (
+                        <g class="heart-fill" clip-path={`url(#${id})`}>
+                          {heartPaths.map((p) => (
+                            <path class={`f-${p.c}`} d={p.d} />
+                          ))}
+                        </g>
+                      )}
+                    </svg>
+                  );
+                })}
+              </span>
             </span>
           </>
         )}
@@ -128,7 +132,7 @@ let uid = 0;
   .hud-wrap {
     display: flex;
     flex-direction: column;
-    gap: var(--space-grid);
+    gap: var(--space-stack);
     container-type: inline-size;
   }
   /* No panels: like Zelda's HUD over the world, the gauges sit on the sheet itself, the rows
@@ -144,8 +148,8 @@ let uid = 0;
   .gauge {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: var(--space-tile) 0;
+    gap: 16px;
+    padding: var(--space-stack) 0;
   }
   .gauge:nth-child(n + 3) {
     border-top: 2px dashed var(--line-2);
@@ -161,7 +165,7 @@ let uid = 0;
       grid-template-columns: minmax(0, 1fr);
     }
     .gauge:nth-child(n) {
-      padding: var(--space-tile) 0;
+      padding: var(--space-stack) 0;
       border-top: 2px dashed var(--line-2);
     }
     .gauge:first-child {
@@ -172,13 +176,15 @@ let uid = 0;
       padding-bottom: 0;
     }
   }
+  /* The card's title: the same as the quest cards' titles above */
   .label {
-    font-size: var(--t-caption);
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
-    color: var(--text-secondary);
+    color: var(--text-primary);
   }
+  /* Number first, then the gauge that shows it */
   .value {
-    margin-top: auto;
     font-size: var(--t-caption);
     color: var(--text-tertiary);
   }
@@ -199,10 +205,7 @@ let uid = 0;
     gap: 12px;
   }
   .part + .part {
-    margin-top: 8px;
-  }
-  .part .value {
-    margin-top: 0;
+    margin-top: 12px;
   }
 
   /* Steps: slots, the dropped ones go out */

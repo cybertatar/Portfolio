@@ -216,7 +216,8 @@ const viewportCss = `
 .participant-content{position:relative;flex:1;height:auto;min-height:0;padding-top:54px;overscroll-behavior-y:auto;touch-action:pan-y}
 .participant-phone.portfolio-home{background:var(--bg-page)}
 .participant-phone.portfolio-home .participant-content{padding-top:0;background:var(--bg-page)}
-.participant-phone.portfolio-home .portfolio-route>main{padding-top:54px;background:var(--bg-page)}
+/* The top block (header, accounts) runs up under the status bar, as in the app */
+.participant-phone.portfolio-home .portfolio-route>main{padding-top:54px;background:linear-gradient(to bottom,var(--bg-surface) 0 74px,var(--bg-page) 74px)}
 .participant-phone.portfolio-home .portfolio-statusbar{background:transparent}
 .participant-phone.portfolio-home .portfolio-route [class*="bankHeader"]{background:transparent}
 .participant-phone.portfolio-home .portfolio-route [class*="bankHeader"]::before,

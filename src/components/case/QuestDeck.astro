@@ -67,6 +67,8 @@ const { quests } = Astro.props;
     list-style: none;
   }
   .quest {
+    /* Holds the hidden "Было/Стало" labels: unanchored, they escaped the swipe deck and widened the page */
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 14px;

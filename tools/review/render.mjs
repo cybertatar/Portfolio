@@ -24,7 +24,9 @@ const FPS = 30;
 // The recording runs 125 s; the outro folds the card and types the title after it
 const DURATION = 127.5;
 
-// 1. Footage: the subtitles start around y = 980 and the name plate at y = 954
+// 1. Footage: from the top of the head down to just above the subtitles (their top edge is
+// y ≥ 978). The name plate starts at y = 953 in the first five seconds; its last few rows
+// hide under the name label on the card.
 const frames = join(here, 'frames');
 mkdirSync(frames, { recursive: true });
 execFileSync('ffmpeg', [
@@ -34,7 +36,7 @@ execFileSync('ffmpeg', [
   '-i',
   source,
   '-vf',
-  'crop=720:830:0:120',
+  'crop=720:715:0:260',
   '-q:v',
   '2',
   '-start_number',

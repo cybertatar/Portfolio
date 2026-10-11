@@ -2,22 +2,28 @@
 import { heartPaths } from '../../content/pixel-heart';
 
 /**
- * Results as game HUD gauges, after Zelda. A scenario card holds both of its numbers: steps are
- * slots that go out, time is a stamina bar that shrinks. First click success is a mana bar, the
- * ease score is a row of heart containers.
- * Gauges play once when scrolled into view (initHud in scripts/case.ts); without JS or with
- * reduced motion they just show the end state.
+ * Results as a row of game HUD stats, after Zelda. Every stat has the same build: a title, the
+ * big number, its gauge right under it and the context below, so the row reads as one rhythm
+ * and each gauge stays next to its number (proximity) while the gauges still line up.
+ * Gauges: time is a bar whose light track is the old time and whose fill is the new one (it
+ * shrinks from the old length on view); first click success is a mana bar; the ease score is
+ * a row of heart containers. They play once when scrolled into view (initHud in
+ * scripts/case.ts); without JS or with reduced motion they just show the end state.
  */
-export type HudStat =
-  | {
-      kind: 'flow';
-      label: string;
-      /** `unit` agrees with `to`: 5 шагов, 4 шага */
-      steps: { from: number; to: number; unit: string };
-      time: { from: number; to: number; unit: string };
-    }
-  | { kind: 'mana'; label: string; value: number; note: string }
-  | { kind: 'hearts'; label: string; value: number; max: number };
+export type HudGauge =
+  | { kind: 'time'; from: number; to: number }
+  | { kind: 'mana'; value: number }
+  | { kind: 'hearts'; value: number; max: number };
+
+export interface HudStat {
+  label: string;
+  /** The big number, and a smaller unit after it */
+  value: string;
+  unit?: string;
+  /** Context lines under the number */
+  notes: string[];
+  gauge: HudGauge;
+}
 
 interface Props {
   stats: HudStat[];
@@ -25,68 +31,37 @@ interface Props {
 }
 
 const { stats, note } = Astro.props;
-
-const fmt = (n: number) => String(n).replace('.', ',');
 let uid = 0;
+
+// Whole pixels of the 9-pixel heart, like Zelda's partial hearts
+const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(1, value - i)) * 9);
 ---
 
 <div class="hud-wrap">
   <ul class="hud" data-hud>
     {stats.map((s) => (
-      <li class:list={['gauge px-clip', `is-${s.kind}`]}>
+      <li class="stat">
         <span class="label">{s.label}</span>
+        <span class="value">
+          {s.value}
+          {s.unit && <span class="unit">{s.unit}</span>}
+        </span>
 
-        {s.kind === 'flow' && (
-          <>
-            <span class="part">
-              <span class="pips" aria-hidden="true">
-                {Array.from({ length: s.steps.from }, (_, i) => (
-                  <span
-                    class:list={['pip', i >= s.steps.to && 'lost']}
-                    style={i >= s.steps.to ? `--i: ${s.steps.from - 1 - i}` : undefined}
-                  />
-                ))}
-              </span>
-              <span class="value is-steps">
-                <b>{s.steps.to}</b> {s.steps.unit} вместо {s.steps.from}
-              </span>
+        <span class="gauge" aria-hidden="true">
+          {s.gauge.kind === 'time' && (
+            <span class="track px-clip">
+              <span class="fill time" style={`--to: ${(s.gauge.to / s.gauge.from) * 100}%`} />
             </span>
-            <span class="part">
-              <span class="bars" aria-hidden="true">
-                <span class="bar-tag">было</span>
-                <span class="bar px-clip was" />
-                <span class="bar-tag">стало</span>
-                <span class="bar-track">
-                  <span
-                    class="bar px-clip now"
-                    style={`--to: ${(s.time.to / s.time.from) * 100}%`}
-                  />
-                </span>
-              </span>
-              <span class="value is-time">
-                <b>{s.time.to}</b> {s.time.unit} вместо {s.time.from}&nbsp;{s.time.unit}
-              </span>
+          )}
+          {s.gauge.kind === 'mana' && (
+            <span class="track px-clip">
+              <span class="fill mana" style={`--to: ${s.gauge.value}%`} />
             </span>
-          </>
-        )}
-
-        {s.kind === 'mana' && (
-          <>
-            <span class="mana px-clip" aria-hidden="true">
-              <span class="mana-fill" style={`--to: ${s.value}%`} />
-            </span>
-            <span class="value">
-              <b>{s.value}%</b> {s.note}
-            </span>
-          </>
-        )}
-
-        {s.kind === 'hearts' && (
-          <>
-            <span class="hearts" aria-hidden="true">
-              {Array.from({ length: s.max }, (_, i) => {
-                // Fill snaps to whole pixels of the 9-pixel heart, like Zelda's partial hearts
-                const px = Math.round(Math.max(0, Math.min(1, s.value - i)) * 9);
+          )}
+          {s.gauge.kind === 'hearts' && (
+            <span class="hearts">
+              {Array.from({ length: s.gauge.max }, (_, i) => {
+                const px = heartFill(s.gauge.kind === 'hearts' ? s.gauge.value : 0, i);
                 const id = `hud-heart-${uid++}`;
                 return (
                   <svg
@@ -113,11 +88,11 @@ let uid = 0;
                 );
               })}
             </span>
-            <span class="value">
-              <b>{fmt(s.value)}</b> из {s.max}
-            </span>
-          </>
-        )}
+          )}
+        </span>
+        {s.notes.map((n) => (
+          <span class="note-line">{n}</span>
+        ))}
       </li>
     ))}
   </ul>
@@ -125,158 +100,91 @@ let uid = 0;
 </div>
 
 <style>
+  /* The note is about the whole row, so it sits at least a row's distance away */
   .hud-wrap {
     display: flex;
     flex-direction: column;
-    gap: var(--space-grid);
+    gap: 40px;
     container-type: inline-size;
   }
+  /* One row of four on the sheet itself, no panels: like Zelda's HUD over the world */
   .hud {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-grid);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    /* Columns well apart from each other, more than any gap inside a stat */
+    gap: 40px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  @container (max-width: 560px) {
+  @container (max-width: 720px) {
     .hud {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 40px 24px;
     }
   }
-  .gauge {
+  .stat {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: var(--space-tile);
-    background: var(--surface-raised);
+    min-width: 0;
   }
   .label {
-    font-size: var(--t-caption);
+    margin-bottom: 10px;
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+  /* The same sans as the text, which has no slashed zero (Handjet's made 105 read as 185) */
+  .value {
+    font-size: calc(var(--t-stat) * 1.15);
+    font-weight: var(--fw-semibold);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+  .unit {
+    margin-left: 0.25em;
+    font-size: 0.5em;
+    font-weight: var(--fw-medium);
+    letter-spacing: 0;
     color: var(--text-secondary);
   }
-  .value {
-    margin-top: auto;
+  .note-line {
     font-size: var(--t-caption);
+    line-height: var(--lh-normal);
     color: var(--text-tertiary);
   }
-  /* Fira Mono: Handjet's slashed zero makes 105 read as 185 */
-  .value b {
-    margin-right: 4px;
-    font-family: var(--font-mono);
-    font-size: var(--t-stat);
-    font-weight: var(--fw-medium);
-    letter-spacing: -0.04em;
-    line-height: 1;
-    color: var(--text-accent);
-  }
-
-  .part {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .part + .part {
-    margin-top: 8px;
-  }
-  .part .value {
-    margin-top: 0;
-  }
-  .value.is-time b {
-    color: var(--stamina-text);
-  }
-  .is-hearts .value b {
-    color: var(--heart-text);
-  }
-  .is-mana .value b {
-    color: var(--mana-text);
-  }
-
-  /* Steps: slots, the dropped ones go out */
-  .pips {
-    display: flex;
-    gap: 4px;
-    height: 20px;
-  }
-  .pip {
-    flex: 1 1 0;
-    max-width: 26px;
-    background: var(--sky-400);
-    clip-path: polygon(
-      0 3px,
-      3px 3px,
-      3px 0,
-      calc(100% - 3px) 0,
-      calc(100% - 3px) 3px,
-      100% 3px,
-      100% calc(100% - 3px),
-      calc(100% - 3px) calc(100% - 3px),
-      calc(100% - 3px) 100%,
-      3px 100%,
-      3px calc(100% - 3px),
-      0 calc(100% - 3px)
-    );
-  }
-  .pip.lost {
-    background: var(--surface-active);
-  }
-
-  /* Time: stamina bars, before and after */
-  .bars {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 6px 10px;
-  }
-  .bar-tag {
-    font-family: var(--font-pixel);
-    font-size: var(--t-chip);
-    line-height: 1;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-  .bar-track {
-    display: flex;
-  }
-  .bar {
-    --px-step: 3px;
+  .gauge {
     display: block;
-    height: 14px;
-  }
-  .bar.was {
-    background: var(--surface-active);
-  }
-  .bar.now {
-    width: var(--to);
-    background: var(--stamina-fill);
+    margin: 12px 0 10px;
   }
 
-  /* First click success: mana */
-  .mana {
+  /* Bars: the track is a light step of the same sky, the fill the stronger one */
+  .track {
     --px-step: 3px;
     display: flex;
-    height: 20px;
-    background: var(--surface-active);
+    height: 14px;
+    background: color-mix(in srgb, var(--sky-300) 35%, var(--surface-card));
   }
-  .mana-fill {
+  .fill {
+    display: block;
     width: var(--to);
-    background: repeating-linear-gradient(
-      90deg,
-      var(--mana-fill) 0 10px,
-      var(--mana-notch) 10px 12px
-    );
+  }
+  .fill.time {
+    background: var(--sky-400);
+  }
+  .fill.mana {
+    background: repeating-linear-gradient(90deg, var(--sky-400) 0 10px, var(--sky-500) 10px 12px);
   }
 
-  /* Ease score: heart containers */
+  /* Ease score: heart containers, the one playful colour here */
   .hearts {
     display: flex;
-    gap: 6px;
+    gap: 3px;
   }
   .heart {
-    flex: 0 1 36px;
+    flex: 0 1 22px;
     min-width: 0;
     aspect-ratio: 9 / 8;
   }
@@ -305,27 +213,20 @@ let uid = 0;
 
   /* Play once on view. Armed only by the script, so without JS the end state shows. */
   @media (prefers-reduced-motion: no-preference) {
-    .hud[data-armed] .pip.lost {
-      background: var(--sky-400);
-    }
-    .hud[data-armed] .bar.now {
+    .hud[data-armed] .fill.time {
       width: 100%;
     }
-    .hud[data-armed] .mana-fill {
+    .hud[data-armed] .fill.mana {
       width: 0;
     }
     .hud[data-armed] .heart-fill {
       opacity: 0;
     }
-    .hud.is-on .pip.lost {
-      background: var(--surface-active);
-      transition: background 0s calc(300ms + var(--i) * 70ms);
-    }
-    .hud.is-on .bar.now {
+    .hud.is-on .fill.time {
       width: var(--to);
       transition: width 700ms steps(10) 300ms;
     }
-    .hud.is-on .mana-fill {
+    .hud.is-on .fill.mana {
       width: var(--to);
       transition: width 800ms steps(12) 300ms;
     }

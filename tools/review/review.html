@@ -160,6 +160,7 @@
       const lang = params.get('lang') === 'en' ? 'en' : 'ru';
       const FPS = 30;
       const END = 125; // the recording ends; then the outro
+      const LAST_FRAME = 3748;
       const TITLE = { ru: 'Ревью', en: 'Review' };
       // One take: the crop is 720×830, so the card keeps that shape at the interviews' height
       const H = 658;
@@ -233,7 +234,9 @@
 
         foot.style.display = t < END ? 'block' : 'none';
         if (t < END) {
-          const src = `frames/f${String(Math.round(t * FPS)).padStart(4, '0')}.jpg`;
+          // The recording has 3749 frames, a hair short of END
+          const f = Math.min(Math.round(t * FPS), LAST_FRAME);
+          const src = `frames/f${String(f).padStart(4, '0')}.jpg`;
           if (!foot.src.endsWith(src)) {
             foot.src = src;
             await foot.decode();

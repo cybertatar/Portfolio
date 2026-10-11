@@ -1,17 +1,19 @@
 ---
+import PixelIcon from '../ui/PixelIcon.astro';
 import Sprite from './scenes/Sprite.astro';
 import type { MascotSpriteName } from '../../content/mascots';
 
 /**
- * What we did, as a guild quest board: four completed quests, all in view, laid out on the sheet
- * itself (no fills). Only the solution: the problems are told in the intro and the numbers live
- * in the results HUD, so nothing is said twice. Each title links to its full write-up.
+ * Problems and their solutions, as a guild quest board: four completed quests, all in view, laid
+ * out on the sheet itself (no fills). Each quest is a muted problem line and, after a pixel
+ * arrow, the solution; numbers stay in the results HUD. Each title links to its full write-up.
  */
 export interface Quest {
   /** Section id of the full write-up further down the page */
   id: string;
   title: string;
   sprite: MascotSpriteName;
+  problem: string;
   solution: string;
 }
 
@@ -32,7 +34,13 @@ const { quests } = Astro.props;
         <a class="title" href={`#${q.id}`}>
           {q.title}
         </a>
-        <p class="solution">{q.solution}</p>
+        <p class="problem">{q.problem}</p>
+        <p class="solution">
+          <span class="arrow" aria-label="Решение:">
+            <PixelIcon name="arrow" size={24} />
+          </span>
+          {q.solution}
+        </p>
       </div>
     </li>
   ))}
@@ -87,10 +95,30 @@ const { quests } = Astro.props;
   .title:hover {
     color: var(--text-accent);
   }
+  .problem,
   .solution {
     margin: 0;
     font-size: var(--t-body);
     line-height: var(--lh-normal);
-    color: var(--text-secondary);
+  }
+  .problem {
+    color: var(--text-tertiary);
+  }
+  /* Problem, then the arrow and the solution: the pair reads as one move */
+  .solution {
+    display: flex;
+    gap: 6px;
+    color: var(--text-primary);
+  }
+  .arrow {
+    flex: none;
+    height: calc(var(--t-body) * var(--lh-normal));
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+  }
+  .arrow :global(svg) {
+    width: 18px;
+    height: 18px;
   }
 </style>

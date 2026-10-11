@@ -39,30 +39,34 @@ const prototypes = [
   { route: '/cashback', poster: 'assets/cases/psb/cb-off.webp', caption: 'Подключение кешбэка' },
 ];
 
-/** What we did, one quest per solution section below; the problems are in the intro */
+/** Each problem and its solution, one quest per solution section below */
 const quests: Quest[] = [
   {
     id: 'home',
     title: 'Главная',
     sprite: 'chest',
-    solution: 'Собрал главную вокруг баланса и частых действий, карты положил внутрь счетов.',
+    problem: 'Продукты банка отвлекали от повседневных действий.',
+    solution: 'Баланс и частые действия наверху, предложения банка можно закрыть.',
   },
   {
     id: 'card-data',
     title: 'Данные карты',
     sprite: 'card',
+    problem: 'Данные на третьей вкладке, CVV только по коду из СМС.',
     solution: 'Просмотр и копирование на одном экране, без кода из СМС.',
   },
   {
     id: 'cashback',
     title: 'Подключение кешбэка',
     sprite: 'coin',
+    problem: '12 шагов через почту и браузер, а в конце непонятно, получилось ли.',
     solution: 'Одна кнопка рядом с условиями, сразу с выбором категорий.',
   },
   {
     id: 'categories',
     title: 'Кешбэк после подключения',
     sprite: 'spark',
+    problem: 'Категории нужно выбирать каждый месяц, а приложение не напоминает.',
     solution: 'Категории на следующий месяц можно выбрать заранее.',
   },
 ];

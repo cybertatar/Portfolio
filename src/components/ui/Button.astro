@@ -1,12 +1,14 @@
 ---
-interface Props {
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'> & {
   href: string;
   full?: boolean;
-}
-const { href, full = false } = Astro.props;
+};
+const { href, full = false, ...rest } = Astro.props;
 ---
 
-<a href={href} class:list={['button', 'px-clip', { full }]}>
+<a href={href} class:list={['button', 'px-clip', { full }]} {...rest}>
   <slot />
 </a>
 

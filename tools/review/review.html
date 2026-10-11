@@ -1,0 +1,265 @@
+<!doctype html>
+<!--
+  Senior's review for the PSB case, 1920×1080 → public/assets/cases/psb/review.{ru,en}.mp4.
+  Built by render.mjs: it crops the reviewer out of the original portrait recording (selfie
+  video with burned-in subtitles and a name plate; the crop stops above both), then steps this
+  page frame by frame through window.render(t) and screenshots it.
+  Open it in a browser with ?t=12.5&lang=en to look at a single frame (footage needs
+  `node render.mjs <source> --frames-only` first).
+  Same look as tools/interviews: parchment, stepped pixel corners, Handjet label, ink subtitles.
+  Colours mirror src/styles/tokens/colors.css.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@500;600&family=Handjet:wght@500;600&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --paper-0: #e7e0d0;
+        --paper-2: #f7f3ea;
+        --line-2: #cfc6b2;
+        --ink-1: #29251e;
+        --ink-4: #a39a88;
+        --sky-500: #3a6ea5;
+        --glass: rgba(247, 243, 234, 0.86);
+        --s: 8px; /* pixel corner step; the video plays at about half size on the page */
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        background: var(--paper-0);
+        font-family: 'Fira Sans', sans-serif;
+        color: var(--ink-1);
+      }
+      /* Barely-there pattern of pixel coins and hearts, as on the PSB cover */
+      body::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' shape-rendering='crispEdges'%3E%3Cpath fill='%23cfc6b2' d='M7 5h1v1h-1zM8 5h1v1h-1zM9 5h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM9 6h1v1h-1zM10 6h1v1h-1zM5 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM11 7h1v1h-1zM5 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM9 8h1v1h-1zM10 8h1v1h-1zM11 8h1v1h-1zM5 9h1v1h-1zM6 9h1v1h-1zM7 9h1v1h-1zM9 9h1v1h-1zM10 9h1v1h-1zM11 9h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM7 11h1v1h-1zM8 11h1v1h-1zM9 11h1v1h-1zM21 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM25 21h1v1h-1zM20 22h1v1h-1zM21 22h1v1h-1zM22 22h1v1h-1zM23 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM20 23h1v1h-1zM21 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM26 23h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM25 24h1v1h-1zM22 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM23 26h1v1h-1z'/%3E%3C/svg%3E");
+        background-size: 96px 96px;
+        opacity: 0.4;
+      }
+      /* Stepped corners, same shape as .px-clip on the site */
+      .px {
+        clip-path: polygon(
+          0 calc(var(--s) * 2),
+          var(--s) calc(var(--s) * 2),
+          var(--s) var(--s),
+          calc(var(--s) * 2) var(--s),
+          calc(var(--s) * 2) 0,
+          calc(100% - var(--s) * 2) 0,
+          calc(100% - var(--s) * 2) var(--s),
+          calc(100% - var(--s)) var(--s),
+          calc(100% - var(--s)) calc(var(--s) * 2),
+          100% calc(var(--s) * 2),
+          100% calc(100% - var(--s) * 2),
+          calc(100% - var(--s)) calc(100% - var(--s) * 2),
+          calc(100% - var(--s)) calc(100% - var(--s)),
+          calc(100% - var(--s) * 2) calc(100% - var(--s)),
+          calc(100% - var(--s) * 2) 100%,
+          calc(var(--s) * 2) 100%,
+          calc(var(--s) * 2) calc(100% - var(--s)),
+          var(--s) calc(100% - var(--s)),
+          var(--s) calc(100% - var(--s) * 2),
+          0 calc(100% - var(--s) * 2)
+        );
+      }
+
+      .card {
+        position: absolute;
+        top: 64px;
+        left: 50%;
+        transform: translateX(-50%);
+        overflow: hidden;
+        background: var(--paper-2);
+      }
+      .card img.foot {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .tag {
+        --s: 4px;
+        position: absolute;
+        top: 722px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: 56px;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        background: var(--glass);
+        font-family: 'Handjet', monospace;
+        font-weight: 500;
+        font-size: 36px;
+        white-space: nowrap;
+      }
+
+      .subs {
+        position: absolute;
+        left: 160px;
+        right: 160px;
+        top: 790px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 48px;
+        line-height: 1.32;
+        letter-spacing: -0.005em;
+      }
+      .subs span {
+        color: var(--ink-4);
+      }
+      .subs span.on {
+        color: var(--ink-1);
+      }
+
+      /* Ending: the card folds into a pixel cursor that types the title */
+      .outro {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        font-family: 'Handjet', monospace;
+        font-weight: 600;
+        font-size: 160px;
+        line-height: 1;
+      }
+      .cursor {
+        width: 40px;
+        height: 112px;
+        background: var(--sky-500);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card px"><img class="foot" alt="" /></div>
+    <div class="tag px">Igor Plyusch · Senior Product Designer @ DECTA</div>
+    <p class="subs"></p>
+    <div class="outro"><span class="title"></span><span class="cursor"></span></div>
+
+    <script>
+      const params = new URLSearchParams(location.search);
+      const lang = params.get('lang') === 'en' ? 'en' : 'ru';
+      const FPS = 30;
+      const END = 125; // the recording ends; then the outro
+      const TITLE = { ru: 'Ревью', en: 'Review' };
+      // One take: the crop is 720×830, so the card keeps that shape at the interviews' height
+      const H = 658;
+      const W = Math.round((H * 720) / 830);
+      const MORPH = 0.3;
+
+      const card = document.querySelector('.card');
+      const foot = document.querySelector('.foot');
+      const tag = document.querySelector('.tag');
+      const subs = document.querySelector('.subs');
+      const outro = document.querySelector('.outro');
+      const title = document.querySelector('.title');
+
+      const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+      const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+
+      let cues = [];
+      const ready = Promise.all([
+        fetch('cues.json').then((r) => r.json()),
+        // Load every face up front, so no frame renders in a fallback font
+        ...['600 48px "Fira Sans"', '500 36px Handjet', '600 160px Handjet'].map((f) =>
+          document.fonts.load(f, 'Ая Az'),
+        ),
+      ]).then(([c]) => {
+        cues = c;
+      });
+
+      function cueAt(t) {
+        for (let i = cues.length - 1; i >= 0; i--) {
+          const c = cues[i];
+          const next = cues[i + 1];
+          const out = Math.min(c.end + 0.8, next ? next.start - 0.15 : Infinity);
+          if (t >= c.start - 0.15 && t < out) return c;
+          if (t >= c.start) return null;
+        }
+        return null;
+      }
+
+      // Russian words light up with the speech; the English line lights up word by word
+      // across the same span, weighted by length.
+      function subsHtml(c, t) {
+        const lines = lang === 'ru' ? c.ru : c.en.map((l) => l.map((w) => ({ w })));
+        if (lang === 'en') {
+          const all = lines.flat();
+          const total = all.reduce((n, x) => n + x.w.length + 1, 0);
+          let acc = 0;
+          for (const x of all) {
+            x.s = c.start + ((c.end - c.start) * acc) / total;
+            acc += x.w.length + 1;
+          }
+        }
+        return lines
+          .map((l) => l.map((x) => `<span class="${t >= x.s ? 'on' : ''}">${x.w}</span>`).join(' '))
+          .join('<br>');
+      }
+
+      async function render(t) {
+        await ready;
+        const showOutro = t >= END + MORPH;
+        outro.style.display = showOutro ? 'flex' : 'none';
+
+        // The card folds into the cursor at the end, sliding to the middle of the frame
+        const fold = t >= END ? ease(clamp((t - END) / MORPH, 0, 1)) : 0;
+        const w = W + (40 - W) * fold;
+        const h = H + (112 - H) * fold;
+        card.style.display = showOutro ? 'none' : 'block';
+        card.style.width = `${w}px`;
+        card.style.height = `${h}px`;
+        card.style.top = `${64 + H / 2 + (540 - 64 - H / 2) * fold - h / 2}px`;
+        card.style.background = fold ? `rgb(58 110 165 / ${fold})` : '';
+
+        foot.style.display = t < END ? 'block' : 'none';
+        if (t < END) {
+          const src = `frames/f${String(Math.round(t * FPS)).padStart(4, '0')}.jpg`;
+          if (!foot.src.endsWith(src)) {
+            foot.src = src;
+            await foot.decode();
+          }
+        }
+
+        // Name label rides the bottom edge of the card
+        tag.style.top = `${64 + H}px`;
+        tag.style.opacity = 1 - fold;
+        tag.style.display = showOutro ? 'none' : 'flex';
+
+        const c = t < END ? cueAt(t) : null;
+        subs.innerHTML = c ? subsHtml(c, t) : '';
+
+        // Outro: type the title behind the cursor, hold, then let the cursor blink
+        if (showOutro) {
+          const word = TITLE[lang];
+          const n = clamp(Math.floor((t - END - MORPH) / 0.07), 0, word.length);
+          title.textContent = word.slice(0, n);
+          const done = END + MORPH + word.length * 0.07;
+          outro.querySelector('.cursor').style.opacity =
+            t > done && Math.floor((t - done) / 0.45) % 2 === 1 ? 0 : 1;
+        }
+      }
+      window.render = render;
+      render(params.has('t') ? Number(params.get('t')) : 10);
+    </script>
+  </body>
+</html>

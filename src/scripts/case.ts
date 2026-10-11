@@ -93,27 +93,3 @@ export function initHud(root: HTMLElement) {
   );
   seen.observe(root);
 }
-
-/** Quest log (QuestLog.astro): one quest open at a time; ↑/↓ move between quests. */
-export function initQuestLog(root: HTMLElement) {
-  const quests = [...root.querySelectorAll<HTMLButtonElement>('[data-quest]')];
-  const open = (quest: HTMLButtonElement) => {
-    quests.forEach((q) => {
-      const isOpen = q === quest;
-      q.setAttribute('aria-expanded', String(isOpen));
-      const page = document.getElementById(q.getAttribute('aria-controls') ?? '');
-      if (page) page.hidden = !isOpen;
-    });
-  };
-  quests.forEach((quest, i) => {
-    quest.addEventListener('click', () => open(quest));
-    quest.addEventListener('keydown', (e) => {
-      const step = e.key === 'ArrowDown' ? 1 : e.key === 'ArrowUp' ? -1 : 0;
-      if (!step) return;
-      e.preventDefault();
-      const next = quests[(i + step + quests.length) % quests.length];
-      next.focus();
-      open(next);
-    });
-  });
-}

@@ -6,7 +6,7 @@ import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Phone from '../../components/case/Phone.astro';
-import QuestLog, { type Quest } from '../../components/case/QuestLog.astro';
+import QuestBoard, { type Quest } from '../../components/case/QuestBoard.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
@@ -46,40 +46,35 @@ const quests: Quest[] = [
     title: 'Главная',
     sprite: 'chest',
     problem:
-      'Продукты банка отвлекали от повседневных действий, а связь карт и счёта не была обозначена: история операций была разбита по картам.',
-    solution:
-      'Пересобрал главную вокруг баланса и частых действий и перенёс карты внутрь их счетов. Предложения банка остались заметными, но их можно закрыть.',
-    reward: 'Кешбэк нашли 30 из 30',
+      'Продукты банка отвлекали от повседневных действий, история операций была разбита по картам.',
+    solution: 'Главная собрана вокруг баланса и частых действий, карты лежат внутри своих счетов.',
+    gain: 'кешбэк нашли 30 из 30',
   },
   {
     id: 'card-data',
     title: 'Данные карты',
     sprite: 'card',
-    problem:
-      'Данные лежали на третьей вкладке «О карте», а CVV открывался только по коду из СМС, даже после входа по биометрии.',
-    solution: 'Собрал просмотр и копирование данных на одном экране, без кода из СМС.',
-    reward: '7 → 4 шага',
+    problem: 'Данные на третьей вкладке, CVV только по коду из СМС даже после биометрии.',
+    solution: 'Просмотр и копирование на одном экране, без кода из СМС.',
+    gain: '−3 шага',
     seq: 6.0,
   },
   {
     id: 'cashback',
     title: 'Подключение кешбэка',
     sprite: 'coin',
-    problem:
-      'Подключение шло через почту и браузер, а подключённый кешбэк не открывался до обновления экрана.',
-    solution:
-      'Оставил одну кнопку рядом с условиями и объединил подключение с выбором категорий, чтобы кешбэк сразу заработал.',
-    reward: '12 → 5 шагов',
+    problem: 'Почта и браузер, а подключённый кешбэк не открывался до обновления экрана.',
+    solution: 'Одна кнопка рядом с условиями, подключение вместе с выбором категорий.',
+    gain: '−7 шагов',
     seq: 6.5,
   },
   {
     id: 'categories',
     title: 'Кешбэк после подключения',
     sprite: 'spark',
-    problem:
-      'Категории нужно было выбирать каждый месяц, но приложение не напоминало об этом, а кнопка выбора была незаметной.',
+    problem: 'Категории нужно выбирать каждый месяц, без напоминания, а кнопка выбора незаметна.',
     solution: 'Категории на следующий месяц можно выбрать заранее и поменять до начала периода.',
-    reward: 'Выбор с первого клика у всех',
+    gain: '100% с первого клика',
     seq: 6.7,
   },
 ];
@@ -351,7 +346,15 @@ const home = withBase('/');
             </dl>
           </div>
 
-          <QuestLog quests={quests} />
+          <div class="quests">
+            <h2 class="results-title">
+              <span class="tile-icon px-clip">
+                <PixelIcon name="spark" />
+              </span>
+              Задания
+            </h2>
+            <QuestBoard quests={quests} />
+          </div>
 
           <div class="results">
             <h2 class="results-title">
@@ -586,13 +589,7 @@ const home = withBase('/');
 </BaseLayout>
 
 <script>
-  import {
-    initCaseMenu,
-    initCompare,
-    initHud,
-    initQuestLog,
-    initScrollSpy,
-  } from '../../scripts/case';
+  import { initCaseMenu, initCompare, initHud, initScrollSpy } from '../../scripts/case';
 
   initScrollSpy(
     [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')],
@@ -602,7 +599,6 @@ const home = withBase('/');
   if (bar) initCaseMenu(bar);
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
-  document.querySelectorAll<HTMLElement>('[data-quest-log]').forEach(initQuestLog);
 </script>
 
 <style>
@@ -914,6 +910,7 @@ const home = withBase('/');
     font-weight: var(--fw-bold);
     line-height: var(--lh-snug);
   }
+  .quests,
   .results {
     display: flex;
     flex-direction: column;

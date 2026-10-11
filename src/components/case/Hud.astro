@@ -33,7 +33,7 @@ let uid = 0;
 <div class="hud-wrap">
   <ul class="hud" data-hud>
     {stats.map((s) => (
-      <li class:list={['gauge px-clip', `is-${s.kind}`]}>
+      <li class:list={['gauge', `is-${s.kind}`]}>
         <span class="label">{s.label}</span>
 
         {s.kind === 'flow' && (
@@ -131,26 +131,46 @@ let uid = 0;
     gap: var(--space-grid);
     container-type: inline-size;
   }
+  /* No panels: like Zelda's HUD over the world, the gauges sit on the sheet itself, the rows
+     split by dashed rules, so the quest cards above stay the page's only boxes */
   .hud {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-grid);
+    column-gap: var(--space-split);
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-  @container (max-width: 560px) {
-    .hud {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 8px;
-    }
   }
   .gauge {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding: var(--space-tile);
-    background: var(--surface-raised);
+    padding: var(--space-tile) 0;
+  }
+  .gauge:nth-child(n + 3) {
+    border-top: 2px dashed var(--line-2);
+  }
+  .gauge:nth-child(-n + 2) {
+    padding-top: 0;
+  }
+  .gauge:nth-last-child(-n + 2) {
+    padding-bottom: 0;
+  }
+  @container (max-width: 560px) {
+    .hud {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .gauge:nth-child(n) {
+      padding: var(--space-tile) 0;
+      border-top: 2px dashed var(--line-2);
+    }
+    .gauge:first-child {
+      padding-top: 0;
+      border-top: 0;
+    }
+    .gauge:last-child {
+      padding-bottom: 0;
+    }
   }
   .label {
     font-size: var(--t-caption);
@@ -170,7 +190,7 @@ let uid = 0;
     font-weight: var(--fw-medium);
     letter-spacing: -0.04em;
     line-height: 1;
-    color: var(--text-accent);
+    color: var(--text-primary);
   }
 
   .part {
@@ -183,15 +203,6 @@ let uid = 0;
   }
   .part .value {
     margin-top: 0;
-  }
-  .value.is-time b {
-    color: var(--stamina-text);
-  }
-  .is-hearts .value b {
-    color: var(--heart-text);
-  }
-  .is-mana .value b {
-    color: var(--mana-text);
   }
 
   /* Steps: slots, the dropped ones go out */
@@ -251,7 +262,7 @@ let uid = 0;
   }
   .bar.now {
     width: var(--to);
-    background: var(--stamina-fill);
+    background: var(--sky-400);
   }
 
   /* First click success: mana */
@@ -263,11 +274,7 @@ let uid = 0;
   }
   .mana-fill {
     width: var(--to);
-    background: repeating-linear-gradient(
-      90deg,
-      var(--mana-fill) 0 10px,
-      var(--mana-notch) 10px 12px
-    );
+    background: repeating-linear-gradient(90deg, var(--sky-400) 0 10px, var(--sky-500) 10px 12px);
   }
 
   /* Ease score: heart containers */

@@ -1,20 +1,18 @@
 ---
 import PixelIcon from '../ui/PixelIcon.astro';
-import Sprite from './scenes/Sprite.astro';
-import { mascotSprites, type MascotSpriteName } from '../../content/mascots';
 
 /**
  * Problems and their solutions as a deck of quest cards that rhymes with the results HUD below:
  * the same cards in the same 2×2 grid, a small label on top and the big value at the bottom.
- * Here the label is the quest, then the muted problem, a pixel arrow down and the solution as
- * the value. The arrows step down once on view, card after card (initHud in scripts/case.ts
- * arms them); on phones the deck swipes one card at a time with dots below (initQuestDeck).
+ * Here the label is the quest, then the muted problem, a quiet pixel arrow down and the
+ * solution as the value. Kept calm on purpose: no sprites, no motion, one weight of emphasis, so
+ * the HUD below is the only lively block. On phones the deck swipes one card at a time with
+ * dots below (initQuestDeck in scripts/case.ts).
  */
 export interface Quest {
   /** Section id of the full write-up further down the page */
   id: string;
   title: string;
-  sprite: MascotSpriteName;
   /** One whole thought each, clear on its own; the section below has the detail */
   problem: string;
   solution: string;
@@ -25,22 +23,13 @@ interface Props {
 }
 
 const { quests } = Astro.props;
-
-// One pixel scale for every sprite, so a coin and a chest have pixels of the same size
-const SCALE = 2;
-const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
 ---
 
 <div class="deck-wrap" data-quest-deck>
-  <ul class="deck" data-hud data-quest-track tabindex="0" aria-label="Проблемы и решения">
-    {quests.map((q, i) => (
-      <li class="quest px-clip" style={`--i: ${i}`} data-quest-card>
+  <ul class="deck" data-quest-track tabindex="0" aria-label="Проблемы и решения">
+    {quests.map((q) => (
+      <li class="quest px-clip" data-quest-card>
         <a class="title" href={`#${q.id}`}>
-          <span class="icon" aria-hidden="true">
-            <span style={`width: ${width(q.sprite)}px`}>
-              <Sprite name={q.sprite} />
-            </span>
-          </span>
           {q.title}
         </a>
         <p class="problem">
@@ -86,9 +75,6 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
 
   /* Label, as on the HUD cards */
   .title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     font-size: var(--t-caption);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
@@ -96,19 +82,6 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
   }
   .title:hover {
     color: var(--text-accent);
-  }
-  .icon {
-    display: flex;
-    align-items: flex-end;
-    height: 20px;
-  }
-  .icon > span {
-    display: block;
-  }
-  .icon :global(svg) {
-    display: block;
-    width: 100%;
-    height: auto;
   }
 
   .problem,
@@ -126,7 +99,7 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
     display: block;
     width: 20px;
     margin: auto 0 -4px;
-    color: var(--accent);
+    color: var(--text-disabled);
     transform: rotate(90deg);
   }
   .arrow :global(svg) {
@@ -137,7 +110,6 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
   /* The value, as the big number on the HUD cards */
   .solution {
     font-size: var(--t-lead);
-    font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
     color: var(--text-primary);
   }
@@ -152,21 +124,6 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-
-  /* Play once on view: each arrow steps down into place, card after card */
-  @media (prefers-reduced-motion: no-preference) {
-    .deck[data-armed] .arrow {
-      opacity: 0;
-      transform: rotate(90deg) translateX(-8px);
-    }
-    .deck.is-on .arrow {
-      opacity: 1;
-      transform: rotate(90deg);
-      transition:
-        opacity 120ms calc(300ms + var(--i, 0) * 150ms),
-        transform 360ms steps(3) calc(300ms + var(--i, 0) * 150ms);
-    }
   }
 
   /* Phones: a deck that swipes one card at a time, the next one peeking in */

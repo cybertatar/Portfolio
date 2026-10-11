@@ -208,8 +208,11 @@ function App() {
 
 const viewportCss = `
 :host{display:block;width:100%;height:100%;min-height:0;background:#0a0c0f;color:#fff;--app-tg-safe-top:0px;--app-tg-safe-bottom:0px}
-.participant-stage{display:block;width:402px;height:874px;min-height:0;padding:0;transform:scale(var(--prototype-scale,.805970149));transform-origin:top left}
-.participant-phone{display:flex;flex-direction:column;width:402px;height:874px;min-height:0}
+.participant-stage{display:block;width:402px;height:var(--prototype-height,874px);min-height:0;padding:0;transform:scale(var(--prototype-scale,.805970149));transform-origin:top left}
+.participant-phone{display:flex;flex-direction:column;width:402px;height:var(--prototype-height,874px);min-height:0}
+.participant-phone>nav[aria-label="Основная навигация"]{border-bottom-left-radius:var(--prototype-radius,0)!important;border-bottom-right-radius:var(--prototype-radius,0)!important}
+.participant-phone .portfolio-route [class*="bankHeader"]::before,
+.participant-phone .portfolio-route [class*="bankHeader"]::after{border-top-left-radius:var(--prototype-radius,0)!important;border-top-right-radius:var(--prototype-radius,0)!important}
 .participant-content{position:relative;flex:1;height:auto;min-height:0;padding-top:54px;overscroll-behavior-y:auto}
 .participant-phone.portfolio-home{background:var(--bg-page)}
 .participant-phone.portfolio-home .participant-content{padding-top:0;background:var(--bg-page)}
@@ -220,11 +223,17 @@ const viewportCss = `
 .participant-phone.portfolio-home .portfolio-route [class*="bankHeader"]::after{inset:-54px 0 -4px;border-radius:0 0 20px 20px}
 .participant-phone:is(.portfolio-cashback,.portfolio-categories,.portfolio-account,.portfolio-card) .participant-content{padding-top:0}
 .participant-phone:is(.portfolio-cashback,.portfolio-categories,.portfolio-account,.portfolio-card) .portfolio-route>main{padding-top:54px}
-.participant-phone.portfolio-cashback .portfolio-route>main{background:linear-gradient(to bottom,var(--bg-surface) 0 122px,var(--bg-page) 122px)}
+.participant-phone.portfolio-cashback .portfolio-route>main,
+.participant-phone.portfolio-cashback [class*="_cashbackScreen"]{background:linear-gradient(to bottom,var(--bg-surface) 0 124px,var(--bg-page) 124px)}
+.participant-phone:is(.portfolio-cashback,.portfolio-categories,.portfolio-account,.portfolio-card) .portfolio-route [class*="bankHeader"]::before,
+.participant-phone:is(.portfolio-cashback,.portfolio-categories,.portfolio-account,.portfolio-card) .portfolio-route [class*="bankHeader"]::after{top:-54px}
+.participant-phone.portfolio-cashback .portfolio-route [class*="bankHeader"]::before{background:rgba(22,26,32,.72);-webkit-backdrop-filter:blur(10px) saturate(1.08);backdrop-filter:blur(10px) saturate(1.08);border-radius:0 0 20px 20px}
+.participant-phone.portfolio-cashback .portfolio-route [class*="bankHeader"]::after{-webkit-backdrop-filter:none;backdrop-filter:none}
+.portfolio-route>main{overscroll-behavior-y:auto}
 .portfolio-statusbar{position:absolute;z-index:35;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;height:54px;padding:11px 28px 5px 36px;background:transparent;color:#fff;font:600 17px/21px "SF Pro Display","Onest Variable",Onest,system-ui,sans-serif;pointer-events:none}
 .portfolio-statusbar strong,.portfolio-status-icons{position:relative;z-index:1}
 .portfolio-statusbar strong{font-weight:500}
-.portfolio-island{display:none}
+.portfolio-island{position:absolute;left:50%;top:var(--prototype-island-top,15px);width:var(--prototype-island-width,124px);height:var(--prototype-island-height,36px);border-radius:20px;background:#000;transform:translateX(-50%);pointer-events:none}
 .portfolio-status-icons{display:flex;align-items:center;gap:7px;height:16px}
 .portfolio-status-icons img{display:block;object-fit:contain}
 .portfolio-status-icons img:nth-child(1){width:19.2px;height:12.23px}
@@ -276,7 +285,7 @@ for (const host of document.querySelectorAll<HTMLElement>('[data-psb-live-route]
   host.addEventListener('dragstart', (event) => event.preventDefault());
   createRoot(mount).render(
     <DemoErrorBoundary>
-      <PortfolioProvider initiallyConnected={host.dataset.psbLiveRoute === '/cashback'}>
+      <PortfolioProvider initiallyConnected={host.dataset.psbCashback === 'connected'}>
         <NavigationProvider
           initialRoute={host.dataset.psbLiveRoute || '/'}
           onNavigate={(route) => {

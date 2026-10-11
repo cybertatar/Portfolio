@@ -2,28 +2,43 @@
 import { withBase } from '../../scripts/url';
 
 interface Props {
-  /** Screen shown until the prototype loads (and without JavaScript), 402×874pt. */
+  /** Screen shown until the prototype loads (and without JavaScript). */
   poster: string;
   alt: string;
   /** Route the prototype opens on. */
   route?: string;
+  /** Start with cashback already connected (the default is the first connection). */
+  cashbackConnected?: boolean;
+  /** Accessible name of this prototype. */
+  label: string;
 }
 
 /**
- * The clickable PSB prototype inside the iPhone 17 Pro body. The app is built from the PSB repo
+ * The clickable PSB prototype inside the iPhone 17 Pro body. Unlike the screenshots in Phone.astro,
+ * the screen sits above the body and covers most of its black display border (inset 20pt instead
+ * of 24pt): next to a live interface the full border read as a frame around it. The body's
+ * dynamic island is covered too, so the app draws its own in the same place. The app is built from the PSB repo
  * by tools/psb-prototype into public/assets/cases/psb/live and is loaded when the phone
- * comes near the screen. It renders a 402×874 viewport in a shadow root, scaled to the screen.
+ * comes near the screen. It renders a 402pt-wide viewport in a shadow root, scaled to the screen.
  */
-const { poster, alt, route = '/' } = Astro.props;
+const { poster, alt, route = '/', cashbackConnected = false, label } = Astro.props;
 const base = withBase('assets/cases/psb/live/');
 ---
 
 <div class="phone" data-live-phone data-base={base}>
+  <!-- The body goes first: the screen paints over its display border (a z-index on the screen
+       left Chromium with unpainted tiles in the app) -->
+  <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
   <div class="screen">
     <img class="poster" src={withBase(poster)} alt={alt} loading="lazy" decoding="async" />
-    <div class="app" data-psb-live-route={route} aria-label="Прототип ПСБ Mobile"></div>
+    <div
+      class="app"
+      data-psb-live-route={route}
+      data-psb-cashback={cashbackConnected ? 'connected' : undefined}
+      role="region"
+      aria-label={label}
+    ></div>
   </div>
-  <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
 </div>
 
 <style>
@@ -35,15 +50,15 @@ const base = withBase('assets/cases/psb/live/');
   }
   .screen {
     position: absolute;
-    left: calc(24 / 450 * 100%);
-    top: calc(23 / 920 * 100%);
-    width: calc(402 / 450 * 100%);
-    height: calc(874 / 920 * 100%);
-    border-radius: calc(60 / 450 * 100cqi);
+    left: calc(20 / 450 * 100%);
+    top: calc(19 / 920 * 100%);
+    width: calc(410 / 450 * 100%);
+    height: calc(882 / 920 * 100%);
+    border-radius: calc(64 / 450 * 100cqi);
     overflow: hidden;
+    /* The tab bar's backdrop blur escapes overflow clipping; clip-path holds it */
+    clip-path: inset(0 round calc(64 / 450 * 100cqi));
     background: #0e1116;
-    /* Safari clips a scaled child to the rounded corners only with its own layer */
-    isolation: isolate;
   }
   .poster,
   .app {
@@ -57,6 +72,12 @@ const base = withBase('assets/cases/psb/live/');
     object-position: top;
   }
   .app {
+    /* The body's island (124×35.5pt, 18.5pt below the screen top) in the app's 402pt units */
+    --prototype-island-top: 18.14px;
+    --prototype-island-width: 121.6px;
+    --prototype-island-height: 34.8px;
+    /* The screen's 64pt corners, so the app's blurred bars round off with it */
+    --prototype-radius: 62.75px;
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -73,8 +94,8 @@ const base = withBase('assets/cases/psb/live/');
 </style>
 
 <script>
-  // Loads the prototype once, when a phone is about a screen away, and keeps its 402pt
-  // viewport scaled to the width of the screen.
+  // Loads the prototype once, when a phone is about a screen away, and keeps its 402pt-wide
+  // viewport scaled to the width of the screen, as tall as the screen allows.
   const phones = document.querySelectorAll<HTMLElement>('[data-live-phone]');
 
   const load = (base: string) => {
@@ -90,7 +111,9 @@ const base = withBase('assets/cases/psb/live/');
     const fit = new ResizeObserver((entries) => {
       for (const { target } of entries) {
         const app = target as HTMLElement;
-        app.style.setProperty('--prototype-scale', String(app.clientWidth / 402));
+        const scale = app.clientWidth / 402;
+        app.style.setProperty('--prototype-scale', String(scale));
+        app.style.setProperty('--prototype-height', `${app.clientHeight / scale}px`);
       }
     });
     phones.forEach((phone) => fit.observe(phone.querySelector('.app')!));

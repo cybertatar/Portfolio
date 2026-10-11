@@ -30,6 +30,13 @@ const toc = [
   { id: 'outcome', title: 'Выводы' },
 ];
 
+/** Final screens: one live prototype per flow from the usability test. */
+const prototypes = [
+  { route: '/', poster: 'assets/cases/psb/main.webp', caption: 'Главная' },
+  { route: '/card', poster: 'assets/cases/psb/card.webp', caption: 'Данные карты' },
+  { route: '/cashback', poster: 'assets/cases/psb/cb-off.webp', caption: 'Подключение кешбэка' },
+];
+
 const stats = [
   { label: 'Шаги подключения кешбэка', from: '12', to: '5' },
   { label: 'Время подключения кешбэка', from: '105', to: '23', unit: 'с' },
@@ -365,13 +372,23 @@ const home = withBase('/');
           <p class="eyebrow">Итог</p>
           <h2 class="h2">Финальные экраны</h2>
           <p class="lead">
-            Это рабочий прототип, на котором проходил юзабилити-тест. Откройте счёт и данные карты,
-            подключите кешбэк и выберите категории.
+            Три рабочих прототипа, на которых проходил юзабилити-тест. Каждый открывается со своего
+            сценария, но внутри это всё приложение целиком.
           </p>
           <div class="stage px-clip">
-            <span class="stage-tag left px-clip">Прототип</span>
-            <div class="stage-phone live">
-              <LivePhone poster="assets/cases/psb/main.webp" alt="Главная нового ПСБ Mobile" />
+            <span class="stage-tag left px-clip">Прототипы</span>
+            <div class="stage-phones live">
+              {prototypes.map((p) => (
+                <figure class="stage-phone live">
+                  <LivePhone
+                    route={p.route}
+                    poster={p.poster}
+                    alt={p.caption}
+                    label={`Прототип: ${p.caption}`}
+                  />
+                  <figcaption class="live-caption">{p.caption}</figcaption>
+                </figure>
+              ))}
             </div>
           </div>
         </section>
@@ -1070,10 +1087,6 @@ const home = withBase('/');
   .stage-phone {
     width: clamp(220px, 26vw, 340px);
   }
-  /* The prototype is read at a glance, so it gets a larger phone, but never taller than the screen */
-  .stage-phone.live {
-    width: min(380px, 100%, calc((100svh - 160px) * 450 / 920));
-  }
   .stage-phones {
     display: flex;
     justify-content: center;
@@ -1082,6 +1095,18 @@ const home = withBase('/');
   }
   .stage-phones .stage-phone {
     flex: 0 1 clamp(180px, 22vw, 300px);
+  }
+  /* Live prototypes: as large as three fit, but a phone is never taller than the screen */
+  .stage-phones .stage-phone.live {
+    /* One expression for Safari, which ignores a percentage basis next to max-width */
+    flex: 0 1 min(clamp(220px, 30%, 360px), calc((100svh - 200px) * 450 / 920));
+    margin: 0;
+  }
+  .live-caption {
+    margin-top: 16px;
+    text-align: center;
+    font-size: var(--t-caption);
+    color: var(--text-secondary);
   }
   .stage-tag {
     --px-step: 2px;
@@ -1344,6 +1369,9 @@ const home = withBase('/');
       flex: 0 0 min(240px, 66%);
       width: auto;
       scroll-snap-align: center;
+    }
+    .stage-phones .stage-phone.live {
+      flex: 0 0 min(300px, 78%);
     }
     .stage-phones .stage-phone:only-child {
       margin: 0 auto;

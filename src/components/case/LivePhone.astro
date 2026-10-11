@@ -72,6 +72,14 @@ const base = withBase('assets/cases/psb/live/');
     object-position: top;
   }
   .app {
+    /* The page's fluid type (up to 20px on wide screens) must not leak into the app, which is
+       drawn for the browser default */
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
     /* The body's island (124×35.5pt, 18.5pt below the screen top) in the app's 402pt units */
     --prototype-island-top: 18.14px;
     --prototype-island-width: 121.6px;

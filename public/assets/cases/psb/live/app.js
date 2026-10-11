@@ -13,7 +13,7 @@ Error generating stack: `+e.message+`
 .participant-phone>nav[aria-label="Основная навигация"]{border-bottom-left-radius:var(--prototype-radius,0)!important;border-bottom-right-radius:var(--prototype-radius,0)!important}
 .participant-phone .portfolio-route [class*="bankHeader"]::before,
 .participant-phone .portfolio-route [class*="bankHeader"]::after{border-top-left-radius:var(--prototype-radius,0)!important;border-top-right-radius:var(--prototype-radius,0)!important}
-.participant-content{position:relative;flex:1;height:auto;min-height:0;padding-top:54px;overscroll-behavior-y:auto}
+.participant-content{position:relative;flex:1;height:auto;min-height:0;padding-top:54px;overscroll-behavior-y:auto;touch-action:pan-y}
 .participant-phone.portfolio-home{background:var(--bg-page)}
 .participant-phone.portfolio-home .participant-content{padding-top:0;background:var(--bg-page)}
 .participant-phone.portfolio-home .portfolio-route>main{padding-top:54px;background:var(--bg-page)}
@@ -40,8 +40,8 @@ Error generating stack: `+e.message+`
 .portfolio-status-icons img:nth-child(2){width:17.14px;height:12.33px}
 .portfolio-status-icons img:nth-child(3){width:27.33px;height:13px}
 .portfolio-tab-icon{display:block;width:24px;height:24px;object-fit:contain}
-.participant-phone>nav[aria-label="Основная навигация"]{height:67px;padding:12px 16px;bottom:0;border-radius:32px 32px 0 0}
-.participant-content:has(~nav[aria-label="Основная навигация"]){padding-bottom:calc(24px + 67px)}
+.participant-phone>nav[aria-label="Основная навигация"]{height:88px;padding:12px 16px 33px;bottom:0;border-radius:32px 32px 0 0}
+.participant-content:has(~nav[aria-label="Основная навигация"]){padding-bottom:calc(24px + 88px)}
 .portfolio-tab-active .portfolio-tab-icon{filter:brightness(0) saturate(100%) invert(49%) sepia(78%) saturate(1383%) hue-rotate(335deg) brightness(102%) contrast(95%)}
 .portfolio-glass{backdrop-filter:blur(8px) saturate(1.08);-webkit-backdrop-filter:blur(8px) saturate(1.08);box-shadow:inset 0 0 0 1px #ffffff2b,inset 0 1px #ffffff24,0 6px 15px #0003}
 [class*="backGlassPull"]{transform:none!important;transition:none!important}

@@ -1,0 +1,342 @@
+---
+import type { MascotSpriteName } from '../../content/mascots';
+import PixelIcon from '../ui/PixelIcon.astro';
+import LivePhone from './LivePhone.astro';
+import Sprite from './scenes/Sprite.astro';
+
+interface Prototype {
+  route: string;
+  poster: string;
+  caption: string;
+  cashbackConnected?: boolean;
+}
+
+interface Props {
+  prototypes: Prototype[];
+}
+
+/**
+ * The live prototypes as a fan that flips by swipe (src/scripts/deck.ts), after the colleague's
+ * deck on psb-portfolio-preview. Each phone brings its own pixel loot around it: the party on the
+ * home screen, the bank card and the elder on card details, the chest of coins on cashback.
+ * Positions are in phone widths from the centre of the front phone, so the decor scales with it.
+ */
+const { prototypes } = Astro.props;
+
+type Item = {
+  sprite: MascotSpriteName;
+  /** Face drawn over the sprite, like in the scenes. */
+  face?: MascotSpriteName;
+  x: number;
+  y: number;
+  size: number;
+  rot?: number;
+};
+type Hint = { text: string; kind: 'swipe' | 'click'; x: number; y: number; rot: number };
+
+const decor: { items: Item[]; hints?: Hint[] }[] = [
+  {
+    items: [
+      { sprite: 'swordsman', face: 'swordsman-happy', x: -0.78, y: 0.52, size: 0.42, rot: -6 },
+      { sprite: 'mage', face: 'mage-happy', x: 0.8, y: -0.5, size: 0.4, rot: 6 },
+      { sprite: 'coin', x: -0.72, y: -0.62, size: 0.1, rot: -12 },
+      { sprite: 'coin', x: -0.6, y: -0.45, size: 0.07, rot: 10 },
+      { sprite: 'spark', x: 0.66, y: 0.4, size: 0.07 },
+      { sprite: 'heart', x: 0.78, y: 0.56, size: 0.1, rot: 8 },
+    ],
+    hints: [
+      { text: 'Свайпай', kind: 'swipe', x: -0.8, y: 0.2, rot: -6 },
+      { text: 'Кликай прототип', kind: 'click', x: 0.82, y: -0.16, rot: 5 },
+    ],
+  },
+  {
+    items: [
+      { sprite: 'card', x: -0.8, y: -0.44, size: 0.4, rot: -12 },
+      { sprite: 'spark', x: -0.6, y: -0.66, size: 0.08 },
+      { sprite: 'spark', x: -0.98, y: -0.3, size: 0.06 },
+      { sprite: 'elder', face: 'elder-talk', x: 0.8, y: 0.5, size: 0.42, rot: 5 },
+      { sprite: 'quest', x: 0.8, y: 0.2, size: 0.05 },
+      { sprite: 'card', x: 0.78, y: -0.5, size: 0.3, rot: 14 },
+    ],
+  },
+  {
+    items: [
+      { sprite: 'chest-open', x: -0.8, y: 0.6, size: 0.4 },
+      { sprite: 'coin', x: -0.9, y: 0.36, size: 0.09, rot: -14 },
+      { sprite: 'coin', x: -0.72, y: 0.26, size: 0.11, rot: 8 },
+      { sprite: 'coin', x: -0.82, y: 0.12, size: 0.07, rot: 20 },
+      { sprite: 'spark', x: -0.62, y: 0.42, size: 0.06 },
+      { sprite: 'mage', face: 'mage-happy', x: 0.8, y: -0.48, size: 0.4, rot: 6 },
+      { sprite: 'heart', x: 0.7, y: 0.3, size: 0.11, rot: -8 },
+      { sprite: 'heart', x: 0.88, y: 0.48, size: 0.07, rot: 10 },
+    ],
+  },
+];
+
+const place = (x: number, y: number, size: number, rot = 0) =>
+  `--x: ${x}; --y: ${y}; --size: ${size}; --rot: ${rot}deg`;
+---
+
+<div class="deck" data-deck>
+  <div class="scene">
+    {decor.map((set, i) => (
+      <div class="decor" data-deck-decor={i} aria-hidden="true">
+        {set.items.map((d, k) => (
+          <span class="item" style={`${place(d.x, d.y, d.size, d.rot)}; --k: ${k}`}>
+            <Sprite name={d.sprite} />
+            {d.face && <Sprite name={d.face} class="face" />}
+          </span>
+        ))}
+      </div>
+    ))}
+    <div class="cards" data-deck-cards>
+      {prototypes.map((p) => (
+        <div class="card" data-deck-card data-title={p.caption}>
+          <LivePhone
+            route={p.route}
+            poster={p.poster}
+            alt={p.caption}
+            label={`Прототип: ${p.caption}`}
+            cashbackConnected={p.cashbackConnected}
+          />
+        </div>
+      ))}
+    </div>
+    {decor.map((set, i) =>
+      set.hints ? (
+        <div class="decor hints" data-deck-decor={i} aria-hidden="true">
+          {set.hints.map((h) => (
+            <span class:list={['hint', 'px-clip', h.kind]} style={place(h.x, h.y, 0, h.rot)}>
+              {h.text}
+            </span>
+          ))}
+        </div>
+      ) : null,
+    )}
+  </div>
+
+  <div class="controls">
+    <button class="arrow px-clip" type="button" aria-label="Предыдущий прототип" data-deck-prev>
+      <span class="flip">
+        <PixelIcon name="arrow" />
+      </span>
+    </button>
+    <div class="status">
+      <p class="caption" aria-live="polite" data-deck-caption>
+        {prototypes[0]?.caption}
+      </p>
+      <div class="dots">
+        {prototypes.map((p, i) => (
+          <button
+            class="dot"
+            type="button"
+            aria-label={p.caption}
+            aria-current={i === 0 ? 'true' : undefined}
+            data-deck-dot={i}
+          />
+        ))}
+      </div>
+    </div>
+    <button class="arrow px-clip" type="button" aria-label="Следующий прототип" data-deck-next>
+      <PixelIcon name="arrow" />
+    </button>
+  </div>
+</div>
+
+<style>
+  .deck {
+    /* Phone width: as large as fits the screen height, smaller on phones */
+    --pw: clamp(200px, calc((100svh - 300px) * 450 / 920), 330px);
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .scene {
+    position: relative;
+    height: calc(var(--pw) * 920 / 450 + var(--pw) * 0.24);
+  }
+  .cards {
+    position: absolute;
+    inset: 0;
+    touch-action: pan-y;
+  }
+  .card {
+    position: absolute;
+    left: 50%;
+    top: calc(var(--pw) * 0.06);
+    width: var(--pw);
+    margin-left: calc(var(--pw) / -2);
+    opacity: 0;
+    transform-origin: 50% 60%;
+    will-change: transform;
+  }
+  .card:not(.is-front) {
+    cursor: pointer;
+  }
+  .card.is-front {
+    cursor: grab;
+  }
+  .deck.is-dragging .card.is-front {
+    cursor: grabbing;
+  }
+
+  /* Decor: sprites around the front phone, appearing with it */
+  .decor {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: calc(1 - var(--deck-pull, 0));
+  }
+  .hints {
+    z-index: 10;
+    --spread: var(--hint-spread, 1);
+  }
+  .item,
+  .hint {
+    position: absolute;
+    left: calc(50% + var(--pw) * var(--x) * var(--spread, 1));
+    top: calc(var(--pw) * 0.06 + var(--pw) * 1.022 + var(--pw) * var(--y));
+    translate: -50% -50%;
+    rotate: var(--rot);
+    scale: 0.6;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.2s ease,
+      scale 0.2s ease,
+      visibility 0s linear 0.2s;
+  }
+  .item {
+    display: grid;
+    width: calc(var(--pw) * var(--size));
+  }
+  .item > :global(*) {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: auto;
+  }
+  .is-active .item,
+  .is-active .hint {
+    scale: 1;
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity 0.3s ease calc(var(--k, 0) * 40ms),
+      scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--k, 0) * 40ms),
+      visibility 0s;
+  }
+  /* Small loot bobs, like items on the ground in a game */
+  .is-active .item:nth-child(n + 3) {
+    animation: bob 2.4s ease-in-out calc(var(--k) * -0.5s) infinite;
+  }
+  @keyframes bob {
+    50% {
+      translate: -50% calc(-50% - var(--pw) * 0.02);
+    }
+  }
+
+  /* Hints: tiny game dialogs with a stepped tail */
+  .hint {
+    --px-step: 2px;
+    padding: 5px 10px 6px;
+    background: var(--surface-dialog);
+    color: var(--text-inverse);
+    font-family: var(--font-pixel);
+    font-size: 17px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .is-active .hint {
+    transition-delay: 0.4s;
+  }
+  .deck.hint-swiped .swipe,
+  .deck.hint-clicked .click {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* Controls under the fan */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 8px;
+  }
+  .arrow {
+    display: grid;
+    place-items: center;
+    width: var(--control-h);
+    height: var(--control-h);
+    border: 0;
+    background: var(--surface-card);
+    color: var(--text-primary);
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .arrow:hover {
+    background: var(--surface-raised);
+  }
+  .flip {
+    display: grid;
+    transform: scaleX(-1);
+  }
+  .status {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    min-width: 180px;
+  }
+  .caption {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .dots {
+    display: flex;
+    gap: 4px;
+  }
+  /* 8px squares in a 24px hit area */
+  .dot {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .dot::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--border-strong);
+  }
+  .dot[aria-current]::before {
+    background: var(--accent);
+  }
+
+  /* On phones the fan gets smaller and pulls its decor in, so the party stays on the stage */
+  @media (max-width: 720px) {
+    .deck {
+      --pw: min(240px, 54vw);
+      --spread: 0.84;
+      --hint-spread: 0.66;
+    }
+    .hint {
+      font-size: 15px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .is-active .item {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { initDeck } from '../../scripts/deck';
+
+  document.querySelectorAll<HTMLElement>('[data-deck]').forEach(initDeck);
+</script>

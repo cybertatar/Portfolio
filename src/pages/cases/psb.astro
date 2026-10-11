@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Footer from '../../components/Footer.astro';
 import CaseVideo from '../../components/case/CaseVideo.astro';
 import Compare from '../../components/case/Compare.astro';
-import LivePhone from '../../components/case/LivePhone.astro';
+import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Phone from '../../components/case/Phone.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -373,23 +373,10 @@ const home = withBase('/');
           <h2 class="h2">Финальные экраны</h2>
           <p class="lead">
             Три рабочих прототипа, на которых проходил юзабилити-тест. Каждый открывается со своего
-            сценария, но внутри это всё приложение целиком.
+            сценария, но внутри это всё приложение целиком. Листайте веер свайпом или стрелками.
           </p>
-          <div class="stage px-clip">
-            <span class="stage-tag left px-clip">Прототипы</span>
-            <div class="stage-phones live">
-              {prototypes.map((p) => (
-                <figure class="stage-phone live">
-                  <LivePhone
-                    route={p.route}
-                    poster={p.poster}
-                    alt={p.caption}
-                    label={`Прототип: ${p.caption}`}
-                  />
-                  <figcaption class="live-caption">{p.caption}</figcaption>
-                </figure>
-              ))}
-            </div>
+          <div class="stage deck-stage px-clip">
+            <PrototypeDeck prototypes={prototypes} />
           </div>
         </section>
 
@@ -1096,17 +1083,11 @@ const home = withBase('/');
   .stage-phones .stage-phone {
     flex: 0 1 clamp(180px, 22vw, 300px);
   }
-  /* Live prototypes: as large as three fit, but a phone is never taller than the screen */
-  .stage-phones .stage-phone.live {
-    /* One expression for Safari, which ignores a percentage basis next to max-width */
-    flex: 0 1 min(clamp(220px, 30%, 360px), calc((100svh - 200px) * 450 / 920));
-    margin: 0;
-  }
-  .live-caption {
-    margin-top: 16px;
-    text-align: center;
-    font-size: var(--t-caption);
-    color: var(--text-secondary);
+  /* The fan of prototypes spills its decor to the edges, so the stage keeps a narrower inset */
+  .stage.deck-stage {
+    display: block;
+    padding: 24px 0 32px;
+    overflow: hidden;
   }
   .stage-tag {
     --px-step: 2px;
@@ -1369,9 +1350,6 @@ const home = withBase('/');
       flex: 0 0 min(240px, 66%);
       width: auto;
       scroll-snap-align: center;
-    }
-    .stage-phones .stage-phone.live {
-      flex: 0 0 min(300px, 78%);
     }
     .stage-phones .stage-phone:only-child {
       margin: 0 auto;

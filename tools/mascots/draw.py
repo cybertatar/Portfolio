@@ -197,6 +197,14 @@ sprites = {
               'kkkkkkkOOkkkkkkk', 'llllllloolllllll', 'llllllllllllllll', 'LLLLLLLLLLLLLLLL'],
     'chest-open': ['.LLLLLLLLLLLLLL.', 'LKKKKKKKKKKKKKKL', 'LoooooooooooooOL', 'LLLLLLLLLLLLLLLL',
                    'kkkkkkkOOkkkkkkk', 'llllllloolllllll', 'llllllllllllllll', 'LLLLLLLLLLLLLLLL'],
+    # loot around the live prototypes: a coin, a heart, a bank card and a sparkle
+    'coin': ['..OOOO..', '.OooooO.', 'OoqqooOO', 'OoqoooOO', 'OooooOOO', 'OoooOOOO', '.OOOOOO.', '..OOOO..'],
+    'heart': ['.RR...RR.', 'RrrR.RrrR', 'RqrrRrrrR', 'RqrrrrrrR', '.RrrrrrR.', '..RrrrR..', '...RrR...',
+              '....R....'],
+    'card': ['.PPPPPPPPPPPPPP.', 'PppppppppppppppP', 'PpoopppppppppppP', 'PpoOpppppppppppP',
+             'PppppppppppppppP', 'PppppppppppppppP', 'PpqqpqqpqqpqqppP', 'PppppppppppppppP',
+             'PpqqqppppppppppP', '.PPPPPPPPPPPPPP.'],
+    'spark': ['...o...', '...o...', '..ooo..', 'ooooooo', '..ooo..', '...o...', '...o...'],
 }
 
 
@@ -240,7 +248,8 @@ html = ('<body style="background:#e7e0d0;display:flex;flex-wrap:wrap;gap:28px;al
                                                       ('mage', ['happy', 'sad', 'blink']),
                                                       ('elder', ['angry', 'talk'])] for f in fs)
         + ''.join(svg(n) for n in ['quest', 'arm-sword', 'arm-mage', 'arm-elder', 'phone',
-                                   'chest', 'chest-open', 'cloud', 'puff'])
+                                   'chest', 'chest-open', 'cloud', 'puff', 'coin', 'heart',
+                                   'card', 'spark'])
         + '</body>')
 (ROOT / 'tools/mascots/preview.html').write_text(html)
 

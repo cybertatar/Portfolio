@@ -93,3 +93,32 @@ export function initHud(root: HTMLElement) {
   );
   seen.observe(root);
 }
+
+/** Quest deck on phones (QuestDeck.astro): the dot of the card at the start of the swipe lights up. */
+export function initQuestDeck(root: HTMLElement) {
+  const track = root.querySelector<HTMLElement>('[data-quest-track]');
+  const cards = [...root.querySelectorAll<HTMLElement>('[data-quest-card]')];
+  const dots = [...root.querySelectorAll<HTMLElement>('[data-quest-dot]')];
+  if (!track || !cards.length) return;
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const start =
+      track.getBoundingClientRect().left + parseFloat(getComputedStyle(track).paddingLeft);
+    let current = 0;
+    cards.forEach((card, i) => {
+      const off = Math.abs(card.getBoundingClientRect().left - start);
+      if (off < Math.abs(cards[current].getBoundingClientRect().left - start)) current = i;
+    });
+    dots.forEach((dot, i) => dot.classList.toggle('is-on', i === current));
+  };
+  track.addEventListener(
+    'scroll',
+    () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(update);
+    },
+    { passive: true },
+  );
+}

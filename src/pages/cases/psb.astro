@@ -6,7 +6,7 @@ import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Phone from '../../components/case/Phone.astro';
-import QuestBoard, { type Quest } from '../../components/case/QuestBoard.astro';
+import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
@@ -353,7 +353,7 @@ const home = withBase('/');
               </span>
               Задания
             </h2>
-            <QuestBoard quests={quests} />
+            <QuestDeck quests={quests} />
           </div>
 
           <div class="results">
@@ -589,7 +589,13 @@ const home = withBase('/');
 </BaseLayout>
 
 <script>
-  import { initCaseMenu, initCompare, initHud, initScrollSpy } from '../../scripts/case';
+  import {
+    initCaseMenu,
+    initCompare,
+    initHud,
+    initQuestDeck,
+    initScrollSpy,
+  } from '../../scripts/case';
 
   initScrollSpy(
     [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')],
@@ -599,6 +605,7 @@ const home = withBase('/');
   if (bar) initCaseMenu(bar);
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
+  document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
 </script>
 
 <style>

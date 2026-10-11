@@ -7,6 +7,7 @@ import Phone from '../../components/case/Phone.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
+import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import Media from '../../components/ui/Media.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
@@ -24,6 +25,7 @@ const toc = [
   { id: 'categories', title: 'Кешбэк после подключения', sub: true },
   { id: 'kit', title: 'UI-кит' },
   { id: 'testing', title: 'Тестирование' },
+  { id: 'review', title: 'Ревью' },
   { id: 'outcome', title: 'Выводы' },
 ];
 
@@ -159,6 +161,8 @@ const next = [
 ];
 
 const title = 'PSB-Bank Redesign concept';
+const figmaHref =
+  'https://www.figma.com/design/CzUlWtfXzInfjatugJLjQ1/PSB-Bank-Redesign-Concept?node-id=25-284';
 const home = withBase('/');
 ---
 
@@ -175,12 +179,7 @@ const home = withBase('/');
         </span>
         <span>Все кейсы</span>
       </a>
-      <div class="case-id">
-        <div class="thumb px-clip">
-          <img src={withBase('assets/cases/psb-cover.webp')} alt="" />
-        </div>
-        <p class="case-name">{title}</p>
-      </div>
+      <p class="case-name">{title}</p>
       <nav class="toc" aria-label="Разделы кейса">
         <ol>
           {toc.map((item) => (
@@ -193,6 +192,12 @@ const home = withBase('/');
           ))}
         </ol>
       </nav>
+      <div class="aside-cta">
+        <Button href={figmaHref} target="_blank" rel="noopener" tone="raised" full>
+          <PixelIcon name="figma" />
+          <span data-en="Figma file">Проект в Figma</span>
+        </Button>
+      </div>
     </aside>
 
     <!-- Mobile: a bar pinned to the top — back home, and the current section that opens the list -->
@@ -232,6 +237,12 @@ const home = withBase('/');
             </li>
           ))}
         </ol>
+        <div class="menu-cta">
+          <Button href={figmaHref} target="_blank" rel="noopener" tone="raised" full>
+            <PixelIcon name="figma" />
+            <span data-en="Figma file">Проект в Figma</span>
+          </Button>
+        </div>
       </nav>
     </header>
 
@@ -532,6 +543,23 @@ const home = withBase('/');
           </p>
         </section>
 
+        <!-- ---------- Review ---------- -->
+        <section id="review" class="sheet px-clip">
+          <p class="eyebrow">Ревью</p>
+          <h2 class="h2">Что сказал сеньор</h2>
+          <div class="wide">
+            <CaseVideo
+              src="assets/cases/psb/review.ru.mp4"
+              poster="assets/cases/psb/review-poster.ru.webp"
+              enSrc="assets/cases/psb/review.en.mp4"
+              enPoster="assets/cases/psb/review-poster.en.webp"
+              ratio="16 / 9"
+              label="Ревью кейса от сеньор-дизайнера"
+              enLabel="Case review by a senior designer"
+            />
+          </div>
+        </section>
+
         <!-- ---------- Outcome ---------- -->
         <section id="outcome" class="sheet px-clip">
           <p class="eyebrow">Выводы</p>
@@ -623,27 +651,17 @@ const home = withBase('/');
   .back:hover .back-icon {
     transform: scaleX(-1) translateX(3px);
   }
-  .case-id {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .thumb {
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background: var(--surface-raised);
-  }
-  .thumb img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
   .case-name {
     font-size: var(--t-lead);
     font-weight: var(--fw-bold);
     line-height: var(--lh-snug);
     letter-spacing: var(--ls-tight);
+  }
+
+  /* The Figma button sits at the bottom of the sidebar, however short the contents are */
+  .aside-cta {
+    display: flex;
+    margin-top: auto;
   }
 
   .toc ol,
@@ -1294,6 +1312,10 @@ const home = withBase('/');
     }
     .menu[hidden] {
       display: none;
+    }
+    .menu-cta {
+      display: flex;
+      margin-top: 8px;
     }
     [data-toc] {
       min-height: 44px;

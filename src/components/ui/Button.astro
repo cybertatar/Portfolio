@@ -1,12 +1,16 @@
 ---
-interface Props {
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = HTMLAttributes<'a'> & {
   href: string;
   full?: boolean;
-}
-const { href, full = false } = Astro.props;
+  /** `raised` is the light secondary button, like the square icon buttons. */
+  tone?: 'inverse' | 'raised';
+};
+const { href, full = false, tone = 'inverse', ...rest } = Astro.props;
 ---
 
-<a href={href} class:list={['button', 'px-clip', { full }]}>
+<a href={href} class:list={['button', 'px-clip', { full, raised: tone === 'raised' }]} {...rest}>
   <slot />
 </a>
 
@@ -33,6 +37,14 @@ const { href, full = false } = Astro.props;
   .button:hover {
     background: var(--surface-inverse-hover);
     color: var(--text-inverse);
+  }
+  .raised {
+    background: var(--surface-raised);
+    color: var(--text-primary);
+  }
+  .raised:hover {
+    background: var(--surface-active);
+    color: var(--text-primary);
   }
   .full {
     flex: 1 1 auto;

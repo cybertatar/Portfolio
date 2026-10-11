@@ -1,0 +1,139 @@
+---
+import { withBase } from '../../scripts/url';
+
+interface Props {
+  /** Screen shown until the prototype loads (and without JavaScript). */
+  poster: string;
+  alt: string;
+  /** Route the prototype opens on. */
+  route?: string;
+  /** Start with cashback already connected (the default is the first connection). */
+  cashbackConnected?: boolean;
+  /** Accessible name of this prototype. */
+  label: string;
+}
+
+/**
+ * The clickable PSB prototype inside the iPhone 17 Pro body. Unlike the screenshots in Phone.astro,
+ * the screen sits above the body and covers most of its black display border (inset 20pt instead
+ * of 24pt): next to a live interface the full border read as a frame around it. The body's
+ * dynamic island is covered too, so the app draws its own in the same place. The app is built from the PSB repo
+ * by tools/psb-prototype into public/assets/cases/psb/live and is loaded when the phone
+ * comes near the screen. It renders a 402pt-wide viewport in a shadow root, scaled to the screen.
+ */
+const { poster, alt, route = '/', cashbackConnected = false, label } = Astro.props;
+const base = withBase('assets/cases/psb/live/');
+---
+
+<div class="phone" data-live-phone data-base={base}>
+  <!-- The body goes first: the screen paints over its display border (a z-index on the screen
+       left Chromium with unpainted tiles in the app) -->
+  <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
+  <div class="screen">
+    <img class="poster" src={withBase(poster)} alt={alt} loading="lazy" decoding="async" />
+    <div
+      class="app"
+      data-psb-live-route={route}
+      data-psb-cashback={cashbackConnected ? 'connected' : undefined}
+      role="region"
+      aria-label={label}
+    ></div>
+  </div>
+</div>
+
+<style>
+  .phone {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 450 / 920;
+    container-type: inline-size;
+  }
+  .screen {
+    position: absolute;
+    left: calc(20 / 450 * 100%);
+    top: calc(19 / 920 * 100%);
+    width: calc(410 / 450 * 100%);
+    height: calc(882 / 920 * 100%);
+    border-radius: calc(64 / 450 * 100cqi);
+    overflow: hidden;
+    /* The tab bar's backdrop blur escapes overflow clipping; clip-path holds it */
+    clip-path: inset(0 round calc(64 / 450 * 100cqi));
+    background: #0e1116;
+  }
+  .poster,
+  .app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .poster {
+    object-fit: cover;
+    object-position: top;
+  }
+  .app {
+    /* The page's fluid type (up to 20px on wide screens) must not leak into the app, which is
+       drawn for the browser default */
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    /* The body's island (124×35.5pt, 18.5pt below the screen top) in the app's 402pt units */
+    --prototype-island-top: 18.14px;
+    --prototype-island-width: 121.6px;
+    --prototype-island-height: 34.8px;
+    /* The screen's 64pt corners, so the app's blurred bars round off with it */
+    --prototype-radius: 62.75px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .app[data-psb-ready] {
+    opacity: 1;
+  }
+  .body {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  // Loads the prototype once, when a phone is about a screen away, and keeps its 402pt-wide
+  // viewport scaled to the width of the screen, as tall as the screen allows.
+  const phones = document.querySelectorAll<HTMLElement>('[data-live-phone]');
+
+  const load = (base: string) => {
+    for (const name of ['style-data.js', 'app.js']) {
+      const script = document.createElement('script');
+      script.src = base + name;
+      script.async = false;
+      document.body.append(script);
+    }
+  };
+
+  if (phones.length) {
+    const fit = new ResizeObserver((entries) => {
+      for (const { target } of entries) {
+        const app = target as HTMLElement;
+        const scale = app.clientWidth / 402;
+        app.style.setProperty('--prototype-scale', String(scale));
+        app.style.setProperty('--prototype-height', `${app.clientHeight / scale}px`);
+      }
+    });
+    phones.forEach((phone) => fit.observe(phone.querySelector('.app')!));
+
+    const near = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        near.disconnect();
+        load(phones[0].dataset.base!);
+      },
+      { rootMargin: '100% 0px' },
+    );
+    phones.forEach((phone) => near.observe(phone));
+  }
+</script>

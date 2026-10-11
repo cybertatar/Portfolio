@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Footer from '../../components/Footer.astro';
 import CaseVideo from '../../components/case/CaseVideo.astro';
 import Compare from '../../components/case/Compare.astro';
+import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Phone from '../../components/case/Phone.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -29,13 +30,11 @@ const toc = [
   { id: 'outcome', title: 'Выводы' },
 ];
 
-const screens = [
-  { src: 'assets/cases/psb/main.webp', caption: 'Главная' },
-  { src: 'assets/cases/psb/account.webp', caption: 'Счёт и его карты' },
-  { src: 'assets/cases/psb/cb-off.webp', caption: 'Кешбэк до подключения' },
-  { src: 'assets/cases/psb/cb-connect.webp', caption: 'Выбор категорий' },
-  { src: 'assets/cases/psb/success.webp', caption: 'Кешбэк подключён' },
-  { src: 'assets/cases/psb/cb-on.webp', caption: 'Кешбэк после подключения' },
+/** Final screens: one live prototype per flow from the usability test. */
+const prototypes = [
+  { route: '/', poster: 'assets/cases/psb/main.webp', caption: 'Главная' },
+  { route: '/card', poster: 'assets/cases/psb/card.webp', caption: 'Данные карты' },
+  { route: '/cashback', poster: 'assets/cases/psb/cb-off.webp', caption: 'Подключение кешбэка' },
 ];
 
 const stats = [
@@ -254,8 +253,9 @@ const home = withBase('/');
           <h1 class="title">
             Упростил ежедневные действия, которые в приложении ощущались как поход в отделение
           </h1>
+          <!-- The owner's own video about the case goes here -->
           <div class="hero px-clip">
-            <img src={withBase('assets/cases/psb-cover.webp')} alt="Экраны нового ПСБ Mobile" />
+            <Media label={{ ru: 'Место для видео о кейсе', en: 'Case video goes here' }} />
           </div>
 
           <div class="intro">
@@ -371,13 +371,12 @@ const home = withBase('/');
         <section id="screens" class="sheet px-clip">
           <p class="eyebrow">Итог</p>
           <h2 class="h2">Финальные экраны</h2>
-          <div class="gallery" tabindex="0" aria-label="Финальные экраны, прокручиваются вбок">
-            {screens.map((s) => (
-              <figure class="shot">
-                <Phone src={s.src} alt={s.caption} />
-                <figcaption>{s.caption}</figcaption>
-              </figure>
-            ))}
+          <p class="lead">
+            Три рабочих прототипа, на которых проходил юзабилити-тест. Каждый открывается со своего
+            сценария, но внутри это всё приложение целиком. Листайте веер свайпом или стрелками.
+          </p>
+          <div class="stage deck-stage px-clip">
+            <PrototypeDeck prototypes={prototypes} />
           </div>
         </section>
 
@@ -819,15 +818,10 @@ const home = withBase('/');
 
   /* Overview */
   .hero {
+    position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     background: var(--surface-raised);
-  }
-  .hero img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
   .intro {
     display: grid;
@@ -999,33 +993,6 @@ const home = withBase('/');
     color: var(--text-secondary);
   }
 
-  /* Final screens: a row of phones that scrolls sideways */
-  .gallery {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: clamp(200px, 22%, 300px);
-    gap: var(--space-media-grid);
-    margin-left: calc(var(--pad) * -1);
-    margin-right: calc(var(--pad) * -1);
-    padding: 4px var(--pad) 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--pad);
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) transparent;
-  }
-  .shot {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scroll-snap-align: start;
-  }
-  .shot figcaption {
-    font-size: var(--t-caption);
-    color: var(--text-secondary);
-    text-align: center;
-  }
-
   /* Process */
   .steps {
     display: flex;
@@ -1115,6 +1082,12 @@ const home = withBase('/');
   }
   .stage-phones .stage-phone {
     flex: 0 1 clamp(180px, 22vw, 300px);
+  }
+  /* The fan of prototypes spills its decor to the edges, so the stage keeps a narrower inset */
+  .stage.deck-stage {
+    display: block;
+    padding: 24px 0 32px;
+    overflow: hidden;
   }
   .stage-tag {
     --px-step: 2px;
@@ -1358,17 +1331,13 @@ const home = withBase('/');
     .stat-value {
       font-size: 30px;
     }
-    .gallery {
-      grid-auto-columns: 62%;
-      gap: 12px;
-    }
     .stage {
       padding: 56px 16px 40px;
     }
     .stage-phone {
       width: min(260px, 72%);
     }
-    /* Several "after" screens scroll sideways like the gallery */
+    /* Several "after" screens scroll sideways */
     .stage-phones {
       justify-content: flex-start;
       margin: 0 -16px;

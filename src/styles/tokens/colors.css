@@ -73,6 +73,17 @@
   --flora-frog-light: #9cbd7a;
   --flora-frog-dark: #5d7d44;
 
+  /* Results HUD gauges only, in Zelda's colours: mana is lilac, stamina green, hearts rose. Bars take the
+     footer meadow's lilac flower and frog; text shades are darker to clear 3:1 as large text. */
+  --mana-fill: var(--flora-lilac-2);
+  --mana-notch: #7f6ca6;
+  --mana-text: #6b5a99;
+  --stamina-fill: var(--flora-frog);
+  --stamina-text: #4f6e3a;
+  --heart-fill: var(--flora-rose-2);
+  --heart-edge: #b0737c;
+  --heart-text: #8f5560;
+
   /* Borders */
   --border-subtle: var(--line-1);
   --border-default: var(--line-2);

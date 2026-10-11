@@ -47,7 +47,7 @@ let uid = 0;
 <div class="hud-wrap">
   <ul class="hud" data-hud>
     {stats.map((s) => (
-      <li class="gauge px-clip">
+      <li class:list={['gauge px-clip', `is-${s.kind}`]}>
         <span class="label">{s.label}</span>
 
         {s.kind === 'steps' && (
@@ -185,6 +185,16 @@ let uid = 0;
     color: var(--text-accent);
   }
 
+  .is-time .value b {
+    color: var(--stamina-text);
+  }
+  .is-hearts .value b {
+    color: var(--heart-text);
+  }
+  .is-mana .value b {
+    color: var(--mana-text);
+  }
+
   /* Steps: slots, the dropped ones go out */
   .pips {
     display: flex;
@@ -242,7 +252,7 @@ let uid = 0;
   }
   .bar.now {
     width: var(--to);
-    background: var(--sky-400);
+    background: var(--stamina-fill);
   }
 
   /* First click success: mana */
@@ -254,7 +264,11 @@ let uid = 0;
   }
   .mana-fill {
     width: var(--to);
-    background: repeating-linear-gradient(90deg, var(--sky-400) 0 10px, var(--sky-500) 10px 12px);
+    background: repeating-linear-gradient(
+      90deg,
+      var(--mana-fill) 0 10px,
+      var(--mana-notch) 10px 12px
+    );
   }
 
   /* Ease score: heart containers */
@@ -275,10 +289,10 @@ let uid = 0;
     fill: var(--paper-4);
   }
   .f-R {
-    fill: #b0737c;
+    fill: var(--heart-edge);
   }
   .f-r {
-    fill: #cc9097;
+    fill: var(--heart-fill);
   }
   .f-q {
     fill: var(--paper-2);

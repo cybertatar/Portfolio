@@ -1,20 +1,21 @@
 ---
+import PixelIcon from '../ui/PixelIcon.astro';
 import Sprite from './scenes/Sprite.astro';
 import { mascotSprites, type MascotSpriteName } from '../../content/mascots';
 
 /**
  * Problems and their solutions as a deck of quest cards that rhymes with the results HUD below:
  * the same cards in the same 2×2 grid, a small label on top and the big value at the bottom.
- * Here the label is the quest, the problem is struck out like a completed quest, and the
- * solution is the value. The strike draws once on view (initHud in scripts/case.ts arms it);
- * on phones the deck swipes one card at a time with dots below (initQuestDeck).
+ * Here the label is the quest, then the muted problem, a pixel arrow down and the solution as
+ * the value. The arrows step down once on view, card after card (initHud in scripts/case.ts
+ * arms them); on phones the deck swipes one card at a time with dots below (initQuestDeck).
  */
 export interface Quest {
   /** Section id of the full write-up further down the page */
   id: string;
   title: string;
   sprite: MascotSpriteName;
-  /** A few words each: the card is a glance, the section below has the detail */
+  /** One whole thought each, clear on its own; the section below has the detail */
   problem: string;
   solution: string;
 }
@@ -44,8 +45,11 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
         </a>
         <p class="problem">
           <span class="visually-hidden">Было: </span>
-          <s>{q.problem}</s>
+          {q.problem}
         </p>
+        <span class="arrow" aria-hidden="true">
+          <PixelIcon name="arrow" size={24} />
+        </span>
         <p class="solution">
           <span class="visually-hidden">Стало: </span>
           {q.solution}
@@ -116,16 +120,22 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
     line-height: var(--lh-normal);
     color: var(--text-tertiary);
   }
-  /* The strike is a background line, so it can draw from left to right on every line of text */
-  .problem s {
-    text-decoration: none;
-    background: linear-gradient(var(--line-3), var(--line-3)) no-repeat 0 55% / 100% 2px;
-    -webkit-box-decoration-break: clone;
-    box-decoration-break: clone;
+  /* Down from the problem to the solution; arrow and solution sit at the bottom together, so the
+     solutions line up across a row like the numbers on the HUD cards */
+  .arrow {
+    display: block;
+    width: 20px;
+    margin: auto 0 -4px;
+    color: var(--accent);
+    transform: rotate(90deg);
+  }
+  .arrow :global(svg) {
+    display: block;
+    width: 20px;
+    height: 20px;
   }
   /* The value, as the big number on the HUD cards */
   .solution {
-    margin-top: auto;
     font-size: var(--t-lead);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
@@ -144,14 +154,18 @@ const width = (name: MascotSpriteName) => mascotSprites[name][0].length * SCALE;
     white-space: nowrap;
   }
 
-  /* Play once on view */
+  /* Play once on view: each arrow steps down into place, card after card */
   @media (prefers-reduced-motion: no-preference) {
-    .deck[data-armed] .problem s {
-      background-size: 0% 2px;
+    .deck[data-armed] .arrow {
+      opacity: 0;
+      transform: rotate(90deg) translateX(-8px);
     }
-    .deck.is-on .problem s {
-      background-size: 100% 2px;
-      transition: background-size 500ms steps(8) calc(300ms + var(--i, 0) * 150ms);
+    .deck.is-on .arrow {
+      opacity: 1;
+      transform: rotate(90deg);
+      transition:
+        opacity 120ms calc(300ms + var(--i, 0) * 150ms),
+        transform 360ms steps(3) calc(300ms + var(--i, 0) * 150ms);
     }
   }
 

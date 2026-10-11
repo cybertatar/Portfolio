@@ -3,6 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Footer from '../../components/Footer.astro';
 import CaseVideo from '../../components/case/CaseVideo.astro';
 import Compare from '../../components/case/Compare.astro';
+import LivePhone from '../../components/case/LivePhone.astro';
 import Phone from '../../components/case/Phone.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -27,15 +28,6 @@ const toc = [
   { id: 'testing', title: 'Тестирование' },
   { id: 'review', title: 'Ревью' },
   { id: 'outcome', title: 'Выводы' },
-];
-
-const screens = [
-  { src: 'assets/cases/psb/main.webp', caption: 'Главная' },
-  { src: 'assets/cases/psb/account.webp', caption: 'Счёт и его карты' },
-  { src: 'assets/cases/psb/cb-off.webp', caption: 'Кешбэк до подключения' },
-  { src: 'assets/cases/psb/cb-connect.webp', caption: 'Выбор категорий' },
-  { src: 'assets/cases/psb/success.webp', caption: 'Кешбэк подключён' },
-  { src: 'assets/cases/psb/cb-on.webp', caption: 'Кешбэк после подключения' },
 ];
 
 const stats = [
@@ -254,8 +246,9 @@ const home = withBase('/');
           <h1 class="title">
             Упростил ежедневные действия, которые в приложении ощущались как поход в отделение
           </h1>
+          <!-- The owner's own video about the case goes here -->
           <div class="hero px-clip">
-            <img src={withBase('assets/cases/psb-cover.webp')} alt="Экраны нового ПСБ Mobile" />
+            <Media label={{ ru: 'Место для видео о кейсе', en: 'Case video goes here' }} />
           </div>
 
           <div class="intro">
@@ -371,13 +364,15 @@ const home = withBase('/');
         <section id="screens" class="sheet px-clip">
           <p class="eyebrow">Итог</p>
           <h2 class="h2">Финальные экраны</h2>
-          <div class="gallery" tabindex="0" aria-label="Финальные экраны, прокручиваются вбок">
-            {screens.map((s) => (
-              <figure class="shot">
-                <Phone src={s.src} alt={s.caption} />
-                <figcaption>{s.caption}</figcaption>
-              </figure>
-            ))}
+          <p class="lead">
+            Это рабочий прототип, на котором проходил юзабилити-тест. Откройте счёт и данные карты,
+            подключите кешбэк и выберите категории.
+          </p>
+          <div class="stage px-clip">
+            <span class="stage-tag left px-clip">Прототип</span>
+            <div class="stage-phone live">
+              <LivePhone poster="assets/cases/psb/main.webp" alt="Главная нового ПСБ Mobile" />
+            </div>
           </div>
         </section>
 
@@ -819,15 +814,10 @@ const home = withBase('/');
 
   /* Overview */
   .hero {
+    position: relative;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     background: var(--surface-raised);
-  }
-  .hero img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
   }
   .intro {
     display: grid;
@@ -999,33 +989,6 @@ const home = withBase('/');
     color: var(--text-secondary);
   }
 
-  /* Final screens: a row of phones that scrolls sideways */
-  .gallery {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: clamp(200px, 22%, 300px);
-    gap: var(--space-media-grid);
-    margin-left: calc(var(--pad) * -1);
-    margin-right: calc(var(--pad) * -1);
-    padding: 4px var(--pad) 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-inline: var(--pad);
-    scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) transparent;
-  }
-  .shot {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    scroll-snap-align: start;
-  }
-  .shot figcaption {
-    font-size: var(--t-caption);
-    color: var(--text-secondary);
-    text-align: center;
-  }
-
   /* Process */
   .steps {
     display: flex;
@@ -1106,6 +1069,10 @@ const home = withBase('/');
   }
   .stage-phone {
     width: clamp(220px, 26vw, 340px);
+  }
+  /* The prototype is read at a glance, so it gets a larger phone, but never taller than the screen */
+  .stage-phone.live {
+    width: min(380px, 100%, calc((100svh - 160px) * 450 / 920));
   }
   .stage-phones {
     display: flex;
@@ -1358,17 +1325,13 @@ const home = withBase('/');
     .stat-value {
       font-size: 30px;
     }
-    .gallery {
-      grid-auto-columns: 62%;
-      gap: 12px;
-    }
     .stage {
       padding: 56px 16px 40px;
     }
     .stage-phone {
       width: min(260px, 72%);
     }
-    /* Several "after" screens scroll sideways like the gallery */
+    /* Several "after" screens scroll sideways */
     .stage-phones {
       justify-content: flex-start;
       margin: 0 -16px;

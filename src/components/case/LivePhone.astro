@@ -1,0 +1,108 @@
+---
+import { withBase } from '../../scripts/url';
+
+interface Props {
+  /** Screen shown until the prototype loads (and without JavaScript), 402×874pt. */
+  poster: string;
+  alt: string;
+  /** Route the prototype opens on. */
+  route?: string;
+}
+
+/**
+ * The clickable PSB prototype inside the iPhone 17 Pro body. The app is built from the PSB repo
+ * by tools/psb-prototype into public/assets/cases/psb/prototype and is loaded when the phone
+ * comes near the screen. It renders a 402×874 viewport in a shadow root, scaled to the screen.
+ */
+const { poster, alt, route = '/' } = Astro.props;
+const base = withBase('assets/cases/psb/prototype/');
+---
+
+<div class="phone" data-live-phone data-base={base}>
+  <div class="screen">
+    <img class="poster" src={withBase(poster)} alt={alt} loading="lazy" decoding="async" />
+    <div class="app" data-psb-live-route={route} aria-label="Прототип ПСБ Mobile"></div>
+  </div>
+  <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
+</div>
+
+<style>
+  .phone {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 450 / 920;
+    container-type: inline-size;
+  }
+  .screen {
+    position: absolute;
+    left: calc(24 / 450 * 100%);
+    top: calc(23 / 920 * 100%);
+    width: calc(402 / 450 * 100%);
+    height: calc(874 / 920 * 100%);
+    border-radius: calc(60 / 450 * 100cqi);
+    overflow: hidden;
+    background: #0e1116;
+    /* Safari clips a scaled child to the rounded corners only with its own layer */
+    isolation: isolate;
+  }
+  .poster,
+  .app {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .poster {
+    object-fit: cover;
+    object-position: top;
+  }
+  .app {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .app[data-psb-ready] {
+    opacity: 1;
+  }
+  .body {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>
+
+<script>
+  // Loads the prototype once, when a phone is about a screen away, and keeps its 402pt
+  // viewport scaled to the width of the screen.
+  const phones = document.querySelectorAll<HTMLElement>('[data-live-phone]');
+
+  const load = (base: string) => {
+    for (const name of ['style-data.js', 'app.js']) {
+      const script = document.createElement('script');
+      script.src = base + name;
+      script.async = false;
+      document.body.append(script);
+    }
+  };
+
+  if (phones.length) {
+    const fit = new ResizeObserver((entries) => {
+      for (const { target } of entries) {
+        const app = target as HTMLElement;
+        app.style.setProperty('--prototype-scale', String(app.clientWidth / 402));
+      }
+    });
+    phones.forEach((phone) => fit.observe(phone.querySelector('.app')!));
+
+    const near = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        near.disconnect();
+        load(phones[0].dataset.base!);
+      },
+      { rootMargin: '100% 0px' },
+    );
+    phones.forEach((phone) => near.observe(phone));
+  }
+</script>

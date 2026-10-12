@@ -143,12 +143,48 @@ const directions = [
     title: 'Главная страница',
     lead: 'Повседневные задачи и предложения банка должны быть заметны одновременно, но не конкурировать между собой.',
     compare: { before: 'assets/cases/psb/main-before.webp', after: 'assets/cases/psb/main.webp' },
-    problem:
-      'Повседневные операции, промо и другие продукты имели близкий визуальный вес. Историю и кешбэк было трудно найти.',
-    solution:
-      'Сгруппировали баланс, действия и историю; показали карты внутри счетов. Сначала на главной был ещё и отдельный блок кешбэка, но вместе с вкладкой и бейджем получалось три входа. Блок убрали и оставили бейдж, чтобы проверить, заметят ли его.',
-    result:
-      'Кешбэк нашли все 30 участников: 63% — через «Выгоду», 37% — через бейдж у суммы, так что второй вход не остался незамеченным.',
+    // Facts row by row under the before/after slider, then the result
+    versus: {
+      rows: [
+        {
+          label: 'Баланс',
+          before: '«Всего доступно средств» в отдельной карточке',
+          after: '«Всего на счетах» наверху, рядом бейдж кешбэка',
+        },
+        {
+          label: 'Карты и счета',
+          before: 'Два отдельных списка',
+          after: 'Карты внутри своих счетов',
+        },
+        {
+          label: 'Частые действия',
+          before: 'Нет на главной',
+          after: 'QR, перевод, по номеру и пополнение под счетами',
+        },
+        {
+          label: 'История',
+          before: 'Отдельная вкладка, у каждой карты своя',
+          after: 'На главной, сразу под действиями',
+        },
+        {
+          label: 'Предложения банка',
+          before: 'Вес как у продуктов, среди счетов и карт',
+          after: 'Баннеры сверху, их можно закрыть',
+        },
+        {
+          label: 'Кешбэк',
+          before: '«Бонусный счёт» в конце главной',
+          after: 'Бейдж у баланса и вкладка «Выгода»',
+        },
+      ],
+      stats: [
+        { value: '63%', note: 'нашли кешбэк через вкладку «Выгода»' },
+        {
+          value: '37%',
+          note: 'через бейдж у баланса: второй вход не остался незамеченным',
+        },
+      ],
+    },
   },
   {
     id: 'card-data',
@@ -683,26 +719,9 @@ const home = withBase('/');
                 </>
               ) : null}
             </div>
-            {d.versus ? (
-              <div>
-                <Versus rows={d.versus.rows} stats={d.versus.stats} />
-              </div>
-            ) : (
-              <div class="psr">
-                <div>
-                  <h3 class="psr-title">Проблема</h3>
-                  <p class="body">{d.problem}</p>
-                </div>
-                <div>
-                  <h3 class="psr-title">Решение</h3>
-                  <p class="body">{d.solution}</p>
-                </div>
-                <div>
-                  <h3 class="psr-title">Результат</h3>
-                  <p class="body">{d.result}</p>
-                </div>
-              </div>
-            )}
+            <div>
+              <Versus rows={d.versus.rows} stats={d.versus.stats} />
+            </div>
           </section>
         ))}
 
@@ -1254,26 +1273,6 @@ const home = withBase('/');
   .stage-tag.right {
     right: 16px;
   }
-  .psr {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-grid);
-  }
-  .psr > div {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 16px;
-    border-top: var(--border-width-keyline) solid var(--border-default);
-  }
-  .psr-title {
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
-    color: var(--text-primary);
-  }
 
   /* Testing */
   .table-wrap {
@@ -1327,8 +1326,7 @@ const home = withBase('/');
     .step {
       grid-template-columns: minmax(0, 1fr);
     }
-    .trio,
-    .psr {
+    .trio {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .findings li {
@@ -1460,12 +1458,8 @@ const home = withBase('/');
     .h2 {
       font-size: 26px;
     }
-    .trio,
-    .psr {
+    .trio {
       grid-template-columns: minmax(0, 1fr);
-    }
-    .psr {
-      gap: 20px;
     }
     .stage {
       padding: 56px 16px 40px;

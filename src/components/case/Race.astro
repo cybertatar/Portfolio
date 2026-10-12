@@ -99,14 +99,14 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
     gap: clamp(16px, 8vw, 120px);
     width: 100%;
   }
+  /* The readout (bar, clock, step) keeps to the left edge of the bar; the label stays over the phone */
   .lane {
     display: flex;
     flex-direction: column;
-    align-items: center;
     min-width: 0;
-    text-align: center;
   }
   .lane-label {
+    align-self: center;
     margin: 0 0 16px;
     font-family: var(--font-pixel);
     font-size: var(--t-pixel-label);
@@ -165,7 +165,6 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
   .time {
     display: flex;
     align-items: baseline;
-    justify-content: center;
     flex-wrap: wrap;
     gap: 0 8px;
     margin: 16px 0 0;

@@ -40,6 +40,18 @@ const stacked = screens.length > 1;
     aspect-ratio: 450 / 920;
     container-type: inline-size;
   }
+  /* Black under the screen, a little past it: the subpixel seam between the screen and the
+     body's display border showed the page through as a light line around dark screens */
+  .phone::before {
+    content: '';
+    position: absolute;
+    left: calc(22 / 450 * 100%);
+    top: calc(21 / 920 * 100%);
+    width: calc(406 / 450 * 100%);
+    height: calc(878 / 920 * 100%);
+    border-radius: calc(62 / 450 * 100cqi);
+    background: #000;
+  }
   .screen {
     position: absolute;
     left: calc(24 / 450 * 100%);

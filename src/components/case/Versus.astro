@@ -50,11 +50,11 @@ const { rows, stats } = Astro.props;
       </div>
     ))}
   </div>
-  <!-- The result is its own group: a title and a list, on no column of the table (an aligned
-       row of numbers read as one more row of "было / стало") -->
-  <div class="result">
+  <!-- The result is its own card: the boundary groups the numbers, so they no longer read as
+       one more row of "было / стало" under the table's columns (NN/g, common region) -->
+  <div class="result px-clip">
     <p class="result-title">Итог теста</p>
-    <ul class="stats">
+    <ul class="stats" style={`--n: ${stats.length}`}>
       {stats.map((s) => (
         <li class="stat">
           <span class="value">
@@ -129,41 +129,40 @@ const { rows, stats } = Astro.props;
     clip-path: inset(50%);
   }
 
-  /* The result: a title close to its list (12px), far from the table (40px) */
+  /* The result card, built like the quest and HUD cards: title, then the numbers */
   .result {
+    --px-step: 3px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
   }
   .result-title {
     margin: 0;
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
+    font-size: var(--t-body);
     font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    line-height: var(--lh-snug);
     color: var(--text-primary);
   }
   .stats {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 40px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  /* Number and its meaning on one line, so the list never lines up with the table's columns */
   .stat {
-    display: grid;
-    grid-template-columns: calc(var(--t-stat) * 0.8 * 2.3) minmax(0, 1fr);
-    column-gap: 16px;
-    align-items: baseline;
-    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
   }
   .value {
-    font-size: calc(var(--t-stat) * 0.8);
+    font-size: var(--t-stat);
     font-weight: var(--fw-semibold);
-    line-height: 1.1;
+    line-height: 1.05;
     letter-spacing: -0.01em;
     color: var(--text-primary);
   }
@@ -175,14 +174,17 @@ const { rows, stats } = Astro.props;
     color: var(--text-secondary);
   }
   .note {
-    font-size: var(--t-body);
-    line-height: var(--lh-snug);
+    font-size: var(--t-caption);
+    line-height: var(--lh-normal);
     color: var(--text-secondary);
     text-wrap: pretty;
   }
 
   /* Narrow sheet: the subject on top, "было" and "стало" side by side under it */
   @container (max-width: 560px) {
+    .stats {
+      gap: 24px;
+    }
     .row {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       column-gap: 16px;

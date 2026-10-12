@@ -241,7 +241,6 @@ const directions = [
         },
       ],
       stats: [
-        { value: '30', unit: 'из 30', note: 'участников подключили кешбэк' },
         { value: '83%', note: 'сразу начали с правильного действия' },
         {
           value: '63%',
@@ -533,7 +532,7 @@ const home = withBase('/');
             </p>
             <h2 class="h2">{d.title}</h2>
             <p class="lead">{d.lead}</p>
-            <div class="stage px-clip">
+            <div class:list={['stage', 'px-clip', { 'race-stage': d.race }]}>
               {d.race ? (
                 <Race lanes={d.race} />
               ) : d.compare ? (
@@ -1360,6 +1359,10 @@ const home = withBase('/');
     }
     .stage {
       padding: 56px 16px 40px;
+    }
+    /* The race has no "До / После" tags to make room for at the top */
+    .stage.race-stage {
+      padding-top: 40px;
     }
     .stage-phone {
       width: min(260px, 72%);

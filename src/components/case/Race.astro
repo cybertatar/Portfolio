@@ -230,7 +230,9 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
       height: 8px;
       margin-top: 16px;
     }
+    /* The bar reads with the clock under it, not the phone above (12 < 16) */
     .time {
+      margin-top: 12px;
       font-size: 28px;
     }
     .end {

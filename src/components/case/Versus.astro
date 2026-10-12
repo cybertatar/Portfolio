@@ -81,8 +81,9 @@ const { rows, stats } = Astro.props;
     line-height: var(--lh-snug);
     text-wrap: pretty;
   }
+  /* Closer to its column than the rows are to each other (8 + 14 < 14 + 14) */
   .row.head {
-    padding: 0 0 12px;
+    padding: 0 0 8px;
     border-top: 0;
   }
   .before {
@@ -176,7 +177,7 @@ const { rows, stats } = Astro.props;
       display: none;
     }
     .stats {
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 24px;
     }
   }

@@ -393,61 +393,57 @@ export function initChapters(root: HTMLElement) {
 }
 
 /**
- * UI kit showcase (Kit.astro): the radio switches set the variant of the component on the
- * stage (data attributes the CSS reads). Rules from data-kit-rules lock an axis while another
- * axis has some value (an accent button is only primary), and lock the other options of that
- * axis. The card flips by its badge, the tab bar by its tabs, both kept in sync with the radios.
+ * UI kit explorer (Kit.astro): the list picks a component, the radios under the stage pick its
+ * variant properties. Not every combination exists in the Figma set (an accent button is only
+ * primary), so a switch takes the variant with that value that keeps most of the other choices,
+ * then the radios follow it.
  */
 export function initKit(root: HTMLElement) {
-  const target = root.querySelector<HTMLElement>('[data-kit-target]');
-  if (!target) return;
-  type Rule = { if: Record<string, string[]>; set: Record<string, string> };
-  const rules: Rule[] = root.dataset.kitRules ? JSON.parse(root.dataset.kitRules) : [];
-  const radios = (axis: string) => [
-    ...root.querySelectorAll<HTMLInputElement>(`[data-axis="${axis}"] input`),
-  ];
+  type Variant = { props: Record<string, string>; src: string; w: number; h: number };
+  type Component = { id: string; title: string; start: number; variants: Variant[] };
+  const json = root.querySelector('[data-kit-data]')?.textContent;
+  const img = root.querySelector<HTMLImageElement>('[data-kit-img]');
+  if (!json || !img) return;
+  const kit: Component[] = JSON.parse(json);
+  const current: Record<string, Variant> = Object.fromEntries(
+    kit.map((c) => [c.id, c.variants[c.start]]),
+  );
+  let active = kit[0];
 
-  const apply = () => {
-    const state: Record<string, string> = {};
-    root.querySelectorAll<HTMLElement>('[data-axis]').forEach((group) => {
-      const axis = group.dataset.axis!;
-      state[axis] = radios(axis).find((r) => r.checked)?.value ?? '';
+  const show = () => {
+    const v = current[active.id];
+    img.src = v.src;
+    img.width = v.w;
+    img.height = v.h;
+    img.style.setProperty('--w', String(v.w));
+    img.style.setProperty('--h', String(v.h));
+    img.alt = `${active.title}: ${Object.values(v.props).join(', ')}`;
+    root.querySelectorAll<HTMLElement>('[data-kit-panel]').forEach((panel) => {
+      panel.hidden = panel.dataset.kitPanel !== active.id;
     });
-    const locked: Record<string, string> = {};
-    for (const rule of rules) {
-      const hit = Object.entries(rule.if).every(([axis, values]) => values.includes(state[axis]));
-      if (hit) Object.assign(locked, rule.set);
-    }
-    // A lock can trip another rule (ghost sets orange, orange locks glass): apply them again
-    for (const rule of rules) {
-      const hit = Object.entries(rule.if).every(([axis, values]) =>
-        values.includes(locked[axis] ?? state[axis]),
-      );
-      if (hit) Object.assign(locked, rule.set);
-    }
-    Object.keys(state).forEach((axis) => {
-      const value = locked[axis] ?? state[axis];
-      radios(axis).forEach((r) => {
-        r.disabled = axis in locked && r.value !== value;
-        r.checked = r.value === value;
-      });
-      target.dataset[axis] = value;
+    const panel = root.querySelector(`[data-kit-panel="${active.id}"]`);
+    panel?.querySelectorAll<HTMLInputElement>('[data-axis] input').forEach((r) => {
+      const axis = r.closest<HTMLElement>('[data-axis]')!.dataset.axis!;
+      r.checked = v.props[axis] === r.value;
     });
   };
 
-  const set = (axis: string, value: string) => {
-    const radio = radios(axis).find((r) => r.value === value);
-    if (!radio || radio.disabled) return;
-    radio.checked = true;
-    apply();
-  };
-
-  root.addEventListener('change', apply);
-  root
-    .querySelectorAll<HTMLElement>('[data-kit-flip]')
-    .forEach((badge) => badge.addEventListener('click', () => set('side', badge.dataset.kitFlip!)));
-  root
-    .querySelectorAll<HTMLElement>('[data-kit-tab]')
-    .forEach((tab) => tab.addEventListener('click', () => set('selected', tab.dataset.kitTab!)));
-  apply();
+  root.addEventListener('change', (e) => {
+    const input = e.target as HTMLInputElement;
+    if (input.name === 'kit-component') {
+      active = kit.find((c) => c.id === input.value) ?? active;
+      show();
+      return;
+    }
+    const axis = input.closest<HTMLElement>('[data-axis]')?.dataset.axis;
+    if (!axis) return;
+    const now = current[active.id].props;
+    const score = (v: Variant) =>
+      Object.entries(now).filter(([k, value]) => k !== axis && v.props[k] === value).length;
+    const best = active.variants
+      .filter((v) => v.props[axis] === input.value)
+      .reduce<Variant | null>((a, v) => (!a || score(v) > score(a) ? v : a), null);
+    if (best) current[active.id] = best;
+    show();
+  });
 }

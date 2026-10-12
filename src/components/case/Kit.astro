@@ -1,19 +1,15 @@
 ---
 import { withBase } from '../../scripts/url';
+import { kit } from '../../content/psb-kit';
 
 /**
  * The PSB UI kit as a showcase: the foundations (colour tokens, the Onest type scale, icons in
- * three sizes), then four components rebuilt from the Figma kit (UI-Kit page of the
- * PSB-Bank-Redesign-Concept file) with their variant axes as switches, like the "passports"
- * there: Button, icnButton, the bank card and the tab bar. Sizes, radii and colours are taken
- * from the Figma components 1:1. Switching is initKit in scripts/case.ts; without JS every
- * component shows its first variant. Kit pieces sit on the kit's own dark page colour, the
- * labels around them are the site's.
+ * three sizes), then every public component of the Figma kit in one explorer: pick a component
+ * on the left, switch its variant properties under the stage, like the "passports" in Figma.
+ * Variants are images cut from the Figma component sets (src/content/psb-kit.ts) on the kit's
+ * #1E1E1E canvas, shown at their real size and scaled down only when taller than the stage.
+ * Switching is initKit in scripts/case.ts; without JS the first variant of Button shows.
  */
-
-const iconUrl = (name: string) => `url('${withBase(`assets/cases/psb/kit/icons/${name}.svg`)}')`;
-const icon = (name: string) => `--i: ${iconUrl(name)}`;
-const kitAsset = (name: string) => withBase(`assets/cases/psb/kit/${name}`);
 
 interface Swatch {
   name: string;
@@ -164,98 +160,25 @@ const icons = [
   },
 ];
 
-interface Axis {
-  name: string;
-  options: { value: string; label?: string }[];
-}
-/** A rule locks an axis to one value while another axis has one of the listed values */
-interface Rule {
-  if: Record<string, string[]>;
-  set: Record<string, string>;
-}
-
-const opts = (...values: string[]) => values.map((value) => ({ value }));
-const sizes = [
-  { value: 'xsmall', label: '24' },
-  { value: 'small', label: '36' },
-  { value: 'medium', label: '44' },
-  { value: 'large', label: '52' },
-];
-
-const playgrounds: {
-  id: string;
-  title: string;
-  desc: string;
-  axes: Axis[];
-  initial: Record<string, string>;
-  rules?: Rule[];
-}[] = [
-  {
-    id: 'button',
-    title: 'Button',
-    desc: 'Запускает все важные действия в интерфейсе. Акцентный цвет — только у основной кнопки.',
-    axes: [
-      { name: 'type', options: opts('primary', 'secondary', 'danger', 'ghost') },
-      { name: 'color', options: opts('accent', 'neutral') },
-      { name: 'size', options: sizes },
-      { name: 'radius', options: opts('circle', 'squircle') },
-    ],
-    initial: { type: 'primary', color: 'accent', size: 'medium', radius: 'circle' },
-    rules: [{ if: { type: ['secondary', 'danger', 'ghost'] }, set: { color: 'neutral' } }],
-  },
-  {
-    id: 'icn',
-    title: 'icnButton',
-    desc: 'Элемент управления в навигации, полях и баннерах. Стекло — у нейтральной поверх фона.',
-    axes: [
-      { name: 'type', options: opts('accent', 'ghost') },
-      { name: 'color', options: opts('orange', 'neutral') },
-      { name: 'glass', options: opts('false', 'frost', 'liquid') },
-      { name: 'size', options: sizes },
-      { name: 'radius', options: opts('circle', 'squircle') },
-    ],
-    initial: { type: 'accent', color: 'neutral', glass: 'frost', size: 'large', radius: 'circle' },
-    rules: [
-      { if: { type: ['ghost'] }, set: { color: 'orange', glass: 'false' } },
-      { if: { color: ['orange'] }, set: { glass: 'false' } },
-    ],
-  },
-  {
-    id: 'card',
-    title: 'Card',
-    desc: 'Карта на главной и в счёте. Переворачивается, чтобы показать реквизиты, — нажмите на плашку.',
-    axes: [
-      { name: 'type', options: opts('night', 'orange') },
-      { name: 'side', options: opts('front', 'back') },
-    ],
-    initial: { type: 'night', side: 'front' },
-  },
-  {
-    id: 'tabbar',
-    title: 'Tabbar',
-    desc: 'Навигация внизу экрана для быстрого переключения разделов продукта.',
-    axes: [{ name: 'selected', options: opts('1', '2', '3', '4', '5') }],
-    initial: { selected: '1' },
-  },
-];
-
-const tabs = [
-  { icon: 'm-logo', label: 'Главная' },
-  { icon: 'm-exchange', label: 'Платежи' },
-  { icon: 'm-heart', label: 'Выгода' },
-  { icon: 'm-chat', label: 'Чат' },
-  { icon: 'm-more', label: 'Ещё' },
-];
-
-const fields = [
-  { label: 'Номер карты', value: '4588 2344 4563 3124', wide: true },
-  { label: 'Срок', value: '07/28' },
-  { label: 'CVV', value: '456' },
-];
-
-let uid = 0;
-const dataAttrs = (state: Record<string, string>) =>
-  Object.fromEntries(Object.entries(state).map(([k, v]) => [`data-${k}`, v]));
+// The variant a component opens on: the first one, or a mid-size one where the first is the
+// smallest of a size axis
+const starts: Record<string, Record<string, string>> = {
+  button: { type: 'primary', color: 'accent', size: 'medium', radius: 'circle' },
+  icnbutton: { size: 'large', type: 'accent', color: 'primary', radius: 'circle', glass: 'false' },
+};
+// Image paths with the site base, for the explorer script
+const data = kit.map((c) => {
+  const want = starts[c.id];
+  const start = want
+    ? Math.max(
+        0,
+        c.variants.findIndex((v) => Object.entries(want).every(([k, x]) => v.props[k] === x)),
+      )
+    : 0;
+  return { ...c, start, variants: c.variants.map((v) => ({ ...v, src: withBase(v.src) })) };
+});
+const first = data[0];
+const firstVariant = first.variants[first.start];
 ---
 
 <link rel="stylesheet" href={withBase('assets/cases/psb/live/fonts.css')} />
@@ -350,124 +273,74 @@ const dataAttrs = (state: Record<string, string>) =>
     </div>
   </article>
 
-  <!-- ---------- Components ---------- -->
-  <div class="comps">
-    {playgrounds.map((p) => {
-      const id = `kit-${p.id}-${uid++}`;
-      return (
-        <article
-          class="card pg px-clip"
-          data-kit
-          data-kit-rules={p.rules ? JSON.stringify(p.rules) : undefined}
-        >
-          <header class="head">
-            <h3 class="title">{p.title}</h3>
-            <p class="desc">{p.desc}</p>
-          </header>
-
-          <div class:list={['stage px-clip', `stage-${p.id}`]}>
-            {p.id !== 'button' && <span class="blob" aria-hidden="true" />}
-
-            {p.id === 'button' && (
-              <button class="k-btn" type="button" data-kit-target {...dataAttrs(p.initial)}>
-                <span class="k-ico" style={icon('m-cashback')} />
-                <span class="k-label">Кешбэк</span>
-                <span class="k-ico" style={icon('m-cashback')} />
-              </button>
-            )}
-
-            {p.id === 'icn' && (
-              <button
-                class="k-icn"
-                type="button"
-                aria-label="Закрыть"
-                data-kit-target
-                {...dataAttrs(p.initial)}
-              >
-                <span class="k-ico" style={`${icon('m-close')}; --i-s: ${iconUrl('s-close')}`} />
-              </button>
-            )}
-
-            {p.id === 'card' && (
-              <div class="k-card" data-kit-target {...dataAttrs(p.initial)}>
-                <div class="k-face k-front">
-                  <img class="k-logo night" src={kitAsset('card-logo-night.svg')} alt="" />
-                  <img class="k-logo orange" src={kitAsset('card-logo-orange.svg')} alt="" />
-                  <img class="k-mir night" src={kitAsset('card-mir-night.svg')} alt="МИР" />
-                  <img class="k-mir orange" src={kitAsset('card-mir-orange.svg')} alt="МИР" />
-                  <div class="k-bar">
-                    <span class="k-num">*2345</span>
-                    <button class="k-badge" type="button" data-kit-flip="back">
-                      <span class="k-ico" style={icon('s-show')} />
-                      Данные карты
-                    </button>
+  <!-- ---------- Components: one explorer ---------- -->
+  <article class="card px-clip" data-kit>
+    <header class="head">
+      <h3 class="title">Компоненты</h3>
+      <p class="desc">
+        {data.length} компонентов, {data.reduce((n, c) => n + c.variants.length, 0)} вариантов.
+        Выберите компонент и переключайте его свойства.
+      </p>
+    </header>
+    <div class="explorer">
+      <div class="list" role="radiogroup" aria-label="Компонент">
+        {data.map((c, i) => (
+          <label class="item">
+            <input type="radio" name="kit-component" value={c.id} checked={i === 0} />
+            <span class="item-face px-clip">{c.title}</span>
+          </label>
+        ))}
+      </div>
+      <div class="view">
+        <div class="stage stage-kit px-clip">
+          <img
+            class="variant"
+            data-kit-img
+            src={firstVariant.src}
+            alt={`${first.title}: ${Object.values(firstVariant.props).join(', ')}`}
+            width={firstVariant.w}
+            height={firstVariant.h}
+            style={`--w: ${firstVariant.w}; --h: ${firstVariant.h}`}
+          />
+        </div>
+        {data.map((c, i) => (
+          <div class="panel" data-kit-panel={c.id} hidden={i !== 0}>
+            <p class="panel-desc">{c.desc}</p>
+            <div class="axes">
+              {c.axes
+                .filter((a) => a.values.length > 1)
+                .map((a) => (
+                  <div
+                    class="axis"
+                    role="radiogroup"
+                    aria-labelledby={`kit-${c.id}-${a.name}`}
+                    data-axis={a.name}
+                  >
+                    <span class="axis-name" id={`kit-${c.id}-${a.name}`}>
+                      {a.name}
+                    </span>
+                    <span class="opts">
+                      {a.values.map((v) => (
+                        <label class="opt">
+                          <input
+                            type="radio"
+                            name={`kit-${c.id}-${a.name}`}
+                            value={v}
+                            checked={c.variants[c.start].props[a.name] === v}
+                          />
+                          <span class="opt-face px-clip">{v}</span>
+                        </label>
+                      ))}
+                    </span>
                   </div>
-                </div>
-                <div class="k-face k-back">
-                  <div class="k-fields">
-                    {fields.map((f) => (
-                      <span class:list={['k-field', { wide: f.wide }]}>
-                        <span class="k-field-label">{f.label}</span>
-                        <span class="k-field-box">
-                          <span class="k-field-value">{f.value}</span>
-                          <span class="k-ico" style={icon('s-copy')} />
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                  <div class="k-bar end">
-                    <button class="k-badge" type="button" data-kit-flip="front">
-                      <span class="k-ico" style={icon('m-show')} />
-                      Скрыть
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {p.id === 'tabbar' && (
-              <nav class="k-tabbar" aria-label="Таббар" data-kit-target {...dataAttrs(p.initial)}>
-                {tabs.map((t, i) => (
-                  <button class="k-tab" type="button" data-kit-tab={i + 1}>
-                    <span class="k-ico" style={icon(t.icon)} />
-                    <span class="k-tab-label">{t.label}</span>
-                  </button>
                 ))}
-              </nav>
-            )}
+            </div>
           </div>
-
-          <div class="axes">
-            {p.axes.map((a) => (
-              <div
-                class="axis"
-                role="radiogroup"
-                aria-labelledby={`${id}-${a.name}-label`}
-                data-axis={a.name}
-              >
-                <span class="axis-name" id={`${id}-${a.name}-label`}>
-                  {a.name}
-                </span>
-                <span class="opts">
-                  {a.options.map((o) => (
-                    <label class="opt">
-                      <input
-                        type="radio"
-                        name={`${id}-${a.name}`}
-                        value={o.value}
-                        checked={p.initial[a.name] === o.value}
-                      />
-                      <span class="opt-face px-clip">{o.label ?? o.value}</span>
-                    </label>
-                  ))}
-                </span>
-              </div>
-            ))}
-          </div>
-        </article>
-      );
-    })}
-  </div>
+        ))}
+      </div>
+    </div>
+    <script type="application/json" data-kit-data set:html={JSON.stringify(data)} />
+  </article>
 </div>
 
 <style>
@@ -482,11 +355,6 @@ const dataAttrs = (state: Record<string, string>) =>
   .found {
     display: grid;
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: 24px;
-  }
-  .comps {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 24px;
   }
 
@@ -649,13 +517,6 @@ const dataAttrs = (state: Record<string, string>) =>
     line-height: 16px;
     color: rgba(255, 255, 255, 0.5);
   }
-  .k-ico {
-    flex: none;
-    width: var(--s, 24px);
-    height: var(--s, 24px);
-    background: currentColor;
-    mask: var(--i) center / contain no-repeat;
-  }
 
   .icons-stage {
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -683,391 +544,87 @@ const dataAttrs = (state: Record<string, string>) =>
     height: var(--s);
   }
 
-  /* The kit's background animation: one warm blob drifting under glass components */
-  .blob {
+  /* ---------- Components explorer ---------- */
+
+  .explorer {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .item,
+  .opt {
+    position: relative;
+  }
+  .item input {
     position: absolute;
-    z-index: -1;
-    left: 50%;
-    top: 50%;
-    width: 260px;
-    height: 260px;
-    margin: -130px 0 0 -130px;
-    border-radius: 50%;
-    background: radial-gradient(closest-side, #8a2a08, rgba(138, 42, 8, 0));
-    animation: blob 14s ease-in-out infinite;
-  }
-  @keyframes blob {
-    0%,
-    100% {
-      transform: translate(-30%, 25%);
-    }
-    20% {
-      transform: translate(20%, 15%);
-    }
-    40% {
-      transform: translate(25%, -20%);
-    }
-    60% {
-      transform: translate(0, -35%);
-    }
-    80% {
-      transform: translate(-25%, -10%);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .blob {
-      animation: none;
-      transform: translate(10%, -10%);
-    }
-  }
-
-  .stage-button,
-  .stage-icn {
-    min-height: 180px;
-  }
-  .stage-card,
-  .stage-tabbar {
-    min-height: 300px;
-  }
-  .stage-tabbar {
-    align-items: end;
-  }
-
-  /* ---------- Button (❖ button) ---------- */
-
-  .k-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    height: 44px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 999px;
-    background: #e86630;
-    font: 500 16px/20px var(--kit-onest);
-    color: #fff;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
     cursor: pointer;
+  }
+  .item-face {
+    --px-step: 2px;
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: var(--t-caption);
+    color: var(--text-secondary);
     transition:
       background-color 0.15s,
       color 0.15s;
   }
-  .k-label {
-    padding: 0 4px;
+  .item:hover .item-face {
+    background: var(--surface-active);
   }
-  .k-btn[data-size='xsmall'] {
-    gap: 0;
-    height: 24px;
-    padding: 0 8px;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 16px;
+  .item input:checked + .item-face {
+    background: var(--surface-card);
+    font-weight: var(--fw-medium);
+    color: var(--text-accent);
   }
-  .k-btn[data-size='xsmall'] .k-ico {
-    --s: 16px;
+  .item input:focus-visible + .item-face {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
   }
-  .k-btn[data-size='small'] {
-    gap: 2px;
-    height: 36px;
+  .view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
   }
-  .k-btn[data-size='large'] {
-    height: 52px;
-    padding: 0 16px;
+  /* The kit's own Figma canvas, so the cut variants sit on it without seams */
+  .stage-kit {
+    /* Height of the stage's content box: tall variants (whole screens) scale to it */
+    --sh: 392;
+    height: calc(var(--sh) * 1px + 48px);
+    padding: 24px;
+    background: #1e1e1e;
   }
-  .k-btn[data-radius='squircle'] {
-    border-radius: 16px;
+  /* Real size (1 Figma px = 1 CSS px), scaled down only to fit the stage */
+  .variant {
+    display: block;
+    width: min(calc(var(--w) * 1px), 100%, calc(var(--sh) * var(--w) / var(--h) * 1px));
+    height: auto;
   }
-  .k-btn[data-radius='squircle'][data-size='small'] {
-    border-radius: 12px;
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
-  .k-btn[data-radius='squircle'][data-size='xsmall'] {
-    border-radius: 8px;
-  }
-  .k-btn[data-color='neutral'] {
-    background: #fff;
-    color: #0a0c0f;
-  }
-  .k-btn[data-type='secondary'],
-  .k-btn[data-type='danger'] {
-    background: #242a33;
-    color: #fff;
-  }
-  .k-btn[data-type='danger'] {
-    color: #fe1818;
-  }
-  .k-btn[data-type='ghost'] {
-    background: transparent;
-    color: #fff;
-  }
-
-  /* ---------- icnButton (❖ icnButton) ---------- */
-
-  .k-icn {
-    display: inline-flex;
-    padding: 14px;
-    border: 0;
-    border-radius: 999px;
-    background: #242a33;
-    color: #fff;
-    cursor: pointer;
-    transition:
-      background-color 0.15s,
-      padding 0.15s;
-  }
-  .k-icn[data-size='medium'] {
-    padding: 10px;
-  }
-  .k-icn[data-size='small'] {
-    padding: 10px;
-  }
-  .k-icn[data-size='xsmall'] {
-    padding: 4px;
-  }
-  .k-icn[data-size='small'] .k-ico,
-  .k-icn[data-size='xsmall'] .k-ico {
-    --s: 16px;
-    mask-image: var(--i-s);
-  }
-  .k-icn[data-radius='squircle'] {
-    border-radius: 12px;
-  }
-  .k-icn[data-radius='squircle'][data-size='medium'] {
-    border-radius: 10px;
-  }
-  .k-icn[data-radius='squircle'][data-size='small'] {
-    border-radius: 8px;
-  }
-  .k-icn[data-radius='squircle'][data-size='xsmall'] {
-    border-radius: 6px;
-  }
-  .k-icn[data-color='orange'] {
-    background: #e86630;
-  }
-  .k-icn[data-glass='frost'] {
-    background: rgba(36, 42, 51, 0.5);
-    backdrop-filter: blur(6px);
-  }
-  /* Figma's liquid glass (Glass effect, radius 4): a clear lens with a lit rim */
-  .k-icn[data-glass='liquid'] {
-    background: rgba(36, 42, 51, 0.5);
-    backdrop-filter: blur(2px) saturate(1.6);
-    box-shadow:
-      inset 0 1px 1px rgba(255, 255, 255, 0.35),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.12),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
-  .k-icn[data-type='ghost'] {
-    background: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-  }
-
-  /* ---------- Card (❖ Card front / back / flip), 320×213 scaled to fit ---------- */
-
-  .k-card {
-    --u: calc(min(320px, 100cqw) / 320);
-    position: relative;
-    width: min(320px, 100%);
-    aspect-ratio: 320 / 213;
-    perspective: 900px;
-  }
-  .stage-card {
-    container-type: inline-size;
-  }
-  .k-face {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    border-radius: calc(20 * var(--u));
-    backface-visibility: hidden;
-    transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
-  }
-  .k-back {
-    transform: rotateY(180deg);
-  }
-  .k-card[data-side='back'] .k-front {
-    transform: rotateY(-180deg);
-  }
-  .k-card[data-side='back'] .k-back {
-    transform: rotateY(0);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .k-face {
-      transition: none;
-    }
-  }
-  .k-front {
-    background: #3a3b57;
-  }
-  .k-card[data-type='orange'] .k-front {
-    background: #e86630;
-  }
-  .k-logo {
-    position: absolute;
-    left: calc(-19 * var(--u));
-    top: 0;
-    width: calc(213 * var(--u));
-    height: calc(213 * var(--u));
-  }
-  .k-mir {
-    position: absolute;
-    left: calc((264 + 11.5 - 41.5) * var(--u));
-    top: calc((64 + 41.5 - 11.5) * var(--u));
-    width: calc(83 * var(--u));
-    height: calc(23 * var(--u));
-    transform: rotate(-90deg);
-  }
-  .k-card[data-type='night'] .orange,
-  .k-card[data-type='orange'] .night {
+  .panel[hidden] {
     display: none;
   }
-  .k-bar {
-    position: absolute;
-    left: calc(16 * var(--u));
-    right: calc(16 * var(--u));
-    bottom: calc(16 * var(--u));
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .k-bar.end {
-    justify-content: flex-end;
-  }
-  .k-num {
-    font-size: calc(12 * var(--u));
-    line-height: calc(16 * var(--u));
-    color: #fff;
-  }
-  .k-card[data-type='orange'] .k-num {
-    color: #0a0c0f;
-  }
-  .k-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: calc(4 * var(--u));
-    padding: calc(4 * var(--u)) calc(8 * var(--u));
-    border: 0;
-    border-radius: 999px;
-    background: #242a33;
-    font: 400 calc(12 * var(--u)) / calc(16 * var(--u)) var(--kit-onest);
-    color: #fff;
-    cursor: pointer;
-  }
-  .k-badge .k-ico {
-    --s: calc(16 * var(--u));
-  }
-  .k-back {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: calc(16 * var(--u));
-    border: calc(1 * var(--u)) solid #585892;
-    background: #161a20;
-  }
-  .k-card[data-type='orange'] .k-back {
-    border-color: #e86630;
-  }
-  .k-back .k-bar {
-    position: static;
-  }
-  .k-fields {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: calc(8 * var(--u));
-  }
-  .k-field {
-    display: flex;
-    flex-direction: column;
-    gap: calc(4 * var(--u));
-    min-width: 0;
-  }
-  .k-field.wide {
-    grid-column: 1 / -1;
-  }
-  .k-field-label {
-    font-size: calc(12 * var(--u));
-    font-weight: 500;
-    line-height: calc(16 * var(--u));
-    color: rgba(255, 255, 255, 0.5);
-  }
-  .k-field-box {
-    display: flex;
-    align-items: center;
-    gap: calc(4 * var(--u));
-    height: calc(44 * var(--u));
-    padding: 0 calc(12 * var(--u));
-    border-radius: calc(20 * var(--u));
-    background: #242a33;
-  }
-  .k-field-value {
-    flex: 1;
-    min-width: 0;
-    padding: 0 calc(4 * var(--u));
-    font-size: calc(16 * var(--u));
-    line-height: calc(20 * var(--u));
-    white-space: nowrap;
-  }
-  .k-field-box .k-ico {
-    --s: calc(16 * var(--u));
-  }
-
-  /* ---------- Tabbar (❖ tabbar), 402×99 scaled to fit ---------- */
-
-  .stage-tabbar {
-    container-type: inline-size;
-    padding-bottom: 0;
-  }
-  .k-tabbar {
-    --u: calc(min(402px, 100cqw) / 402);
-    display: flex;
-    justify-content: center;
-    gap: calc(28 * var(--u));
-    width: min(402px, 100%);
-    padding: calc(12 * var(--u)) calc(16 * var(--u)) calc(32 * var(--u));
-    border-radius: calc(32 * var(--u)) calc(32 * var(--u)) 0 0;
-    background: rgba(36, 42, 51, 0.75);
-    backdrop-filter: blur(11.2px);
-  }
-  .k-tab {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: calc(4 * var(--u));
-    width: calc(44 * var(--u));
-    min-height: calc(44 * var(--u));
-    padding: 0;
-    border: 0;
-    background: none;
-    font: 400 calc(12 * var(--u)) / calc(16 * var(--u)) var(--kit-onest);
-    color: rgba(255, 255, 255, 0.5);
-    white-space: nowrap;
-    cursor: pointer;
-  }
-  .k-tab .k-ico {
-    --s: calc(24 * var(--u));
-    color: #a8a8bf;
-  }
-  .k-tabbar[data-selected='1'] .k-tab:nth-child(1),
-  .k-tabbar[data-selected='2'] .k-tab:nth-child(2),
-  .k-tabbar[data-selected='3'] .k-tab:nth-child(3),
-  .k-tabbar[data-selected='4'] .k-tab:nth-child(4),
-  .k-tabbar[data-selected='5'] .k-tab:nth-child(5) {
-    color: #e86630;
-  }
-  .k-tabbar[data-selected='1'] .k-tab:nth-child(1) .k-ico,
-  .k-tabbar[data-selected='2'] .k-tab:nth-child(2) .k-ico,
-  .k-tabbar[data-selected='3'] .k-tab:nth-child(3) .k-ico,
-  .k-tabbar[data-selected='4'] .k-tab:nth-child(4) .k-ico,
-  .k-tabbar[data-selected='5'] .k-tab:nth-child(5) .k-ico {
-    color: #e86630;
-  }
-
-  .k-btn:focus-visible,
-  .k-icn:focus-visible,
-  .k-badge:focus-visible,
-  .k-tab:focus-visible {
-    outline: 2px solid var(--sky-300);
-    outline-offset: 3px;
+  .panel-desc {
+    margin: 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
   }
 
   /* ---------- Axis switches: the variant properties of the Figma component ---------- */
@@ -1091,9 +648,6 @@ const dataAttrs = (state: Record<string, string>) =>
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-  }
-  .opt {
-    position: relative;
   }
   .opt input {
     position: absolute;
@@ -1136,9 +690,23 @@ const dataAttrs = (state: Record<string, string>) =>
   /* ---------- Narrow sheet ---------- */
 
   @container (max-width: 860px) {
-    .found,
-    .comps {
+    .found {
       grid-template-columns: minmax(0, 1fr);
+    }
+    /* The list becomes a row of chips that scrolls sideways */
+    .explorer {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+    .list {
+      flex-direction: row;
+      margin: 0 calc(var(--space-tile) * -1);
+      padding: 0 var(--space-tile);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .item-face {
+      white-space: nowrap;
     }
   }
   @container (max-width: 560px) {
@@ -1164,9 +732,10 @@ const dataAttrs = (state: Record<string, string>) =>
     .stage {
       padding: 20px 16px;
     }
-    .stage-card,
-    .stage-tabbar {
-      min-height: 240px;
+    .stage-kit {
+      --sh: 280;
+      padding: 20px 16px;
+      height: calc(var(--sh) * 1px + 40px);
     }
     /* One column, name and hex on one line: two columns cut the token names */
     .swatches {

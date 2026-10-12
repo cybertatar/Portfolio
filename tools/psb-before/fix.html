@@ -17,6 +17,43 @@
         BAR = 70;
       // Android screens: status bar rows 0..43, nav bar from 1239
       const ANDROID = [3, 4, 5, 6, 8, 9, 10];
+      // Android screens whose full-width button sat on the nav bar
+      const LIFTED = [5, 6, 9, 10];
+      const SAFE = 48;
+      // The longest stretch of rows that are one flat colour, as [from, to) in source rows
+      function emptyRun(img, y0, y1) {
+        const c = document.createElement('canvas');
+        c.width = W;
+        c.height = H;
+        const k = c.getContext('2d');
+        k.drawImage(img, 0, 0);
+        const d = k.getImageData(0, 0, W, H).data;
+        const flat = (y) => {
+          const i0 = (y * W + 8) * 4;
+          for (let x = 8; x < W - 8; x += 3) {
+            const i = (y * W + x) * 4;
+            if (
+              Math.abs(d[i] - d[i0]) +
+                Math.abs(d[i + 1] - d[i0 + 1]) +
+                Math.abs(d[i + 2] - d[i0 + 2]) >
+              9
+            )
+              return false;
+          }
+          return true;
+        };
+        let best = [y0, y0];
+        let start = -1;
+        for (let y = y0; y <= y1; y++) {
+          if (y < y1 && flat(y)) {
+            if (start < 0) start = y;
+          } else if (start >= 0) {
+            if (y - start > best[1] - best[0]) best = [start, y];
+            start = -1;
+          }
+        }
+        return best;
+      }
       const load = (src) =>
         new Promise((r) => {
           const i = new Image();
@@ -141,9 +178,22 @@
             top = px(img, 6, 50);
             ctx.fillStyle = `rgb(${top})`;
             ctx.fillRect(0, 0, W, H);
-            ctx.drawImage(img, 0, 44, W, 1195, 0, BAR, W, 1195);
-            ctx.fillStyle = `rgb(${px(img, 40, 1236)})`;
-            ctx.fillRect(0, BAR + 1195, W, H - BAR - 1195);
+            if (LIFTED.includes(n)) {
+              // A full-width button at the bottom: lift it above the home indicator like an
+              // iOS safe area, taking the room out of the screen's longest empty stretch
+              const cut = BAR + 1195 + SAFE - H;
+              const [from, to] = emptyRun(img, 44, 1239);
+              const at = Math.round((from + to) / 2 - cut / 2);
+              ctx.drawImage(img, 0, 44, W, at - 44, 0, BAR, W, at - 44);
+              const rest = 1239 - (at + cut);
+              ctx.drawImage(img, 0, at + cut, W, rest, 0, BAR + at - 44, W, rest);
+              ctx.fillStyle = `rgb(${px(img, 6, from + 4)})`;
+              ctx.fillRect(0, H - SAFE, W, SAFE);
+            } else {
+              ctx.drawImage(img, 0, 44, W, 1195, 0, BAR, W, 1195);
+              ctx.fillStyle = `rgb(${px(img, 40, 1236)})`;
+              ctx.fillRect(0, BAR + 1195, W, H - BAR - 1195);
+            }
           } else {
             top = px(img, 40, 70);
             ctx.fillStyle = `rgb(${top})`;

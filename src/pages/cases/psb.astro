@@ -14,6 +14,7 @@ import TestingScene from '../../components/case/scenes/TestingScene.astro';
 import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import Media from '../../components/ui/Media.astro';
+import Kit from '../../components/case/Kit.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
 import { withBase } from '../../scripts/url';
 
@@ -747,9 +748,7 @@ const home = withBase('/');
             Хоть это и концепт, на каждый компонент я написал спецификацию и разложил компоненты
             так, чтобы с ними было удобно работать.
           </p>
-          <div class="slot wide-slot px-clip">
-            <Media label={{ ru: 'Место для UI-кита', en: 'UI kit goes here' }} />
-          </div>
+          <Kit />
         </section>
 
         <!-- ---------- Testing ---------- -->
@@ -838,6 +837,7 @@ const home = withBase('/');
     initCompare,
     initChapters,
     initHud,
+    initKit,
     initQuestDeck,
     initRace,
     initScrollSpy,
@@ -854,6 +854,7 @@ const home = withBase('/');
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
   document.querySelectorAll<HTMLElement>('[data-race]').forEach(initRace);
+  document.querySelectorAll<HTMLElement>('[data-kit]').forEach(initKit);
 </script>
 
 <style>

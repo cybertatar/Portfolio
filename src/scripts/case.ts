@@ -391,3 +391,63 @@ export function initChapters(root: HTMLElement) {
   layout();
   document.fonts?.ready.then(layout);
 }
+
+/**
+ * UI kit showcase (Kit.astro): the radio switches set the variant of the component on the
+ * stage (data attributes the CSS reads). Rules from data-kit-rules lock an axis while another
+ * axis has some value (an accent button is only primary), and lock the other options of that
+ * axis. The card flips by its badge, the tab bar by its tabs, both kept in sync with the radios.
+ */
+export function initKit(root: HTMLElement) {
+  const target = root.querySelector<HTMLElement>('[data-kit-target]');
+  if (!target) return;
+  type Rule = { if: Record<string, string[]>; set: Record<string, string> };
+  const rules: Rule[] = root.dataset.kitRules ? JSON.parse(root.dataset.kitRules) : [];
+  const radios = (axis: string) => [
+    ...root.querySelectorAll<HTMLInputElement>(`[data-axis="${axis}"] input`),
+  ];
+
+  const apply = () => {
+    const state: Record<string, string> = {};
+    root.querySelectorAll<HTMLElement>('[data-axis]').forEach((group) => {
+      const axis = group.dataset.axis!;
+      state[axis] = radios(axis).find((r) => r.checked)?.value ?? '';
+    });
+    const locked: Record<string, string> = {};
+    for (const rule of rules) {
+      const hit = Object.entries(rule.if).every(([axis, values]) => values.includes(state[axis]));
+      if (hit) Object.assign(locked, rule.set);
+    }
+    // A lock can trip another rule (ghost sets orange, orange locks glass): apply them again
+    for (const rule of rules) {
+      const hit = Object.entries(rule.if).every(([axis, values]) =>
+        values.includes(locked[axis] ?? state[axis]),
+      );
+      if (hit) Object.assign(locked, rule.set);
+    }
+    Object.keys(state).forEach((axis) => {
+      const value = locked[axis] ?? state[axis];
+      radios(axis).forEach((r) => {
+        r.disabled = axis in locked && r.value !== value;
+        r.checked = r.value === value;
+      });
+      target.dataset[axis] = value;
+    });
+  };
+
+  const set = (axis: string, value: string) => {
+    const radio = radios(axis).find((r) => r.value === value);
+    if (!radio || radio.disabled) return;
+    radio.checked = true;
+    apply();
+  };
+
+  root.addEventListener('change', apply);
+  root
+    .querySelectorAll<HTMLElement>('[data-kit-flip]')
+    .forEach((badge) => badge.addEventListener('click', () => set('side', badge.dataset.kitFlip!)));
+  root
+    .querySelectorAll<HTMLElement>('[data-kit-tab]')
+    .forEach((tab) => tab.addEventListener('click', () => set('selected', tab.dataset.kitTab!)));
+  apply();
+}

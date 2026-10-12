@@ -1,0 +1,1186 @@
+---
+import { withBase } from '../../scripts/url';
+
+/**
+ * The PSB UI kit as a showcase: the foundations (colour tokens, the Onest type scale, icons in
+ * three sizes), then four components rebuilt from the Figma kit (UI-Kit page of the
+ * PSB-Bank-Redesign-Concept file) with their variant axes as switches, like the "passports"
+ * there: Button, icnButton, the bank card and the tab bar. Sizes, radii and colours are taken
+ * from the Figma components 1:1. Switching is initKit in scripts/case.ts; without JS every
+ * component shows its first variant. Kit pieces sit on the kit's own dark page colour, the
+ * labels around them are the site's.
+ */
+
+const iconUrl = (name: string) => `url('${withBase(`assets/cases/psb/kit/icons/${name}.svg`)}')`;
+const icon = (name: string) => `--i: ${iconUrl(name)}`;
+const kitAsset = (name: string) => withBase(`assets/cases/psb/kit/${name}`);
+
+interface Swatch {
+  name: string;
+  hex: string;
+  /** Opacity, 0–1: drawn over a checkerboard */
+  alpha?: number;
+}
+const colors: { group: string; items: Swatch[] }[] = [
+  {
+    group: 'Фоны',
+    items: [
+      { name: 'page', hex: '#0A0C0F' },
+      { name: 'surface', hex: '#161A20' },
+      { name: 'elevated', hex: '#242A33' },
+      { name: 'overlay', hex: '#000000', alpha: 0.6 },
+    ],
+  },
+  {
+    group: 'Действия',
+    items: [
+      { name: 'action/primary', hex: '#E86630' },
+      { name: 'action/neutral', hex: '#FFFFFF' },
+      { name: 'action/secondary', hex: '#242A33' },
+    ],
+  },
+  {
+    group: 'Текст',
+    items: [
+      { name: 'primary', hex: '#FFFFFF' },
+      { name: 'secondary', hex: '#FFFFFF', alpha: 0.5 },
+      { name: 'tertiary', hex: '#CCCCCC' },
+      { name: 'danger', hex: '#FE1818' },
+      { name: 'success', hex: '#11C44C' },
+    ],
+  },
+  {
+    group: 'Иконки и обводки',
+    items: [
+      { name: 'icon/secondary', hex: '#A8A8BF' },
+      { name: 'border/primary', hex: '#E9F0F3', alpha: 0.2 },
+    ],
+  },
+];
+
+const type = [
+  { name: 'e-large', weight: 700, size: 32, line: 40, label: 'Bold', sample: 'Кешбэк 5%' },
+  { name: 'large', weight: 700, size: 24, line: 32, label: 'Bold', sample: '11 726 777,61 ₽' },
+  {
+    name: 'medium',
+    weight: 600,
+    size: 20,
+    line: 28,
+    label: 'SemiBold',
+    sample: 'Категории на октябрь',
+  },
+  {
+    name: 'small',
+    weight: 600,
+    size: 16,
+    line: 20,
+    label: 'SemiBold',
+    sample: 'Мои карты и счета',
+  },
+  {
+    name: 'm',
+    weight: 400,
+    size: 16,
+    line: 20,
+    label: 'Regular',
+    sample: 'Выберите три категории',
+  },
+  {
+    name: 'm-medium',
+    weight: 500,
+    size: 16,
+    line: 20,
+    label: 'Medium',
+    sample: 'Подключить кешбэк',
+  },
+  {
+    name: 'caption',
+    weight: 400,
+    size: 12,
+    line: 16,
+    label: 'Regular',
+    sample: 'Начислим до 30 числа',
+  },
+  {
+    name: 'caption-medium',
+    weight: 500,
+    size: 12,
+    line: 16,
+    label: 'Medium',
+    sample: 'Номер карты',
+  },
+];
+
+const icons = [
+  {
+    name: 'large',
+    size: 32,
+    items: ['l-send', 'l-qrcode', 'l-add', 'l-sbp', 'l-card', 'l-settings', 'l-add2'],
+  },
+  {
+    name: 'medium',
+    size: 24,
+    items: [
+      'm-cashback',
+      'm-bankcard',
+      'm-hide',
+      'm-show',
+      'm-more',
+      'm-chat',
+      'm-heart',
+      'm-exchange',
+      'm-logo',
+      'm-add',
+      'm-minus',
+      'm-close',
+      'm-arrow-back',
+      'm-arrow-forward',
+      'm-send',
+      'm-add2',
+      'm-copy',
+      'm-search',
+      'm-bell',
+      'm-faq',
+    ],
+  },
+  {
+    name: 'small',
+    size: 16,
+    items: [
+      's-show',
+      's-hide',
+      's-cashback',
+      's-bankcard',
+      's-close',
+      's-copy',
+      's-edit',
+      's-triangle-up',
+      's-triangle-down',
+      's-back',
+      's-arrow-opened',
+      's-arrow-closed',
+      's-check',
+    ],
+  },
+];
+
+interface Axis {
+  name: string;
+  options: { value: string; label?: string }[];
+}
+/** A rule locks an axis to one value while another axis has one of the listed values */
+interface Rule {
+  if: Record<string, string[]>;
+  set: Record<string, string>;
+}
+
+const opts = (...values: string[]) => values.map((value) => ({ value }));
+const sizes = [
+  { value: 'xsmall', label: '24' },
+  { value: 'small', label: '36' },
+  { value: 'medium', label: '44' },
+  { value: 'large', label: '52' },
+];
+
+const playgrounds: {
+  id: string;
+  title: string;
+  desc: string;
+  axes: Axis[];
+  initial: Record<string, string>;
+  rules?: Rule[];
+}[] = [
+  {
+    id: 'button',
+    title: 'Button',
+    desc: 'Запускает все важные действия в интерфейсе. Акцентный цвет — только у основной кнопки.',
+    axes: [
+      { name: 'type', options: opts('primary', 'secondary', 'danger', 'ghost') },
+      { name: 'color', options: opts('accent', 'neutral') },
+      { name: 'size', options: sizes },
+      { name: 'radius', options: opts('circle', 'squircle') },
+    ],
+    initial: { type: 'primary', color: 'accent', size: 'medium', radius: 'circle' },
+    rules: [{ if: { type: ['secondary', 'danger', 'ghost'] }, set: { color: 'neutral' } }],
+  },
+  {
+    id: 'icn',
+    title: 'icnButton',
+    desc: 'Элемент управления в навигации, полях и баннерах. Стекло — у нейтральной поверх фона.',
+    axes: [
+      { name: 'type', options: opts('accent', 'ghost') },
+      { name: 'color', options: opts('orange', 'neutral') },
+      { name: 'glass', options: opts('false', 'frost', 'liquid') },
+      { name: 'size', options: sizes },
+      { name: 'radius', options: opts('circle', 'squircle') },
+    ],
+    initial: { type: 'accent', color: 'neutral', glass: 'frost', size: 'large', radius: 'circle' },
+    rules: [
+      { if: { type: ['ghost'] }, set: { color: 'orange', glass: 'false' } },
+      { if: { color: ['orange'] }, set: { glass: 'false' } },
+    ],
+  },
+  {
+    id: 'card',
+    title: 'Card',
+    desc: 'Карта на главной и в счёте. Переворачивается, чтобы показать реквизиты, — нажмите на плашку.',
+    axes: [
+      { name: 'type', options: opts('night', 'orange') },
+      { name: 'side', options: opts('front', 'back') },
+    ],
+    initial: { type: 'night', side: 'front' },
+  },
+  {
+    id: 'tabbar',
+    title: 'Tabbar',
+    desc: 'Навигация внизу экрана для быстрого переключения разделов продукта.',
+    axes: [{ name: 'selected', options: opts('1', '2', '3', '4', '5') }],
+    initial: { selected: '1' },
+  },
+];
+
+const tabs = [
+  { icon: 'm-logo', label: 'Главная' },
+  { icon: 'm-exchange', label: 'Платежи' },
+  { icon: 'm-heart', label: 'Выгода' },
+  { icon: 'm-chat', label: 'Чат' },
+  { icon: 'm-more', label: 'Ещё' },
+];
+
+const fields = [
+  { label: 'Номер карты', value: '4588 2344 4563 3124', wide: true },
+  { label: 'Срок', value: '07/28' },
+  { label: 'CVV', value: '456' },
+];
+
+let uid = 0;
+const dataAttrs = (state: Record<string, string>) =>
+  Object.fromEntries(Object.entries(state).map(([k, v]) => [`data-${k}`, v]));
+---
+
+<link rel="stylesheet" href={withBase('assets/cases/psb/live/fonts.css')} />
+
+<div class="kit">
+  <!-- ---------- Foundations ---------- -->
+  <div class="found">
+    <article class="card px-clip">
+      <header class="head">
+        <h3 class="title">Цвета</h3>
+        <p class="desc">Семантические токены: каждый назван по роли, а не по цвету.</p>
+      </header>
+      <div class="groups">
+        {colors.map((g) => (
+          <div class="group">
+            <p class="group-name">{g.group}</p>
+            <ul class="swatches">
+              {g.items.map((s) => (
+                <li class="swatch">
+                  <span
+                    class:list={['chip px-clip', { alpha: s.alpha !== undefined }]}
+                    style={`--c: ${s.hex}; --a: ${s.alpha ?? 1}`}
+                  />
+                  <span class="sw-text">
+                    <span class="sw-name">{s.name}</span>
+                    <span class="sw-hex">
+                      {s.hex}
+                      {s.alpha !== undefined && ` · ${Math.round(s.alpha * 100)}%`}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </article>
+
+    <article class="card px-clip">
+      <header class="head">
+        <h3 class="title">Типографика</h3>
+        <p class="desc">Onest: четыре заголовка и четыре наборных стиля.</p>
+      </header>
+      <ul class="type">
+        {type.map((t) => (
+          <li class="type-row">
+            <span class="type-meta">
+              <span class="type-name">{t.name}</span>
+              <span class="type-spec">
+                {t.label} {t.size}/{t.line}
+              </span>
+            </span>
+            <span
+              class="type-sample"
+              style={`font-weight: ${t.weight}; font-size: ${t.size}px; line-height: ${t.line}px`}
+            >
+              {t.sample}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  </div>
+
+  <article class="card px-clip">
+    <header class="head">
+      <h3 class="title">Иконки</h3>
+      <p class="desc">Три размера на одной сетке: 32, 24 и 16 пикселей.</p>
+    </header>
+    <div class="stage icons-stage px-clip">
+      {icons.map((set) => (
+        <div class="icon-set">
+          <p class="kit-caption">
+            {set.name} · {set.size}px
+          </p>
+          <ul class="icon-grid" style={`--s: ${set.size}px`}>
+            {set.items.map((name) => (
+              <li>
+                <img
+                  src={withBase(`assets/cases/psb/kit/icons/${name}.svg`)}
+                  alt={name}
+                  title={name}
+                  width={set.size}
+                  height={set.size}
+                  loading="lazy"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </article>
+
+  <!-- ---------- Components ---------- -->
+  <div class="comps">
+    {playgrounds.map((p) => {
+      const id = `kit-${p.id}-${uid++}`;
+      return (
+        <article
+          class="card pg px-clip"
+          data-kit
+          data-kit-rules={p.rules ? JSON.stringify(p.rules) : undefined}
+        >
+          <header class="head">
+            <h3 class="title">{p.title}</h3>
+            <p class="desc">{p.desc}</p>
+          </header>
+
+          <div class:list={['stage px-clip', `stage-${p.id}`]}>
+            {p.id !== 'button' && <span class="blob" aria-hidden="true" />}
+
+            {p.id === 'button' && (
+              <button class="k-btn" type="button" data-kit-target {...dataAttrs(p.initial)}>
+                <span class="k-ico" style={icon('m-cashback')} />
+                <span class="k-label">Кешбэк</span>
+                <span class="k-ico" style={icon('m-cashback')} />
+              </button>
+            )}
+
+            {p.id === 'icn' && (
+              <button
+                class="k-icn"
+                type="button"
+                aria-label="Закрыть"
+                data-kit-target
+                {...dataAttrs(p.initial)}
+              >
+                <span class="k-ico" style={`${icon('m-close')}; --i-s: ${iconUrl('s-close')}`} />
+              </button>
+            )}
+
+            {p.id === 'card' && (
+              <div class="k-card" data-kit-target {...dataAttrs(p.initial)}>
+                <div class="k-face k-front">
+                  <img class="k-logo night" src={kitAsset('card-logo-night.svg')} alt="" />
+                  <img class="k-logo orange" src={kitAsset('card-logo-orange.svg')} alt="" />
+                  <img class="k-mir night" src={kitAsset('card-mir-night.svg')} alt="МИР" />
+                  <img class="k-mir orange" src={kitAsset('card-mir-orange.svg')} alt="МИР" />
+                  <div class="k-bar">
+                    <span class="k-num">*2345</span>
+                    <button class="k-badge" type="button" data-kit-flip="back">
+                      <span class="k-ico" style={icon('s-show')} />
+                      Данные карты
+                    </button>
+                  </div>
+                </div>
+                <div class="k-face k-back">
+                  <div class="k-fields">
+                    {fields.map((f) => (
+                      <span class:list={['k-field', { wide: f.wide }]}>
+                        <span class="k-field-label">{f.label}</span>
+                        <span class="k-field-box">
+                          <span class="k-field-value">{f.value}</span>
+                          <span class="k-ico" style={icon('s-copy')} />
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                  <div class="k-bar end">
+                    <button class="k-badge" type="button" data-kit-flip="front">
+                      <span class="k-ico" style={icon('m-show')} />
+                      Скрыть
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {p.id === 'tabbar' && (
+              <nav class="k-tabbar" aria-label="Таббар" data-kit-target {...dataAttrs(p.initial)}>
+                {tabs.map((t, i) => (
+                  <button class="k-tab" type="button" data-kit-tab={i + 1}>
+                    <span class="k-ico" style={icon(t.icon)} />
+                    <span class="k-tab-label">{t.label}</span>
+                  </button>
+                ))}
+              </nav>
+            )}
+          </div>
+
+          <div class="axes">
+            {p.axes.map((a) => (
+              <div
+                class="axis"
+                role="radiogroup"
+                aria-labelledby={`${id}-${a.name}-label`}
+                data-axis={a.name}
+              >
+                <span class="axis-name" id={`${id}-${a.name}-label`}>
+                  {a.name}
+                </span>
+                <span class="opts">
+                  {a.options.map((o) => (
+                    <label class="opt">
+                      <input
+                        type="radio"
+                        name={`${id}-${a.name}`}
+                        value={o.value}
+                        checked={p.initial[a.name] === o.value}
+                      />
+                      <span class="opt-face px-clip">{o.label ?? o.value}</span>
+                    </label>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .kit {
+    --kit-page: #0a0c0f;
+    --kit-onest: 'Onest Variable', Onest, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    container-type: inline-size;
+  }
+  .found {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 24px;
+  }
+  .comps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  /* Cards like the quest and HUD cards: raised paper, pixel corners, title over content */
+  .card {
+    --px-step: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .title {
+    margin: 0;
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+  .desc {
+    margin: 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+
+  /* ---------- Colours ---------- */
+
+  .groups {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .group-name,
+  .axis-name {
+    margin: 0 0 8px;
+    padding: 0;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .swatch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .chip {
+    --px-step: 2px;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    background: var(--c);
+  }
+  /* See-through tokens over the kit's own dark page, checkered like in Figma */
+  .chip.alpha {
+    background:
+      linear-gradient(
+        color-mix(in srgb, var(--c) calc(var(--a) * 100%), transparent),
+        color-mix(in srgb, var(--c) calc(var(--a) * 100%), transparent)
+      ),
+      repeating-conic-gradient(#242a33 0 25%, var(--kit-page) 0 50%) 0 0 / 12px 12px;
+  }
+  .sw-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .sw-name {
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: var(--t-chip);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .sw-hex {
+    font-family: var(--font-mono);
+    font-size: var(--t-chip);
+    color: var(--text-tertiary);
+  }
+
+  /* ---------- Type ---------- */
+
+  .type {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .type-row {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr);
+    gap: 16px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-top: var(--border-width-keyline) solid var(--border-default);
+  }
+  .type-row:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+  .type-meta {
+    display: flex;
+    flex-direction: column;
+  }
+  .type-name {
+    font-family: var(--font-mono);
+    font-size: var(--t-chip);
+    color: var(--text-primary);
+  }
+  .type-spec {
+    font-size: var(--t-caption);
+    color: var(--text-tertiary);
+  }
+  .type-sample {
+    overflow: hidden;
+    font-family: var(--kit-onest);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+
+  /* ---------- Kit stage: the kit's own dark page ---------- */
+
+  .stage {
+    --px-step: 3px;
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 24px;
+    background: var(--kit-page);
+    font-family: var(--kit-onest);
+    color: #fff;
+    isolation: isolate;
+  }
+  .kit-caption {
+    margin: 0 0 12px;
+    font-family: var(--kit-onest);
+    font-size: 12px;
+    line-height: 16px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .k-ico {
+    flex: none;
+    width: var(--s, 24px);
+    height: var(--s, 24px);
+    background: currentColor;
+    mask: var(--i) center / contain no-repeat;
+  }
+
+  .icons-stage {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 32px;
+    place-items: start;
+    padding: 24px 28px;
+  }
+  .icon-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .icon-set:first-child .icon-grid {
+    max-width: calc(4 * 32px + 3 * 8px);
+  }
+  .icon-set:last-child .icon-grid {
+    max-width: calc(5 * 16px + 4 * 8px);
+  }
+  .icon-grid img {
+    display: block;
+    width: var(--s);
+    height: var(--s);
+  }
+
+  /* The kit's background animation: one warm blob drifting under glass components */
+  .blob {
+    position: absolute;
+    z-index: -1;
+    left: 50%;
+    top: 50%;
+    width: 260px;
+    height: 260px;
+    margin: -130px 0 0 -130px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, #8a2a08, rgba(138, 42, 8, 0));
+    animation: blob 14s ease-in-out infinite;
+  }
+  @keyframes blob {
+    0%,
+    100% {
+      transform: translate(-30%, 25%);
+    }
+    20% {
+      transform: translate(20%, 15%);
+    }
+    40% {
+      transform: translate(25%, -20%);
+    }
+    60% {
+      transform: translate(0, -35%);
+    }
+    80% {
+      transform: translate(-25%, -10%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .blob {
+      animation: none;
+      transform: translate(10%, -10%);
+    }
+  }
+
+  .stage-button,
+  .stage-icn {
+    min-height: 180px;
+  }
+  .stage-card,
+  .stage-tabbar {
+    min-height: 300px;
+  }
+  .stage-tabbar {
+    align-items: end;
+  }
+
+  /* ---------- Button (❖ button) ---------- */
+
+  .k-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: #e86630;
+    font: 500 16px/20px var(--kit-onest);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+  .k-label {
+    padding: 0 4px;
+  }
+  .k-btn[data-size='xsmall'] {
+    gap: 0;
+    height: 24px;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 16px;
+  }
+  .k-btn[data-size='xsmall'] .k-ico {
+    --s: 16px;
+  }
+  .k-btn[data-size='small'] {
+    gap: 2px;
+    height: 36px;
+  }
+  .k-btn[data-size='large'] {
+    height: 52px;
+    padding: 0 16px;
+  }
+  .k-btn[data-radius='squircle'] {
+    border-radius: 16px;
+  }
+  .k-btn[data-radius='squircle'][data-size='small'] {
+    border-radius: 12px;
+  }
+  .k-btn[data-radius='squircle'][data-size='xsmall'] {
+    border-radius: 8px;
+  }
+  .k-btn[data-color='neutral'] {
+    background: #fff;
+    color: #0a0c0f;
+  }
+  .k-btn[data-type='secondary'],
+  .k-btn[data-type='danger'] {
+    background: #242a33;
+    color: #fff;
+  }
+  .k-btn[data-type='danger'] {
+    color: #fe1818;
+  }
+  .k-btn[data-type='ghost'] {
+    background: transparent;
+    color: #fff;
+  }
+
+  /* ---------- icnButton (❖ icnButton) ---------- */
+
+  .k-icn {
+    display: inline-flex;
+    padding: 14px;
+    border: 0;
+    border-radius: 999px;
+    background: #242a33;
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background-color 0.15s,
+      padding 0.15s;
+  }
+  .k-icn[data-size='medium'] {
+    padding: 10px;
+  }
+  .k-icn[data-size='small'] {
+    padding: 10px;
+  }
+  .k-icn[data-size='xsmall'] {
+    padding: 4px;
+  }
+  .k-icn[data-size='small'] .k-ico,
+  .k-icn[data-size='xsmall'] .k-ico {
+    --s: 16px;
+    mask-image: var(--i-s);
+  }
+  .k-icn[data-radius='squircle'] {
+    border-radius: 12px;
+  }
+  .k-icn[data-radius='squircle'][data-size='medium'] {
+    border-radius: 10px;
+  }
+  .k-icn[data-radius='squircle'][data-size='small'] {
+    border-radius: 8px;
+  }
+  .k-icn[data-radius='squircle'][data-size='xsmall'] {
+    border-radius: 6px;
+  }
+  .k-icn[data-color='orange'] {
+    background: #e86630;
+  }
+  .k-icn[data-glass='frost'] {
+    background: rgba(36, 42, 51, 0.5);
+    backdrop-filter: blur(6px);
+  }
+  /* Figma's liquid glass (Glass effect, radius 4): a clear lens with a lit rim */
+  .k-icn[data-glass='liquid'] {
+    background: rgba(36, 42, 51, 0.5);
+    backdrop-filter: blur(2px) saturate(1.6);
+    box-shadow:
+      inset 0 1px 1px rgba(255, 255, 255, 0.35),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.12),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  .k-icn[data-type='ghost'] {
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  /* ---------- Card (❖ Card front / back / flip), 320×213 scaled to fit ---------- */
+
+  .k-card {
+    --u: calc(min(320px, 100cqw) / 320);
+    position: relative;
+    width: min(320px, 100%);
+    aspect-ratio: 320 / 213;
+    perspective: 900px;
+  }
+  .stage-card {
+    container-type: inline-size;
+  }
+  .k-face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: calc(20 * var(--u));
+    backface-visibility: hidden;
+    transition: transform 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+  }
+  .k-back {
+    transform: rotateY(180deg);
+  }
+  .k-card[data-side='back'] .k-front {
+    transform: rotateY(-180deg);
+  }
+  .k-card[data-side='back'] .k-back {
+    transform: rotateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .k-face {
+      transition: none;
+    }
+  }
+  .k-front {
+    background: #3a3b57;
+  }
+  .k-card[data-type='orange'] .k-front {
+    background: #e86630;
+  }
+  .k-logo {
+    position: absolute;
+    left: calc(-19 * var(--u));
+    top: 0;
+    width: calc(213 * var(--u));
+    height: calc(213 * var(--u));
+  }
+  .k-mir {
+    position: absolute;
+    left: calc((264 + 11.5 - 41.5) * var(--u));
+    top: calc((64 + 41.5 - 11.5) * var(--u));
+    width: calc(83 * var(--u));
+    height: calc(23 * var(--u));
+    transform: rotate(-90deg);
+  }
+  .k-card[data-type='night'] .orange,
+  .k-card[data-type='orange'] .night {
+    display: none;
+  }
+  .k-bar {
+    position: absolute;
+    left: calc(16 * var(--u));
+    right: calc(16 * var(--u));
+    bottom: calc(16 * var(--u));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .k-bar.end {
+    justify-content: flex-end;
+  }
+  .k-num {
+    font-size: calc(12 * var(--u));
+    line-height: calc(16 * var(--u));
+    color: #fff;
+  }
+  .k-card[data-type='orange'] .k-num {
+    color: #0a0c0f;
+  }
+  .k-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(4 * var(--u));
+    padding: calc(4 * var(--u)) calc(8 * var(--u));
+    border: 0;
+    border-radius: 999px;
+    background: #242a33;
+    font: 400 calc(12 * var(--u)) / calc(16 * var(--u)) var(--kit-onest);
+    color: #fff;
+    cursor: pointer;
+  }
+  .k-badge .k-ico {
+    --s: calc(16 * var(--u));
+  }
+  .k-back {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(16 * var(--u));
+    border: calc(1 * var(--u)) solid #585892;
+    background: #161a20;
+  }
+  .k-card[data-type='orange'] .k-back {
+    border-color: #e86630;
+  }
+  .k-back .k-bar {
+    position: static;
+  }
+  .k-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: calc(8 * var(--u));
+  }
+  .k-field {
+    display: flex;
+    flex-direction: column;
+    gap: calc(4 * var(--u));
+    min-width: 0;
+  }
+  .k-field.wide {
+    grid-column: 1 / -1;
+  }
+  .k-field-label {
+    font-size: calc(12 * var(--u));
+    font-weight: 500;
+    line-height: calc(16 * var(--u));
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .k-field-box {
+    display: flex;
+    align-items: center;
+    gap: calc(4 * var(--u));
+    height: calc(44 * var(--u));
+    padding: 0 calc(12 * var(--u));
+    border-radius: calc(20 * var(--u));
+    background: #242a33;
+  }
+  .k-field-value {
+    flex: 1;
+    min-width: 0;
+    padding: 0 calc(4 * var(--u));
+    font-size: calc(16 * var(--u));
+    line-height: calc(20 * var(--u));
+    white-space: nowrap;
+  }
+  .k-field-box .k-ico {
+    --s: calc(16 * var(--u));
+  }
+
+  /* ---------- Tabbar (❖ tabbar), 402×99 scaled to fit ---------- */
+
+  .stage-tabbar {
+    container-type: inline-size;
+    padding-bottom: 0;
+  }
+  .k-tabbar {
+    --u: calc(min(402px, 100cqw) / 402);
+    display: flex;
+    justify-content: center;
+    gap: calc(28 * var(--u));
+    width: min(402px, 100%);
+    padding: calc(12 * var(--u)) calc(16 * var(--u)) calc(32 * var(--u));
+    border-radius: calc(32 * var(--u)) calc(32 * var(--u)) 0 0;
+    background: rgba(36, 42, 51, 0.75);
+    backdrop-filter: blur(11.2px);
+  }
+  .k-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(4 * var(--u));
+    width: calc(44 * var(--u));
+    min-height: calc(44 * var(--u));
+    padding: 0;
+    border: 0;
+    background: none;
+    font: 400 calc(12 * var(--u)) / calc(16 * var(--u)) var(--kit-onest);
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .k-tab .k-ico {
+    --s: calc(24 * var(--u));
+    color: #a8a8bf;
+  }
+  .k-tabbar[data-selected='1'] .k-tab:nth-child(1),
+  .k-tabbar[data-selected='2'] .k-tab:nth-child(2),
+  .k-tabbar[data-selected='3'] .k-tab:nth-child(3),
+  .k-tabbar[data-selected='4'] .k-tab:nth-child(4),
+  .k-tabbar[data-selected='5'] .k-tab:nth-child(5) {
+    color: #e86630;
+  }
+  .k-tabbar[data-selected='1'] .k-tab:nth-child(1) .k-ico,
+  .k-tabbar[data-selected='2'] .k-tab:nth-child(2) .k-ico,
+  .k-tabbar[data-selected='3'] .k-tab:nth-child(3) .k-ico,
+  .k-tabbar[data-selected='4'] .k-tab:nth-child(4) .k-ico,
+  .k-tabbar[data-selected='5'] .k-tab:nth-child(5) .k-ico {
+    color: #e86630;
+  }
+
+  .k-btn:focus-visible,
+  .k-icn:focus-visible,
+  .k-badge:focus-visible,
+  .k-tab:focus-visible {
+    outline: 2px solid var(--sky-300);
+    outline-offset: 3px;
+  }
+
+  /* ---------- Axis switches: the variant properties of the Figma component ---------- */
+
+  .axes {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .axis {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+  }
+  .axis-name {
+    margin: 0;
+  }
+  .opts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .opt {
+    position: relative;
+  }
+  .opt input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .opt-face {
+    --px-step: 2px;
+    display: flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 10px;
+    font-family: var(--font-mono);
+    font-size: var(--t-chip);
+    color: var(--text-secondary);
+    transition:
+      background-color 0.15s,
+      color 0.15s;
+  }
+  .opt:hover .opt-face {
+    background: var(--surface-active);
+  }
+  .opt input:checked + .opt-face {
+    background: var(--surface-card);
+    color: var(--text-accent);
+  }
+  .opt input:focus-visible + .opt-face {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
+  }
+  .opt input:disabled,
+  .opt input:disabled + .opt-face {
+    color: var(--text-disabled);
+    background: none;
+    cursor: default;
+  }
+
+  /* ---------- Narrow sheet ---------- */
+
+  @container (max-width: 860px) {
+    .found,
+    .comps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @container (max-width: 560px) {
+    .icons-stage {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 20px;
+    }
+    .icon-set .icon-grid {
+      max-width: none !important;
+    }
+    .type-row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 4px;
+    }
+    .type-meta {
+      flex-direction: row;
+      gap: 8px;
+    }
+    .axis {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px;
+    }
+    .stage {
+      padding: 20px 16px;
+    }
+    .stage-card,
+    .stage-tabbar {
+      min-height: 240px;
+    }
+    /* One column, name and hex on one line: two columns cut the token names */
+    .swatches {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+    .chip {
+      width: 28px;
+      height: 28px;
+    }
+    .sw-text {
+      flex-direction: row;
+      flex-wrap: wrap;
+      column-gap: 10px;
+    }
+  }
+</style>

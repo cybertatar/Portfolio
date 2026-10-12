@@ -144,6 +144,8 @@ export function initRace(root: HTMLElement) {
     screens: [...el.querySelectorAll<HTMLElement>('[data-screen]')],
     bar: el.querySelector<HTMLElement>('[data-bar]'),
     clock: el.querySelector<HTMLElement>('[data-clock]'),
+    // The server renders the finish, the median as measured
+    finish: el.querySelector<HTMLElement>('[data-clock]')?.textContent ?? '',
     step: el.querySelector<HTMLElement>('[data-step]'),
     caption: el.querySelector<HTMLElement>('[data-caption]'),
   }));
@@ -184,7 +186,7 @@ export function initRace(root: HTMLElement) {
       }
       if (l.away) l.away.textContent = l.aways[screen] ?? '';
       if (l.bar) l.bar.style.width = `${(t / longest) * 100}%`;
-      if (l.clock) l.clock.textContent = clock(t);
+      if (l.clock) l.clock.textContent = done ? l.finish : clock(t);
       if (l.step) l.step.textContent = String(Math.max(1, steps));
       if (l.caption) l.caption.textContent = l.captions[screen] ?? '';
       l.el.classList.toggle('is-done', done);

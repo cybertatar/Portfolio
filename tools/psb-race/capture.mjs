@@ -6,7 +6,7 @@
  * and scaled to 800×1727 like the other race screens (Python with Pillow).
  *
  *   npm run build && npx astro preview   # in another shell
- *   node tools/psb-race/capture.mjs card
+ *   node tools/psb-race/capture.mjs card   # or cats
  *
  * Needs Playwright: `npm i --no-save playwright` (CHROMIUM_PATH picks a browser binary).
  */
@@ -32,7 +32,19 @@ const flows = {
     ['card-data', 'COPY'],
     ['card-copied'],
   ],
+  // Cashback already connected: next month's categories from «Выгода», as in the Figma flow
+  // (categories that fit on the screen, so every tick shows)
+  cats: [
+    ['next-home', 'cashback.tab.open'],
+    ['next-cashback', 'cashback.next_month.categories.open'],
+    ['next-0', 'cashback.category.scooters.toggle'],
+    ['next-1', 'cashback.category.taxi.toggle'],
+    ['next-2', 'cashback.category.delivery.toggle'],
+    ['next-3', 'cashback.categories.confirm'],
+    ['next-success'],
+  ],
 };
+const connected = process.argv[2] === 'cats';
 const flow = flows[process.argv[2]];
 if (!flow) throw new Error(`Flow: ${Object.keys(flows).join(', ')}`);
 
@@ -46,6 +58,11 @@ const page = await browser.newPage({
   deviceScaleFactor: 2,
 });
 await page.goto(url);
+// Read when the app mounts, which waits for the phones to come near the screen
+if (connected)
+  await page.evaluate(() => {
+    document.querySelector('[data-psb-live-route="/"]').dataset.psbCashback = 'connected';
+  });
 await page.locator('#screens').scrollIntoViewIfNeeded();
 await page.waitForFunction(() =>
   document.querySelector('[data-psb-live-route="/"]')?.shadowRoot?.querySelector('[data-track]'),

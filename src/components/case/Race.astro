@@ -36,7 +36,11 @@ interface Props {
  */
 const { lanes, speed = 7 } = Astro.props;
 const longest = Math.max(...lanes.map((l) => l.seconds));
-const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+// The finish shows the median as measured, tenths too (0:28,7)
+const clock = (s: number) => {
+  const tenths = Math.round((s % 1) * 10);
+  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}${tenths ? `,${tenths}` : ''}`;
+};
 ---
 
 <div class="race" data-race data-speed={speed}>

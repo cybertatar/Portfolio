@@ -182,7 +182,9 @@ const { rows, stats } = Astro.props;
 
   /* Narrow sheet: the subject on top, "было" and "стало" side by side under it */
   @container (max-width: 560px) {
+    /* Two numbers stay side by side, a third goes under them */
     .stats {
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
       gap: 24px;
     }
     .row {

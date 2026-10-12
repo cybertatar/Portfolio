@@ -74,7 +74,7 @@ const { rows, stats } = Astro.props;
     list-style: none;
   }
   /* The keyline on top ties the subject to its column; inside an item the lines sit closer
-     (8, 6) than the items to each other (32) */
+     (about 12 with the leading) than the items to each other (32 + 12) */
   .change {
     /* Holds the hidden "Стало:" */
     position: relative;
@@ -87,7 +87,6 @@ const { rows, stats } = Astro.props;
     text-wrap: pretty;
   }
   .label {
-    margin-bottom: 2px;
     font-family: var(--font-pixel);
     font-size: var(--t-pixel-label);
     letter-spacing: var(--ls-caps);
@@ -98,14 +97,15 @@ const { rows, stats } = Astro.props;
   .before {
     margin: 0;
   }
+  /* Often two lines: body leading, not the snug one of a single-line title */
   .after {
     font-size: var(--t-body);
     font-weight: var(--fw-medium);
-    line-height: var(--lh-snug);
+    line-height: var(--lh-normal);
     color: var(--text-primary);
   }
   .before {
-    font-size: var(--t-caption);
+    font-size: var(--t-body-sm);
     line-height: var(--lh-normal);
     color: var(--text-secondary);
   }
@@ -162,8 +162,9 @@ const { rows, stats } = Astro.props;
     letter-spacing: 0;
     color: var(--text-secondary);
   }
+  /* The same secondary size as "Было: …" above, one style for the quieter text in the block */
   .note {
-    font-size: var(--t-caption);
+    font-size: var(--t-body-sm);
     line-height: var(--lh-normal);
     color: var(--text-secondary);
     text-wrap: pretty;

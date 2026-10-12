@@ -741,7 +741,7 @@ const home = withBase('/');
                 </>
               ) : null}
             </div>
-            <div>
+            <div class="versus-wrap">
               <Versus rows={d.versus.rows} stats={d.versus.stats} />
             </div>
           </section>
@@ -1333,6 +1333,11 @@ const home = withBase('/');
   }
 
   /* Directions */
+  /* The list under the race (or slider) sits as far from it as the result card sits from the
+     list, and further than its own rows sit from each other */
+  .sheet > .versus-wrap {
+    margin-top: 40px;
+  }
   .stage {
     position: relative;
     display: flex;

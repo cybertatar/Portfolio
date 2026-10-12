@@ -1,8 +1,8 @@
 /**
  * Looping pixel scenes on the case page (they replace the co-author's videos). A scene is
  * a list of states: the root's data-state switches on a timer and CSS does the rest. The
- * loop runs only while the scene is on screen; with reduced motion the scene stays on
- * its `still` state.
+ * loop runs only while the scene is on screen (and, inside the process deck, on the front
+ * card); with reduced motion the scene stays on its `still` state.
  */
 export interface SceneStep {
   state: string;
@@ -32,11 +32,24 @@ export function runScene(root: HTMLElement, steps: SceneStep[], still: string) {
     }, step.ms);
   };
 
+  // A card in the process deck: covered or not yet arrived, it waits (initChapters in case.ts)
+  const card = root.closest<HTMLElement>('[data-chapter]');
+  let visible = false;
+  let playing = false;
+  const sync = () => {
+    const on = visible && card?.dataset.front !== 'false';
+    if (on === playing) return;
+    playing = on;
+    clearTimeout(timer);
+    if (on) play();
+  };
+
   root.dataset.state = steps[0].state;
+  card?.addEventListener('chapter:front', sync);
   new IntersectionObserver(
     ([entry]) => {
-      clearTimeout(timer);
-      if (entry.isIntersecting) play();
+      visible = entry.isIntersecting;
+      sync();
     },
     { threshold: 0.3 },
   ).observe(root);

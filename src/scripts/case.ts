@@ -275,7 +275,7 @@ export function initChapters(root: HTMLElement) {
   let mode: 'list' | 'deck' | 'stack' = 'list';
   let pin = 0; // deck: where the pile holds still
   let step = 1; // deck: scroll per card
-  let travel = 0; // deck: from the pile down to below the screen, shadow and all
+  let travel = 0; // deck: how far below the pile a coming card starts
   let stick = 0; // stack: where each card sticks
   let pitch = 1; // stack: card height and gap
   let front = -2;
@@ -307,15 +307,20 @@ export function initChapters(root: HTMLElement) {
       const d = p - i;
       let transform = '';
       let dim = 0;
+      let opacity = '';
       if (d < 0 && mode === 'deck') {
         transform = `translate3d(0, ${(Math.min(1, -d) * travel).toFixed(1)}px, 0)`;
+        // Rises from just under the pile and shows up on the way, rather than flying in
+        // from the bottom of a tall screen across empty space
+        opacity = d < -1 ? '0' : Math.min(1, (1 + d) / 0.3).toFixed(3);
       } else if (d > 0) {
         const depth = Math.min(d, DEPTH);
         transform = `translate3d(0, ${(-OFFSET * depth).toFixed(1)}px, 0) scale(${(1 - SCALE * depth).toFixed(4)})`;
         dim = DIM * depth;
       }
       card.style.transform = transform;
-      card.style.visibility = d > DEPTH + 1 ? 'hidden' : '';
+      card.style.opacity = opacity;
+      card.style.visibility = d > DEPTH + 1 || d < -1 ? 'hidden' : '';
       const layer = dims[i];
       if (layer) layer.style.opacity = dim.toFixed(3);
     });
@@ -329,7 +334,7 @@ export function initChapters(root: HTMLElement) {
     );
     run.style.height = '';
     cards.forEach((card, i) => {
-      card.style.transform = card.style.visibility = '';
+      card.style.transform = card.style.opacity = card.style.visibility = '';
       const layer = dims[i];
       if (layer) layer.style.opacity = '';
     });
@@ -350,9 +355,14 @@ export function initChapters(root: HTMLElement) {
 
     if (!top && ROOM + cardH + PAD * 2 <= vh) {
       mode = 'deck';
-      pin = Math.round((vh - ROOM - cardH) / 2);
+      // The pile holds where it sits under the section heading once the section reaches the
+      // top of the screen. Centred instead, on a tall screen it stopped well below the heading
+      // and the next card was already halfway in while the heading still showed.
+      const section = root.closest('section') ?? root;
+      const natural = root.getBoundingClientRect().top - section.getBoundingClientRect().top;
+      pin = Math.round(Math.max(PAD, Math.min(natural, vh - ROOM - cardH - PAD)));
       step = Math.round(vh * 0.7);
-      travel = vh - pin - ROOM + 48;
+      travel = Math.min(vh - pin - ROOM + 48, cardH + PAD * 4);
       root.style.setProperty('--deck-pin', `${pin}px`);
       root.style.setProperty('--deck-stage', `${ROOM + cardH}px`);
       run.style.height = `${step * last}px`;

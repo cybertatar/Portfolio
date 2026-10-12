@@ -155,13 +155,88 @@ const directions = [
     id: 'card-data',
     title: 'Данные карты',
     lead: 'Посмотреть и скопировать данные карты должно быть простым и понятным действием сразу после входа в приложение.',
-    after: ['assets/cases/psb/account.webp'],
-    problem:
-      'Данные лежали на третьей вкладке и защищались пушами и кодами: CVV открывался только по коду из СМС, даже после входа по биометрии. Один участник из-за сложного поиска доставал физическую карту.',
-    solution:
-      'Показали связь счёта и карты и собрали просмотр и копирование на одном экране. Код из СМС перед показом CVV убрали: клиент уже вошёл по ПИН-коду или биометрии, и во многих банках этого достаточно, пока активен токен. Короткий toast подтверждает, что данные скопированы.',
-    result:
-      'Большинство нашли данные сразу: first click success — 83%. Но клиентам, у которых ПСБ — единственный банк, было непривычно видеть карты внутри счёта, а переворот карты оказался не самым явным способом показать данные. Это отразилось на SEQ — 6,0 из 7.',
+    // Before: the original flow from the PSB Figma file (section "Пользователь просматривает и
+    // копирует данные карты"); steps and times are the medians from the results
+    race: [
+      {
+        label: 'Было',
+        steps: 7,
+        seconds: 42,
+        end: 'через СМС',
+        screens: [
+          { src: 'assets/cases/psb/before/card-01.webp', caption: 'Главная, карта в «Картах»' },
+          { src: 'assets/cases/psb/before/card-02.webp', caption: 'Открылись «Настройки» карты' },
+          { src: 'assets/cases/psb/before/card-03.webp', caption: 'Свайп — «История»' },
+          { src: 'assets/cases/psb/before/card-04.webp', caption: 'Третья вкладка — «О карте»' },
+          { src: 'assets/cases/psb/before/card-05.webp', caption: 'Данные карты, номер скрыт' },
+          { src: 'assets/cases/psb/before/card-06.webp', caption: 'Показал номер', same: true },
+          {
+            src: 'assets/cases/psb/before/card-07.webp',
+            caption: 'Удержал поле — скопировано',
+            same: true,
+          },
+          { src: 'assets/cases/psb/before/card-08.webp', caption: 'CVV — только по СМС' },
+          {
+            src: 'assets/cases/psb/before/card-09.webp',
+            caption: 'Код не подставился',
+            away: 'сообщения',
+          },
+          { src: 'assets/cases/psb/before/card-10.webp', caption: 'Согласие подтверждено' },
+        ],
+      },
+      {
+        label: 'Стало',
+        steps: 4,
+        seconds: 17,
+        end: 'готово',
+        win: true,
+        screens: [
+          // Captured from the live prototype (Финальные экраны) by tools/psb-race/capture.mjs
+          { src: 'assets/cases/psb/race/card-home.webp', caption: 'Главная, текущий счёт' },
+          { src: 'assets/cases/psb/race/card-account.webp', caption: 'Карта внутри счёта' },
+          { src: 'assets/cases/psb/race/card-card.webp', caption: '«Данные карты» на карте' },
+          {
+            src: 'assets/cases/psb/race/card-data.webp',
+            caption: 'Номер, срок и CVV сразу',
+            same: true,
+          },
+          { src: 'assets/cases/psb/race/card-copied.webp', caption: 'Скопировано', same: true },
+        ],
+      },
+    ],
+    versus: {
+      rows: [
+        {
+          label: 'Где найти',
+          before: 'Третья вкладка в карточке карты',
+          after: 'Карта внутри счёта, данные на ней',
+        },
+        { label: 'Путь', before: '7 шагов, 42 секунды', after: '4 шага, 17 секунд' },
+        {
+          label: 'CVV',
+          before: 'Только по коду из СМС, даже после входа по биометрии',
+          after: 'Сразу, вместе с номером и сроком',
+        },
+        {
+          label: 'Выход из приложения',
+          before: 'В сообщения за кодом: сам он не подставлялся',
+          after: 'Не нужен',
+        },
+        {
+          label: 'Копирование',
+          before: 'Удержать поле, пока внизу не появится подсказка',
+          after: 'Кнопка у каждого поля и плашка «Скопировано»',
+        },
+      ],
+      stats: [
+        { value: '83%', note: 'сразу начали с правильного действия' },
+        {
+          value: '6,0',
+          unit: 'из 7',
+          note: 'оценка лёгкости: тем, у кого ПСБ — единственный банк, карты внутри счёта были непривычны, а переворот карты — не самый явный способ показать данные',
+        },
+      ],
+    },
   },
   {
     id: 'cashback',

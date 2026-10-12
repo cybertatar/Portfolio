@@ -1,5 +1,13 @@
 export type Lang = 'ru' | 'en';
 export type Localized = Record<Lang, string>;
+/** Text that is either the same in both languages or given in both. */
+export type Text = string | Localized;
+
+/** The Russian text that goes into the HTML. */
+export const ru = (t: Text) => (typeof t === 'string' ? t : t.ru);
+/** The English text for a data-en attribute; nothing when it's the same in both languages. */
+export const en = (t: Text | undefined) =>
+  t === undefined || typeof t === 'string' ? undefined : t.en;
 
 import type { PixelIconName } from './pixel-icons';
 

@@ -1,5 +1,6 @@
 ---
 import type { MascotSpriteName } from '../../content/mascots';
+import type { Localized } from '../../content/site';
 import PixelIcon from '../ui/PixelIcon.astro';
 import LivePhone from './LivePhone.astro';
 import Sprite from './scenes/Sprite.astro';
@@ -7,7 +8,7 @@ import Sprite from './scenes/Sprite.astro';
 interface Prototype {
   route: string;
   poster: string;
-  caption: string;
+  caption: Localized;
   cashbackConnected?: boolean;
 }
 
@@ -39,7 +40,7 @@ type Item = {
   size: number;
   rot?: number;
 };
-type Hint = { text: string; kind: 'swipe' | 'click'; x: number; y: number; rot: number };
+type Hint = { text: Localized; kind: 'swipe' | 'click'; x: number; y: number; rot: number };
 
 const swordsman = {
   rest: 'swordsman-happy',
@@ -63,8 +64,14 @@ const decor: { items: Item[]; hints?: Hint[] }[] = [
       { sprite: 'heart', x: 0.78, y: 0.56, size: 0.1, rot: 8 },
     ],
     hints: [
-      { text: 'Свайпай', kind: 'swipe', x: -0.8, y: 0.2, rot: -6 },
-      { text: 'Кликай прототип', kind: 'click', x: 0.82, y: -0.16, rot: 5 },
+      { text: { ru: 'Свайпай', en: 'Swipe' }, kind: 'swipe', x: -0.8, y: 0.2, rot: -6 },
+      {
+        text: { ru: 'Кликай прототип', en: 'Click the prototype' },
+        kind: 'click',
+        x: 0.82,
+        y: -0.16,
+        rot: 5,
+      },
     ],
   },
   {
@@ -117,12 +124,12 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     ))}
     <div class="cards" data-deck-cards>
       {prototypes.map((p) => (
-        <div class="card" data-deck-card data-title={p.caption}>
+        <div class="card" data-deck-card data-name={p.caption.ru} data-en-name={p.caption.en}>
           <LivePhone
             route={p.route}
             poster={p.poster}
             alt={p.caption}
-            label={`Прототип: ${p.caption}`}
+            label={{ ru: `Прототип: ${p.caption.ru}`, en: `Prototype: ${p.caption.en}` }}
             cashbackConnected={p.cashbackConnected}
           />
         </div>
@@ -132,8 +139,12 @@ const place = (x: number, y: number, size: number, rot = 0) =>
       set.hints ? (
         <div class="decor hints" data-deck-decor={i} aria-hidden="true">
           {set.hints.map((h) => (
-            <span class:list={['hint', 'px-clip', h.kind]} style={place(h.x, h.y, 0, h.rot)}>
-              {h.text}
+            <span
+              class:list={['hint', 'px-clip', h.kind]}
+              style={place(h.x, h.y, 0, h.rot)}
+              data-en={h.text.en}
+            >
+              {h.text.ru}
             </span>
           ))}
         </div>
@@ -142,28 +153,41 @@ const place = (x: number, y: number, size: number, rot = 0) =>
   </div>
 
   <div class="controls">
-    <button class="arrow px-clip" type="button" aria-label="Предыдущий прототип" data-deck-prev>
+    <button
+      class="arrow px-clip"
+      type="button"
+      aria-label="Предыдущий прототип"
+      data-en-label="Previous prototype"
+      data-deck-prev
+    >
       <span class="flip">
         <PixelIcon name="arrow" />
       </span>
     </button>
     <div class="status">
-      <p class="caption" aria-live="polite" data-deck-caption>
-        {prototypes[0]?.caption}
+      <p class="caption" aria-live="polite" data-deck-caption data-en={prototypes[0]?.caption.en}>
+        {prototypes[0]?.caption.ru}
       </p>
       <div class="dots">
         {prototypes.map((p, i) => (
           <button
             class="dot"
             type="button"
-            aria-label={p.caption}
+            aria-label={p.caption.ru}
+            data-en-label={p.caption.en}
             aria-current={i === 0 ? 'true' : undefined}
             data-deck-dot={i}
           />
         ))}
       </div>
     </div>
-    <button class="arrow px-clip" type="button" aria-label="Следующий прототип" data-deck-next>
+    <button
+      class="arrow px-clip"
+      type="button"
+      aria-label="Следующий прототип"
+      data-en-label="Next prototype"
+      data-deck-next
+    >
       <PixelIcon name="arrow" />
     </button>
   </div>

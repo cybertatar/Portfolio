@@ -9,20 +9,50 @@ import { withBase } from '../../../scripts/url';
  * `tile`: the mark sits on a white app-icon tile; without it the file is the whole icon.
  */
 const banks = [
-  { name: 'Сбер', logo: 'sber.svg', tile: true, idea: 'Флип карты' },
-  { name: 'Ozon Банк', logo: 'ozon.svg', tile: false, idea: 'Копирование иконкой' },
-  { name: 'Т-Банк', logo: 'tbank.svg', tile: true, idea: 'Акцент на скорости' },
-  { name: 'Альфа-Банк', logo: 'alfa.svg', tile: true, idea: 'Кешбэк в таббаре' },
-  { name: 'Райффайзен', logo: 'raiffeisen.svg', tile: false, idea: 'Кешбэк в бейдже' },
+  {
+    name: { ru: 'Сбер', en: 'Sber' },
+    logo: 'sber.svg',
+    tile: true,
+    idea: { ru: 'Флип карты', en: 'Card flip' },
+  },
+  {
+    name: { ru: 'Ozon Банк', en: 'Ozon Bank' },
+    logo: 'ozon.svg',
+    tile: false,
+    idea: { ru: 'Копирование иконкой', en: 'Copy with an icon' },
+  },
+  {
+    name: { ru: 'Т-Банк', en: 'T-Bank' },
+    logo: 'tbank.svg',
+    tile: true,
+    idea: { ru: 'Акцент на скорости', en: 'Focus on speed' },
+  },
+  {
+    name: { ru: 'Альфа-Банк', en: 'Alfa-Bank' },
+    logo: 'alfa.svg',
+    tile: true,
+    idea: { ru: 'Кешбэк в таббаре', en: 'Cashback in the tab bar' },
+  },
+  {
+    name: { ru: 'Райффайзен', en: 'Raiffeisen' },
+    logo: 'raiffeisen.svg',
+    tile: false,
+    idea: { ru: 'Кешбэк в бейдже', en: 'Cashback in a badge' },
+  },
 ].map((b) => ({ ...b, logo: withBase(`assets/cases/psb/banks/${b.logo}`) }));
+// The script reads one language: data-banks, or data-en-banks swapped in for English
+const inLang = (lang: 'ru' | 'en') =>
+  JSON.stringify(banks.map((b) => ({ ...b, name: b.name[lang], idea: b.idea[lang] })));
 ---
 
 <div
   class="stage px-clip"
   data-scene="bench"
-  data-banks={JSON.stringify(banks)}
+  data-banks={inLang('ru')}
+  data-en-banks={inLang('en')}
   role="img"
-  aria-label={`Сравнили пять банков: ${banks.map((b) => `${b.name} — ${b.idea.toLowerCase()}`).join(', ')}`}
+  aria-label={`Сравнили пять банков: ${banks.map((b) => `${b.name.ru} — ${b.idea.ru.toLowerCase()}`).join(', ')}`}
+  data-en-label={`We compared five banks: ${banks.map((b) => `${b.name.en} — ${b.idea.en.toLowerCase()}`).join(', ')}`}
 >
   <div class="desk"></div>
 
@@ -55,11 +85,11 @@ const banks = [
     <img src={banks[0].logo} alt="" data-logo />
   </span>
   <div class="tooltip px-clip" aria-hidden="true">
-    <span class="tooltip-bank" data-bank>
-      {banks[0].name}
+    <span class="tooltip-bank" data-bank data-en={banks[0].name.en}>
+      {banks[0].name.ru}
     </span>
-    <span class="tooltip-idea" data-idea>
-      {banks[0].idea}
+    <span class="tooltip-idea" data-idea data-en={banks[0].idea.en}>
+      {banks[0].idea.ru}
     </span>
   </div>
 </div>

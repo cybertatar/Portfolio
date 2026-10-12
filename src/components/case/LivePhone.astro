@@ -1,16 +1,17 @@
 ---
+import { en, ru, type Text } from '../../content/site';
 import { withBase } from '../../scripts/url';
 
 interface Props {
   /** Screen shown until the prototype loads (and without JavaScript). */
   poster: string;
-  alt: string;
+  alt: Text;
   /** Route the prototype opens on. */
   route?: string;
   /** Start with cashback already connected (the default is the first connection). */
   cashbackConnected?: boolean;
   /** Accessible name of this prototype. */
-  label: string;
+  label: Text;
 }
 
 /**
@@ -30,13 +31,21 @@ const base = withBase('assets/cases/psb/live/');
        left Chromium with unpainted tiles in the app) -->
   <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
   <div class="screen">
-    <img class="poster" src={withBase(poster)} alt={alt} loading="lazy" decoding="async" />
+    <img
+      class="poster"
+      src={withBase(poster)}
+      alt={ru(alt)}
+      data-en-alt={en(alt)}
+      loading="lazy"
+      decoding="async"
+    />
     <div
       class="app"
       data-psb-live-route={route}
       data-psb-cashback={cashbackConnected ? 'connected' : undefined}
       role="region"
-      aria-label={label}
+      aria-label={ru(label)}
+      data-en-label={en(label)}
     ></div>
   </div>
 </div>

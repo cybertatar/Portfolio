@@ -1,23 +1,24 @@
 ---
+import type { Localized } from '../../content/site';
 import Phone from './Phone.astro';
 
 export interface RaceScreen {
   src: string;
-  caption: string;
+  caption: Localized;
   /** Where the flow has left the app on this screen, e.g. "почта". */
-  away?: string;
+  away?: Localized;
   /** The same view as the screen before (a box ticked): it swaps without the push. */
   same?: boolean;
 }
 export interface RaceLane {
-  label: string;
+  label: Localized;
   screens: RaceScreen[];
   /** Taps from start to finish, shown as "Шаг N из M". */
   steps: number;
   /** Median time of the task, seconds. */
   seconds: number;
   /** Said next to the time at the finish. */
-  end: string;
+  end: Localized;
   /** The finish is a success (sky) or a dead end (ink). */
   win?: boolean;
 }
@@ -36,11 +37,17 @@ interface Props {
  */
 const { lanes, speed = 7 } = Astro.props;
 const longest = Math.max(...lanes.map((l) => l.seconds));
-// The finish shows the median as measured, tenths too (0:28,7)
-const clock = (s: number) => {
+// The finish shows the median as measured, tenths too (0:28,7; 0:28.7 in English)
+const clock = (s: number, comma = ',') => {
   const tenths = Math.round((s % 1) * 10);
-  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}${tenths ? `,${tenths}` : ''}`;
+  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}${tenths ? `${comma}${tenths}` : ''}`;
 };
+const captions = (lane: RaceLane, lang: 'ru' | 'en') =>
+  JSON.stringify(lane.screens.map((s) => s.caption[lang]));
+const aways = (lane: RaceLane, lang: 'ru' | 'en') =>
+  JSON.stringify(lane.screens.map((s) => s.away?.[lang] ?? ''));
+const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
+  `${lane.label[lang]}: ${lane.screens.map((s) => s.caption[lang]).join(' → ')}`;
 ---
 
 <div class="race" data-race data-speed={speed}>
@@ -51,39 +58,48 @@ const clock = (s: number) => {
         data-lane
         data-seconds={lane.seconds}
         data-steps={lane.steps}
-        data-captions={JSON.stringify(lane.screens.map((s) => s.caption))}
-        data-aways={JSON.stringify(lane.screens.map((s) => s.away ?? ''))}
+        data-captions={captions(lane, 'ru')}
+        data-en-captions={captions(lane, 'en')}
+        data-aways={aways(lane, 'ru')}
+        data-en-aways={aways(lane, 'en')}
         data-sames={JSON.stringify(lane.screens.map((s) => Boolean(s.same)))}
       >
         <p class="lane-label">
-          {lane.label}
-          <span class="away" data-away>
-            {lane.screens.at(-1)?.away}
+          <span data-en={lane.label.en}>{lane.label.ru}</span>
+          <span class="away" data-away data-en={lane.screens.at(-1)?.away?.en}>
+            {lane.screens.at(-1)?.away?.ru}
           </span>
         </p>
         <div class="lane-phone">
           <Phone
             src={lane.screens.map((s) => s.src)}
-            alt={`${lane.label}: ${lane.screens.map((s) => s.caption).join(' → ')}`}
+            alt={{ ru: flow(lane, 'ru'), en: flow(lane, 'en') }}
           />
         </div>
         <div class="bar px-clip" aria-hidden="true">
           <span class="bar-fill" data-bar style={`width: ${(lane.seconds / longest) * 100}%`} />
         </div>
         <p class="time">
-          <span data-clock>{clock(lane.seconds)}</span>
-          <span class="end" data-end>
-            {lane.end}
+          <span data-clock data-en={clock(lane.seconds, '.')}>
+            {clock(lane.seconds)}
+          </span>
+          <span class="end" data-end data-en={lane.end.en}>
+            {lane.end.ru}
           </span>
         </p>
         <p class="caption">
-          Шаг <span data-step>{lane.steps}</span> из {lane.steps} ·{' '}
-          <span data-caption>{lane.screens.at(-1)?.caption}</span>
+          <!-- Words around the counter stay with it: spaces between tags are left to the
+               typograph only when they hold text, so these are non-breaking by hand -->
+          <span data-en="Step">Шаг</span>&nbsp;<span data-step>{lane.steps}</span>&nbsp;
+          <span data-en={`of\u00A0${lane.steps}`}>из&nbsp;{lane.steps}</span>&nbsp;·{' '}
+          <span data-caption data-en={lane.screens.at(-1)?.caption.en}>
+            {lane.screens.at(-1)?.caption.ru}
+          </span>
         </p>
       </div>
     ))}
   </div>
-  <button class="replay px-clip" type="button" data-replay hidden>
+  <button class="replay px-clip" type="button" data-replay data-en="Replay" hidden>
     Ещё раз
   </button>
 </div>

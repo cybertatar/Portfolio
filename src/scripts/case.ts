@@ -31,7 +31,7 @@ export function initScrollSpy(links: HTMLAnchorElement[], current: HTMLElement |
       if (on) a.setAttribute('aria-current', 'location');
       else a.removeAttribute('aria-current');
       if (on && current && a.closest('[data-case-menu]')) {
-        current.textContent = a.dataset.title ?? a.textContent ?? '';
+        current.textContent = a.textContent ?? '';
       }
     });
   };

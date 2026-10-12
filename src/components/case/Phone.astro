@@ -1,4 +1,5 @@
 ---
+import { en, ru, type Text } from '../../content/site';
 import { withBase } from '../../scripts/url';
 
 interface Props {
@@ -7,7 +8,7 @@ interface Props {
    * last one shows until a script switches `is-on` (Race.astro).
    */
   src: string | string[];
-  alt: string;
+  alt: Text;
 }
 
 /**
@@ -24,7 +25,8 @@ const stacked = screens.length > 1;
     <img
       class:list={['screen', { stacked, 'is-on': i === screens.length - 1 }]}
       src={withBase(s)}
-      alt={i === screens.length - 1 ? alt : ''}
+      alt={i === screens.length - 1 ? ru(alt) : ''}
+      data-en-alt={i === screens.length - 1 ? en(alt) : undefined}
       loading="lazy"
       decoding="async"
       data-screen={stacked ? '' : undefined}

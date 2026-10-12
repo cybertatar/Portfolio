@@ -113,7 +113,7 @@ export function initDeck(root: HTMLElement) {
       d.classList.toggle('is-active', revealed && Number(d.dataset.deckDecor) === i),
     );
     dots.forEach((d) => d.toggleAttribute('aria-current', Number(d.dataset.deckDot) === i));
-    const label = cards[i].dataset.title ?? '';
+    const label = cards[i].dataset.name ?? '';
     if (caption && caption.textContent !== label) caption.textContent = label;
   }
 

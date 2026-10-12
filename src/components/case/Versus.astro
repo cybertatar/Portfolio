@@ -1,13 +1,15 @@
 ---
+import { en, ru, type Localized, type Text } from '../../content/site';
+
 export interface VersusRow {
-  label: string;
-  before: string;
-  after: string;
+  label: Text;
+  before: Localized;
+  after: Localized;
 }
 export interface VersusStat {
-  value: string;
-  unit?: string;
-  note: string;
+  value: Text;
+  unit?: Localized;
+  note: Localized;
 }
 
 interface Props {
@@ -28,29 +30,48 @@ const { rows, stats } = Astro.props;
 ---
 
 <div class="versus">
-  <ul class="changes" style={`--cols: ${rows.length === 4 ? 2 : 3}`} aria-label="Было и стало">
+  <ul
+    class="changes"
+    style={`--cols: ${rows.length === 4 ? 2 : 3}`}
+    aria-label="Было и стало"
+    data-en-label="Before and after"
+  >
     {rows.map((r) => (
       <li class="change">
-        <span class="label">{r.label}</span>
+        <span class="label" data-en={en(r.label)}>
+          {ru(r.label)}
+        </span>
         <p class="after">
-          <span class="sr">Стало: </span>
-          {r.after}
+          <span class="sr" data-en="After: ">
+            Стало:{' '}
+          </span>
+          <span data-en={r.after.en}>{r.after.ru}</span>
         </p>
-        <p class="before">Было: {r.before}</p>
+        <p class="before" data-en={`Before: ${r.before.en}`}>
+          Было: {r.before.ru}
+        </p>
       </li>
     ))}
   </ul>
   <!-- The result is its own card: the boundary groups the numbers (NN/g, common region) -->
   <div class="result px-clip">
-    <p class="result-title">Итог теста</p>
+    <p class="result-title" data-en="Test result">
+      Итог теста
+    </p>
     <ul class="stats" style={`--n: ${stats.length}`}>
       {stats.map((s) => (
         <li class="stat">
           <span class="value">
-            {s.value}
-            {s.unit && <span class="unit">{s.unit}</span>}
+            <span data-en={en(s.value)}>{ru(s.value)}</span>
+            {s.unit && (
+              <span class="unit" data-en={s.unit.en}>
+                {s.unit.ru}
+              </span>
+            )}
           </span>
-          <span class="note">{s.note}</span>
+          <span class="note" data-en={s.note.en}>
+            {s.note.ru}
+          </span>
         </li>
       ))}
     </ul>

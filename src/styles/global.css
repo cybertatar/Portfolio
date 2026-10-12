@@ -78,3 +78,9 @@ textarea {
       pointer;
   }
 }
+
+/* Text with markup inside comes in both languages, one block each; <html lang> picks (BaseLayout) */
+html:not([lang='en']) [data-lang='en'],
+html[lang='en'] [data-lang='ru'] {
+  display: none !important;
+}

@@ -5,8 +5,8 @@ import CaseVideo from '../../components/case/CaseVideo.astro';
 import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
-import Race from '../../components/case/Race.astro';
-import Versus from '../../components/case/Versus.astro';
+import Race, { type RaceLane } from '../../components/case/Race.astro';
+import Versus, { type VersusRow, type VersusStat } from '../../components/case/Versus.astro';
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -15,307 +15,552 @@ import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import Media from '../../components/ui/Media.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
+import { type Localized } from '../../content/site';
 import { withBase } from '../../scripts/url';
 
 /** Contents: the sidebar on desktop, the drop-down list on mobile. `sub` items are indented. */
-const toc = [
-  { id: 'overview', title: 'Обзор' },
-  { id: 'screens', title: 'Финальные экраны' },
-  { id: 'process', title: 'Как мы работали' },
-  { id: 'interviews', title: 'Интервью' },
-  { id: 'home', title: 'Главная', group: 'Решения' },
-  { id: 'card-data', title: 'Данные карты', sub: true },
-  { id: 'cashback', title: 'Подключение кешбэка', sub: true },
-  { id: 'categories', title: 'Кешбэк после подключения', sub: true },
-  { id: 'testing', title: 'Тестирование' },
-  { id: 'review', title: 'Ревью' },
-  { id: 'outcome', title: 'Выводы' },
+const toc: { id: string; title: Localized; group?: Localized; sub?: boolean }[] = [
+  { id: 'overview', title: { ru: 'Обзор', en: 'Overview' } },
+  { id: 'screens', title: { ru: 'Финальные экраны', en: 'Final screens' } },
+  { id: 'process', title: { ru: 'Как мы работали', en: 'How we worked' } },
+  { id: 'interviews', title: { ru: 'Интервью', en: 'Interviews' } },
+  {
+    id: 'home',
+    title: { ru: 'Главная', en: 'Home' },
+    group: { ru: 'Решения', en: 'Solutions' },
+  },
+  { id: 'card-data', title: { ru: 'Данные карты', en: 'Card details' }, sub: true },
+  { id: 'cashback', title: { ru: 'Подключение кешбэка', en: 'Activating cashback' }, sub: true },
+  {
+    id: 'categories',
+    title: { ru: 'Кешбэк после подключения', en: 'Cashback after activation' },
+    sub: true,
+  },
+  { id: 'testing', title: { ru: 'Тестирование', en: 'Testing' } },
+  { id: 'review', title: { ru: 'Ревью', en: 'Review' } },
+  { id: 'outcome', title: { ru: 'Выводы', en: 'Takeaways' } },
 ];
 
 /** Final screens: one live prototype per flow from the usability test. */
 const prototypes = [
-  { route: '/', poster: 'assets/cases/psb/main.webp', caption: 'Главная' },
-  { route: '/card', poster: 'assets/cases/psb/card.webp', caption: 'Данные карты' },
-  { route: '/cashback', poster: 'assets/cases/psb/cb-off.webp', caption: 'Подключение кешбэка' },
+  { route: '/', poster: 'assets/cases/psb/main.webp', caption: { ru: 'Главная', en: 'Home' } },
+  {
+    route: '/card',
+    poster: 'assets/cases/psb/card.webp',
+    caption: { ru: 'Данные карты', en: 'Card details' },
+  },
+  {
+    route: '/cashback',
+    poster: 'assets/cases/psb/cb-off.webp',
+    caption: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
+  },
 ];
 
 /** Each problem and its solution, one quest per solution section below: one whole thought each, clear without the section */
 const quests: Quest[] = [
   {
     id: 'home',
-    title: 'Главная',
-    problem: 'Промо и продукты банка спорили с повседневными действиями, историю было трудно найти',
-    solution: 'Баланс, частые действия и история наверху, а предложения банка можно закрыть',
+    title: { ru: 'Главная', en: 'Home' },
+    problem: {
+      ru: 'Промо и продукты банка спорили с повседневными действиями, историю было трудно найти',
+      en: 'Bank promos and products competed with everyday actions, and the history was hard to find',
+    },
+    solution: {
+      ru: 'Баланс, частые действия и история наверху, а предложения банка можно закрыть',
+      en: 'Balance, frequent actions and history at the top, and bank offers can be closed',
+    },
   },
   {
     id: 'card-data',
-    title: 'Данные карты',
-    problem: 'Данные лежали на третьей вкладке, а CVV открывался только по коду из СМС',
-    solution: 'Их можно посмотреть и скопировать на одном экране, без кода из СМС',
+    title: { ru: 'Данные карты', en: 'Card details' },
+    problem: {
+      ru: 'Данные лежали на третьей вкладке, а CVV открывался только по коду из СМС',
+      en: 'The details sat on the third tab, and the CVV only opened with a code from a text message',
+    },
+    solution: {
+      ru: 'Их можно посмотреть и скопировать на одном экране, без кода из СМС',
+      en: 'They can be viewed and copied on one screen, no text message code',
+    },
   },
   {
     id: 'cashback',
-    title: 'Подключение кешбэка',
-    problem:
-      '12 шагов через почту и браузер, а подключённый кешбэк не появлялся до обновления экрана',
-    solution: 'Одна кнопка рядом с условиями, и сразу выбор категорий',
+    title: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
+    problem: {
+      ru: '12 шагов через почту и браузер, а подключённый кешбэк не появлялся до обновления экрана',
+      en: '12 steps through email and a browser, and the activated cashback didn’t show up until the screen was refreshed',
+    },
+    solution: {
+      ru: 'Одна кнопка рядом с условиями, и сразу выбор категорий',
+      en: 'One button next to the terms, and straight on to choosing categories',
+    },
   },
   {
     id: 'categories',
-    title: 'Кешбэк после подключения',
-    problem: 'Категории нужно было выбирать каждый месяц, а приложение об этом не напоминало',
-    solution: 'Их можно выбрать на месяц вперёд и поменять до его начала',
+    title: { ru: 'Кешбэк после подключения', en: 'Cashback after activation' },
+    problem: {
+      ru: 'Категории нужно было выбирать каждый месяц, а приложение об этом не напоминало',
+      en: 'Categories had to be chosen every month, and the app never reminded you',
+    },
+    solution: {
+      ru: 'Их можно выбрать на месяц вперёд и поменять до его начала',
+      en: 'They can be chosen a month ahead and changed before it starts',
+    },
   },
 ];
 
 // One row of stats, all built the same: number, context, one gauge
 const stats: HudStat[] = [
   {
-    label: 'Подключение кешбэка',
+    label: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
     value: '23',
-    unit: 'с',
-    notes: ['вместо 105 с', '5 шагов вместо 12'],
+    unit: { ru: 'с', en: 's' },
+    notes: [
+      { ru: 'вместо 105 с', en: 'instead of 105 s' },
+      { ru: '5 шагов вместо 12', en: '5 steps instead of 12' },
+    ],
     gauge: { kind: 'time', from: 105, to: 23 },
   },
   {
-    label: 'Путь к данным карты',
+    label: { ru: 'Путь к данным карты', en: 'Getting to card details' },
     value: '17',
-    unit: 'с',
-    notes: ['вместо 42 с', '4 шага вместо 7'],
+    unit: { ru: 'с', en: 's' },
+    notes: [
+      { ru: 'вместо 42 с', en: 'instead of 42 s' },
+      { ru: '4 шага вместо 7', en: '4 steps instead of 7' },
+    ],
     gauge: { kind: 'time', from: 42, to: 17 },
   },
   {
     label: 'First click success',
     value: '89%',
-    notes: ['начали с правильного действия'],
+    notes: [{ ru: 'начали с правильного действия', en: 'started with the right action' }],
     gauge: { kind: 'mana', value: 89 },
   },
   {
-    label: 'Оценка лёгкости',
-    value: '6,4',
-    unit: 'из 7',
-    notes: ['SEQ, среднее по задачам'],
+    label: { ru: 'Оценка лёгкости', en: 'Ease score' },
+    value: { ru: '6,4', en: '6.4' },
+    unit: { ru: 'из 7', en: 'of 7' },
+    notes: [{ ru: 'SEQ, среднее по задачам', en: 'SEQ, average across tasks' }],
     gauge: { kind: 'hearts', value: 6.4, max: 7 },
   },
 ];
 
-const steps = [
+const steps: { id: string; title: Localized; text: Localized }[] = [
   {
     id: 'team',
-    title: 'Дизайнили вдвоём, проверяли у сеньора',
-    text: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
+    title: {
+      ru: 'Дизайнили вдвоём, проверяли у сеньора',
+      en: 'Designed as a pair, checked with a senior',
+    },
+    text: {
+      ru: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
+      en: 'While one of us proposed a concept, the other looked for its weak spots, then we swapped roles. We showed the result to a senior designer and, when needed, reworked it based on the feedback.',
+    },
   },
   {
     id: 'scope',
-    title: 'Выбрали четыре направления',
-    text: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
+    title: { ru: 'Выбрали четыре направления', en: 'Picked four directions' },
+    text: {
+      ru: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
+      en: 'We broke down the original flows and compared them across five banks. We took the best from each and focused on the home screen, card details, activating cashback and choosing categories.',
+    },
   },
   {
     id: 'prototype',
-    title: 'Не только макеты',
-    text: 'Завайбкодили прототип для быстрого тестирования: в нём можно пройти сценарии на телефоне — подключить кешбэк, выбрать категории и открыть данные карты.',
+    title: { ru: 'Не только макеты', en: 'More than mockups' },
+    text: {
+      ru: 'Завайбкодили прототип для быстрого тестирования: в нём можно пройти сценарии на телефоне — подключить кешбэк, выбрать категории и открыть данные карты.',
+      en: 'We vibe-coded a prototype for quick testing: it lets you go through the flows on a phone — activate cashback, choose categories and open card details.',
+    },
   },
   {
     id: 'testing',
-    title: 'Видели путь, а не только финал',
-    text: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
+    title: { ru: 'Видели путь, а не только финал', en: 'We saw the path, not just the finish' },
+    text: {
+      ru: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
+      en: 'The prototype automatically logged what participants did: taps, scrolling, moves between screens, the start and the end of each task.',
+    },
   },
 ];
 
-const findings = [
+const findings: { title: Localized; text: Localized }[] = [
   {
-    title: 'Похожие названия сбивали с толку',
-    text: 'Кешбэк подключался через «Бонусный счёт», а «Кешбэк и скидки» открывал список партнёров.',
+    title: { ru: 'Похожие названия сбивали с толку', en: 'Similar names were confusing' },
+    text: {
+      ru: 'Кешбэк подключался через «Бонусный счёт», а «Кешбэк и скидки» открывал список партнёров.',
+      en: 'Cashback was activated through the “Bonus account”, while “Cashback and discounts” opened a list of partners.',
+    },
   },
   {
-    title: 'Данные карты искали вне приложения',
-    text: 'Лояльный клиент искал данные своей карты не в приложении: он достал её из кошелька.',
+    title: {
+      ru: 'Данные карты искали вне приложения',
+      en: 'Card details were looked up outside the app',
+    },
+    text: {
+      ru: 'Лояльный клиент искал данные своей карты не в приложении: он достал её из кошелька.',
+      en: 'A loyal customer didn’t look for their card details in the app: they took the card out of their wallet.',
+    },
   },
   {
-    title: 'Не сразу верилось, что это банк',
-    text: 'Экраны выглядели собранными по шаблону, и один участник при первом знакомстве засомневался, что перед ним настоящее приложение банка.',
+    title: { ru: 'Не сразу верилось, что это банк', en: 'Hard to believe it was a bank' },
+    text: {
+      ru: 'Экраны выглядели собранными по шаблону, и один участник при первом знакомстве засомневался, что перед ним настоящее приложение банка.',
+      en: 'The screens looked like they were put together from a template, and at first sight one participant doubted it was a real banking app.',
+    },
   },
 ];
 
-const directions = [
+interface Direction {
+  id: string;
+  title: Localized;
+  lead: Localized;
+  compare?: { before: string; after: string };
+  race?: RaceLane[];
+  versus: { rows: VersusRow[]; stats: VersusStat[] };
+}
+
+const before = { ru: 'Было', en: 'Before' };
+const after = { ru: 'Стало', en: 'After' };
+const done = { ru: 'готово', en: 'done' };
+const notNeeded = { ru: 'Не нужен', en: 'Not needed' };
+const rightAction = {
+  ru: 'сразу начали с правильного действия',
+  en: 'started with the right action',
+};
+const ofSeven = { ru: 'из 7', en: 'of 7' };
+
+const directions: Direction[] = [
   {
     id: 'home',
-    title: 'Главная страница',
-    lead: 'Повседневные задачи и предложения банка должны быть заметны одновременно, но не конкурировать между собой.',
+    title: { ru: 'Главная страница', en: 'Home screen' },
+    lead: {
+      ru: 'Повседневные задачи и предложения банка должны быть заметны одновременно, но не конкурировать между собой.',
+      en: 'Everyday tasks and bank offers should be visible at the same time without competing with each other.',
+    },
     compare: { before: 'assets/cases/psb/main-before.webp', after: 'assets/cases/psb/main.webp' },
     // Facts row by row under the before/after slider, then the result
     versus: {
       rows: [
         {
-          label: 'Баланс',
-          before: '«Всего доступно средств» в отдельной карточке',
-          after: '«Всего на счетах» наверху, рядом бейдж кешбэка',
+          label: { ru: 'Баланс', en: 'Balance' },
+          before: {
+            ru: '«Всего доступно средств» в отдельной карточке',
+            en: '“Total available funds” in a separate card',
+          },
+          after: {
+            ru: '«Всего на счетах» наверху, рядом бейдж кешбэка',
+            en: '“Total in accounts” at the top, with a cashback badge next to it',
+          },
         },
         {
-          label: 'Карты и счета',
-          before: 'Два отдельных списка',
-          after: 'Карты внутри своих счетов',
+          label: { ru: 'Карты и счета', en: 'Cards and accounts' },
+          before: { ru: 'Два отдельных списка', en: 'Two separate lists' },
+          after: { ru: 'Карты внутри своих счетов', en: 'Cards inside their accounts' },
         },
         {
-          label: 'Частые действия',
-          before: 'Нет на главной',
-          after: 'QR, перевод, по номеру и пополнение под счетами',
+          label: { ru: 'Частые действия', en: 'Frequent actions' },
+          before: { ru: 'Нет на главной', en: 'Not on the home screen' },
+          after: {
+            ru: 'QR, перевод, по номеру и пополнение под счетами',
+            en: 'QR, transfer, by phone number and top-up under the accounts',
+          },
         },
         {
-          label: 'История',
-          before: 'Отдельная вкладка, у каждой карты своя',
-          after: 'На главной, сразу под действиями',
+          label: { ru: 'История', en: 'History' },
+          before: {
+            ru: 'Отдельная вкладка, у каждой карты своя',
+            en: 'A separate tab, with its own for every card',
+          },
+          after: {
+            ru: 'На главной, сразу под действиями',
+            en: 'On the home screen, right under the actions',
+          },
         },
         {
-          label: 'Предложения банка',
-          before: 'Вес как у продуктов, среди счетов и карт',
-          after: 'Баннеры сверху, их можно закрыть',
+          label: { ru: 'Предложения банка', en: 'Bank offers' },
+          before: {
+            ru: 'Вес как у продуктов, среди счетов и карт',
+            en: 'As much weight as products, among the accounts and cards',
+          },
+          after: {
+            ru: 'Баннеры сверху, их можно закрыть',
+            en: 'Banners at the top that can be closed',
+          },
         },
         {
-          label: 'Кешбэк',
-          before: '«Бонусный счёт» в конце главной',
-          after: 'Бейдж у баланса и вкладка «Выгода»',
+          label: { ru: 'Кешбэк', en: 'Cashback' },
+          before: {
+            ru: '«Бонусный счёт» в конце главной',
+            en: '“Bonus account” at the very bottom of the home screen',
+          },
+          after: {
+            ru: 'Бейдж у баланса и вкладка «Выгода»',
+            en: 'A badge by the balance and the “Benefits” tab',
+          },
         },
       ],
       stats: [
-        { value: '63%', note: 'нашли кешбэк через вкладку «Выгода»' },
+        {
+          value: '63%',
+          note: {
+            ru: 'нашли кешбэк через вкладку «Выгода»',
+            en: 'found cashback through the “Benefits” tab',
+          },
+        },
         {
           value: '37%',
-          note: 'через бейдж у баланса: второй вход не остался незамеченным',
+          note: {
+            ru: 'через бейдж у баланса: второй вход не остался незамеченным',
+            en: 'through the badge by the balance: the second way in didn’t go unnoticed',
+          },
         },
       ],
     },
   },
   {
     id: 'card-data',
-    title: 'Данные карты',
-    lead: 'Посмотреть и скопировать данные карты должно быть простым и понятным действием сразу после входа в приложение.',
+    title: { ru: 'Данные карты', en: 'Card details' },
+    lead: {
+      ru: 'Посмотреть и скопировать данные карты должно быть простым и понятным действием сразу после входа в приложение.',
+      en: 'Viewing and copying card details should be a simple, clear action right after opening the app.',
+    },
     // Before: the original flow from the PSB Figma file (section "Пользователь просматривает и
     // копирует данные карты"); steps and times are the medians from the results
     race: [
       {
-        label: 'Было',
+        label: before,
         steps: 7,
         seconds: 42,
-        end: 'через СМС',
+        end: { ru: 'через СМС', en: 'via text message' },
         screens: [
-          { src: 'assets/cases/psb/before/card-01.webp', caption: 'Главная, карта в «Картах»' },
-          { src: 'assets/cases/psb/before/card-02.webp', caption: 'Открылись «Настройки» карты' },
-          { src: 'assets/cases/psb/before/card-03.webp', caption: 'Свайп — «История»' },
-          { src: 'assets/cases/psb/before/card-04.webp', caption: 'Третья вкладка — «О карте»' },
-          { src: 'assets/cases/psb/before/card-05.webp', caption: 'Данные карты, номер скрыт' },
-          { src: 'assets/cases/psb/before/card-06.webp', caption: 'Показал номер', same: true },
           {
-            src: 'assets/cases/psb/before/card-07.webp',
-            caption: 'Удержал поле — скопировано',
+            src: 'assets/cases/psb/before/card-01.webp',
+            caption: { ru: 'Главная, карта в «Картах»', en: 'Home, the card under “Cards”' },
+          },
+          {
+            src: 'assets/cases/psb/before/card-02.webp',
+            caption: { ru: 'Открылись «Настройки» карты', en: 'The card’s “Settings” opened' },
+          },
+          {
+            src: 'assets/cases/psb/before/card-03.webp',
+            caption: { ru: 'Свайп — «История»', en: 'Swipe — “History”' },
+          },
+          {
+            src: 'assets/cases/psb/before/card-04.webp',
+            caption: { ru: 'Третья вкладка — «О карте»', en: 'Third tab — “About the card”' },
+          },
+          {
+            src: 'assets/cases/psb/before/card-05.webp',
+            caption: { ru: 'Данные карты, номер скрыт', en: 'Card details, number hidden' },
+          },
+          {
+            src: 'assets/cases/psb/before/card-06.webp',
+            caption: { ru: 'Показал номер', en: 'Revealed the number' },
             same: true,
           },
-          { src: 'assets/cases/psb/before/card-08.webp', caption: 'CVV — только по СМС' },
+          {
+            src: 'assets/cases/psb/before/card-07.webp',
+            caption: { ru: 'Удержал поле — скопировано', en: 'Held the field — copied' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/before/card-08.webp',
+            caption: { ru: 'CVV — только по СМС', en: 'CVV — only by text message' },
+          },
           {
             src: 'assets/cases/psb/before/card-09.webp',
-            caption: 'Код не подставился',
-            away: 'сообщения',
+            caption: { ru: 'Код не подставился', en: 'The code didn’t fill in' },
+            away: { ru: 'сообщения', en: 'messages' },
           },
-          { src: 'assets/cases/psb/before/card-10.webp', caption: 'Согласие подтверждено' },
+          {
+            src: 'assets/cases/psb/before/card-10.webp',
+            caption: { ru: 'Согласие подтверждено', en: 'Consent confirmed' },
+          },
         ],
       },
       {
-        label: 'Стало',
+        label: after,
         steps: 4,
         seconds: 17,
-        end: 'готово',
+        end: done,
         win: true,
         screens: [
           // Captured from the live prototype (Финальные экраны) by tools/psb-race/capture.mjs
-          { src: 'assets/cases/psb/race/card-home.webp', caption: 'Главная, текущий счёт' },
-          { src: 'assets/cases/psb/race/card-account.webp', caption: 'Карта внутри счёта' },
-          { src: 'assets/cases/psb/race/card-card.webp', caption: '«Данные карты» на карте' },
+          {
+            src: 'assets/cases/psb/race/card-home.webp',
+            caption: { ru: 'Главная, текущий счёт', en: 'Home, current account' },
+          },
+          {
+            src: 'assets/cases/psb/race/card-account.webp',
+            caption: { ru: 'Карта внутри счёта', en: 'The card inside the account' },
+          },
+          {
+            src: 'assets/cases/psb/race/card-card.webp',
+            caption: { ru: '«Данные карты» на карте', en: '“Card details” on the card' },
+          },
           {
             src: 'assets/cases/psb/race/card-data.webp',
-            caption: 'Номер, срок и CVV сразу',
+            caption: { ru: 'Номер, срок и CVV сразу', en: 'Number, expiry and CVV at once' },
             same: true,
           },
-          { src: 'assets/cases/psb/race/card-copied.webp', caption: 'Скопировано', same: true },
+          {
+            src: 'assets/cases/psb/race/card-copied.webp',
+            caption: { ru: 'Скопировано', en: 'Copied' },
+            same: true,
+          },
         ],
       },
     ],
     versus: {
       rows: [
         {
-          label: 'Где найти',
-          before: 'Третья вкладка в карточке карты',
-          after: 'Карта внутри счёта, данные на ней',
+          label: { ru: 'Где найти', en: 'Where to find' },
+          before: { ru: 'Третья вкладка в карточке карты', en: 'The third tab on the card’s page' },
+          after: {
+            ru: 'Карта внутри счёта, данные на ней',
+            en: 'The card inside its account, the details on the card',
+          },
         },
         {
           label: 'CVV',
-          before: 'Только по коду из СМС, даже после входа по биометрии',
-          after: 'Сразу, вместе с номером и сроком',
+          before: {
+            ru: 'Только по коду из СМС, даже после входа по биометрии',
+            en: 'Only with a code from a text message, even after biometric login',
+          },
+          after: {
+            ru: 'Сразу, вместе с номером и сроком',
+            en: 'Right away, with the number and the expiry date',
+          },
         },
         {
-          label: 'Выход из приложения',
-          before: 'В сообщения за кодом: сам он не подставлялся',
-          after: 'Не нужен',
+          label: { ru: 'Выход из приложения', en: 'Leaving the app' },
+          before: {
+            ru: 'В сообщения за кодом: сам он не подставлялся',
+            en: 'To messages for the code: it didn’t fill in on its own',
+          },
+          after: notNeeded,
         },
         {
-          label: 'Копирование',
-          before: 'Удержать поле, пока внизу не появится подсказка',
-          after: 'Кнопка у каждого поля и плашка «Скопировано»',
+          label: { ru: 'Копирование', en: 'Copying' },
+          before: {
+            ru: 'Удержать поле, пока внизу не появится подсказка',
+            en: 'Hold the field until a hint pops up at the bottom',
+          },
+          after: {
+            ru: 'Кнопка у каждого поля и плашка «Скопировано»',
+            en: 'A button by every field and a “Copied” toast',
+          },
         },
       ],
       stats: [
-        { value: '83%', note: 'сразу начали с правильного действия' },
+        { value: '83%', note: rightAction },
         {
-          value: '6,0',
-          unit: 'из 7',
-          note: 'оценка лёгкости: тем, у кого ПСБ — единственный банк, карты внутри счёта были непривычны, а переворот карты — не самый явный способ показать данные',
+          value: { ru: '6,0', en: '6.0' },
+          unit: ofSeven,
+          note: {
+            ru: 'оценка лёгкости: тем, у кого ПСБ — единственный банк, карты внутри счёта были непривычны, а переворот карты — не самый явный способ показать данные',
+            en: 'ease score: for those whose only bank is PSB, cards inside an account felt unfamiliar, and flipping the card isn’t the most obvious way to show the details',
+          },
         },
       ],
     },
   },
   {
     id: 'cashback',
-    title: 'Подключение кешбэка',
-    lead: 'Кешбэк — самая популярная программа лояльности в российских банках, и подключить его должно быть не сложнее, чем прочитать условия.',
+    title: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
+    lead: {
+      ru: 'Кешбэк — самая популярная программа лояльности в российских банках, и подключить его должно быть не сложнее, чем прочитать условия.',
+      en: 'Cashback is the most popular loyalty programme in Russian banks, and activating it should be no harder than reading the terms.',
+    },
     // Before: the original flow from the PSB Figma file (section "Пользователь подключает кешбэк");
     // steps and times are the medians from the results
     race: [
       {
-        label: 'Было',
+        label: before,
         steps: 12,
         seconds: 105,
-        end: 'кешбэка нет',
+        end: { ru: 'кешбэка нет', en: 'no cashback' },
         screens: [
-          { src: 'assets/cases/psb/before/cb-01.webp', caption: 'Главная' },
-          { src: 'assets/cases/psb/before/cb-02.webp', caption: 'Внизу — «Бонусный счёт»' },
-          { src: 'assets/cases/psb/before/cb-03.webp', caption: 'Условия и «Подключить»' },
-          { src: 'assets/cases/psb/before/cb-04.webp', caption: 'Почта и два согласия' },
-          { src: 'assets/cases/psb/before/cb-05.webp', caption: 'Ждём письмо' },
-          { src: 'assets/cases/psb/before/cb-06.webp', caption: 'Не дождался — ошибка' },
-          { src: 'assets/cases/psb/before/cb-07.webp', caption: 'Письмо в почте', away: 'почта' },
+          { src: 'assets/cases/psb/before/cb-01.webp', caption: { ru: 'Главная', en: 'Home' } },
+          {
+            src: 'assets/cases/psb/before/cb-02.webp',
+            caption: { ru: 'Внизу — «Бонусный счёт»', en: 'At the bottom — “Bonus account”' },
+          },
+          {
+            src: 'assets/cases/psb/before/cb-03.webp',
+            caption: { ru: 'Условия и «Подключить»', en: 'Terms and “Activate”' },
+          },
+          {
+            src: 'assets/cases/psb/before/cb-04.webp',
+            caption: { ru: 'Почта и два согласия', en: 'Email and two consents' },
+          },
+          {
+            src: 'assets/cases/psb/before/cb-05.webp',
+            caption: { ru: 'Ждём письмо', en: 'Waiting for the email' },
+          },
+          {
+            src: 'assets/cases/psb/before/cb-06.webp',
+            caption: { ru: 'Не дождался — ошибка', en: 'Didn’t wait — an error' },
+          },
+          {
+            src: 'assets/cases/psb/before/cb-07.webp',
+            caption: { ru: 'Письмо в почте', en: 'The email in the mail app' },
+            away: { ru: 'почта', en: 'mail' },
+          },
           {
             src: 'assets/cases/psb/before/cb-08.webp',
-            caption: 'Ссылка в браузере',
-            away: 'браузер',
+            caption: { ru: 'Ссылка в браузере', en: 'The link in a browser' },
+            away: { ru: 'браузер', en: 'browser' },
           },
-          { src: 'assets/cases/psb/before/cb-09.webp', caption: 'Согласие не открыть' },
-          { src: 'assets/cases/psb/before/cb-10.webp', caption: 'Готово' },
-          { src: 'assets/cases/psb/before/cb-01.webp', caption: 'А на главной кешбэка нет' },
+          {
+            src: 'assets/cases/psb/before/cb-09.webp',
+            caption: { ru: 'Согласие не открыть', en: 'The consent won’t open' },
+          },
+          { src: 'assets/cases/psb/before/cb-10.webp', caption: { ru: 'Готово', en: 'Done' } },
+          {
+            src: 'assets/cases/psb/before/cb-01.webp',
+            caption: { ru: 'А на главной кешбэка нет', en: 'Yet no cashback on the home screen' },
+          },
         ],
       },
       {
-        label: 'Стало',
+        label: after,
         steps: 5,
         seconds: 23,
-        end: 'готово',
+        end: done,
         win: true,
         screens: [
           // Captured from the live prototype (Финальные экраны): three categories, the button counts them
-          { src: 'assets/cases/psb/race/start.webp', caption: '«Хочу подключить» в «Выгоде»' },
-          { src: 'assets/cases/psb/race/cats-0.webp', caption: 'Выбор трёх категорий' },
-          { src: 'assets/cases/psb/race/cats-1.webp', caption: 'Отметил «Авиабилеты»', same: true },
-          { src: 'assets/cases/psb/race/cats-2.webp', caption: 'Отметил «Такси»', same: true },
-          { src: 'assets/cases/psb/race/cats-3.webp', caption: 'Отметил «Деливери»', same: true },
-          { src: 'assets/cases/psb/race/success.webp', caption: 'Кешбэк подключён' },
+          {
+            src: 'assets/cases/psb/race/start.webp',
+            caption: {
+              ru: '«Хочу подключить» в «Выгоде»',
+              en: '“I want to activate” in “Benefits”',
+            },
+          },
+          {
+            src: 'assets/cases/psb/race/cats-0.webp',
+            caption: { ru: 'Выбор трёх категорий', en: 'Choosing three categories' },
+          },
+          {
+            src: 'assets/cases/psb/race/cats-1.webp',
+            caption: { ru: 'Отметил «Авиабилеты»', en: 'Ticked “Flights”' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/race/cats-2.webp',
+            caption: { ru: 'Отметил «Такси»', en: 'Ticked “Taxi”' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/race/cats-3.webp',
+            caption: { ru: 'Отметил «Деливери»', en: 'Ticked “Delivery”' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/race/success.webp',
+            caption: { ru: 'Кешбэк подключён', en: 'Cashback activated' },
+          },
         ],
       },
     ],
@@ -323,135 +568,256 @@ const directions = [
     versus: {
       rows: [
         {
-          label: 'Где найти',
-          before: '«Бонусный счёт» внизу главной',
-          after: '«Выгода» в таббаре и бейдж у баланса',
+          label: { ru: 'Где найти', en: 'Where to find' },
+          before: {
+            ru: '«Бонусный счёт» внизу главной',
+            en: '“Bonus account” at the bottom of the home screen',
+          },
+          after: {
+            ru: '«Выгода» в таббаре и бейдж у баланса',
+            en: '“Benefits” in the tab bar and a badge by the balance',
+          },
         },
         {
-          label: 'Выход из приложения',
-          before: 'В почту за письмом, в браузер по ссылке',
-          after: 'Не нужен',
+          label: { ru: 'Выход из приложения', en: 'Leaving the app' },
+          before: {
+            ru: 'В почту за письмом, в браузер по ссылке',
+            en: 'To the mail app for an email, to a browser for a link',
+          },
+          after: notNeeded,
         },
         {
-          label: 'Согласия',
-          before: 'Два переключателя и экран, который не открыть',
-          after: 'Одна кнопка рядом с условиями',
+          label: { ru: 'Согласия', en: 'Consents' },
+          before: {
+            ru: 'Два переключателя и экран, который не открыть',
+            en: 'Two toggles and a screen that won’t open',
+          },
+          after: { ru: 'Одна кнопка рядом с условиями', en: 'One button next to the terms' },
         },
         {
-          label: 'Категории',
-          before: 'Отдельно, после подключения',
-          after: 'Сразу, кнопка считает выбранные',
+          label: { ru: 'Категории', en: 'Categories' },
+          before: { ru: 'Отдельно, после подключения', en: 'Separately, after activation' },
+          after: {
+            ru: 'Сразу, кнопка считает выбранные',
+            en: 'Right away, the button counts the chosen ones',
+          },
         },
         {
-          label: 'После подключения',
-          before: 'Главная как раньше, пока не перезайдёшь',
-          after: 'Кешбэк сразу виден у баланса',
+          label: { ru: 'После подключения', en: 'After activation' },
+          before: {
+            ru: 'Главная как раньше, пока не перезайдёшь',
+            en: 'The home screen stays the same until you log in again',
+          },
+          after: {
+            ru: 'Кешбэк сразу виден у баланса',
+            en: 'Cashback shows by the balance right away',
+          },
         },
       ],
       stats: [
-        { value: '83%', note: 'сразу начали с правильного действия' },
+        { value: '83%', note: rightAction },
         {
           value: '63%',
-          note: 'прошли без ошибок: по пути отвлекались на условия и плитки предложений, это следующий шаг',
+          note: {
+            ru: 'прошли без ошибок: по пути отвлекались на условия и плитки предложений, это следующий шаг',
+            en: 'finished without errors: along the way people got distracted by the terms and the offer tiles, that’s the next step',
+          },
         },
       ],
     },
   },
   {
     id: 'categories',
-    title: 'Кешбэк после подключения',
-    lead: 'Кешбэк должен приносить выгоду каждый месяц, а не только после первого подключения.',
+    title: { ru: 'Кешбэк после подключения', en: 'Cashback after activation' },
+    lead: {
+      ru: 'Кешбэк должен приносить выгоду каждый месяц, а не только после первого подключения.',
+      en: 'Cashback should pay off every month, not only after the first activation.',
+    },
     // Before: the original flow from the PSB Figma file (section "Пользователь выбирает категории
     // кешбека"); the category screen isn't in it, the flow goes from the bonus account to the
     // check. Steps are taps by the scenario, times the medians
     race: [
       {
-        label: 'Было',
+        label: before,
         steps: 7,
         seconds: 28.7,
-        end: 'готово',
+        end: done,
         screens: [
-          { src: 'assets/cases/psb/before/card-01.webp', caption: 'Главная' },
-          { src: 'assets/cases/psb/before/cats-02.webp', caption: 'Ищет кешбэк, листая главную' },
-          { src: 'assets/cases/psb/before/cats-03.webp', caption: '«Бонусный счёт» внизу' },
+          { src: 'assets/cases/psb/before/card-01.webp', caption: { ru: 'Главная', en: 'Home' } },
+          {
+            src: 'assets/cases/psb/before/cats-02.webp',
+            caption: {
+              ru: 'Ищет кешбэк, листая главную',
+              en: 'Looking for cashback down the home screen',
+            },
+          },
+          {
+            src: 'assets/cases/psb/before/cats-03.webp',
+            caption: { ru: '«Бонусный счёт» внизу', en: '“Bonus account” at the bottom' },
+          },
           {
             src: 'assets/cases/psb/before/cats-04.webp',
-            caption: 'Выбрал категории — проверка данных',
+            caption: {
+              ru: 'Выбрал категории — проверка данных',
+              en: 'Categories chosen — checking the details',
+            },
           },
-          { src: 'assets/cases/psb/before/cats-05.webp', caption: 'Операция выполнена' },
+          {
+            src: 'assets/cases/psb/before/cats-05.webp',
+            caption: { ru: 'Операция выполнена', en: 'Operation completed' },
+          },
         ],
       },
       {
-        label: 'Стало',
+        label: after,
         steps: 6,
         seconds: 14,
-        end: 'готово',
+        end: done,
         win: true,
         screens: [
           // Captured from the live prototype with cashback connected by tools/psb-race/capture.mjs
-          { src: 'assets/cases/psb/race/next-home.webp', caption: 'Главная, вкладка «Выгода»' },
-          { src: 'assets/cases/psb/race/next-cashback.webp', caption: '«Категории на октябрь»' },
-          { src: 'assets/cases/psb/race/next-0.webp', caption: 'Выбор трёх категорий' },
-          { src: 'assets/cases/psb/race/next-1.webp', caption: 'Отметил «Самокаты»', same: true },
-          { src: 'assets/cases/psb/race/next-2.webp', caption: 'Отметил «Такси»', same: true },
-          { src: 'assets/cases/psb/race/next-3.webp', caption: 'Отметил «Деливери»', same: true },
-          { src: 'assets/cases/psb/race/next-success.webp', caption: 'Категории выбраны' },
+          {
+            src: 'assets/cases/psb/race/next-home.webp',
+            caption: { ru: 'Главная, вкладка «Выгода»', en: 'Home, the “Benefits” tab' },
+          },
+          {
+            src: 'assets/cases/psb/race/next-cashback.webp',
+            caption: { ru: '«Категории на октябрь»', en: '“Categories for October”' },
+          },
+          {
+            src: 'assets/cases/psb/race/next-0.webp',
+            caption: { ru: 'Выбор трёх категорий', en: 'Choosing three categories' },
+          },
+          {
+            src: 'assets/cases/psb/race/next-1.webp',
+            caption: { ru: 'Отметил «Самокаты»', en: 'Ticked “Scooters”' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/race/next-2.webp',
+            caption: { ru: 'Отметил «Такси»', en: 'Ticked “Taxi”' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/race/next-3.webp',
+            caption: { ru: 'Отметил «Деливери»', en: 'Ticked “Delivery”' },
+            same: true,
+          },
+          {
+            src: 'assets/cases/psb/race/next-success.webp',
+            caption: { ru: 'Категории выбраны', en: 'Categories chosen' },
+          },
         ],
       },
     ],
     versus: {
       rows: [
         {
-          label: 'Где найти',
-          before: '«Бонусный счёт» в конце главной',
-          after: '«Выгода» в таббаре',
+          label: { ru: 'Где найти', en: 'Where to find' },
+          before: {
+            ru: '«Бонусный счёт» в конце главной',
+            en: '“Bonus account” at the very bottom of the home screen',
+          },
+          after: { ru: '«Выгода» в таббаре', en: '“Benefits” in the tab bar' },
         },
         {
-          label: 'Напоминание',
-          before: 'Нет, о новом месяце нужно помнить самому',
-          after: 'Плашка «Категории на октябрь» с кнопкой «Выбрать»',
+          label: { ru: 'Напоминание', en: 'Reminder' },
+          before: {
+            ru: 'Нет, о новом месяце нужно помнить самому',
+            en: 'None, you have to remember the new month yourself',
+          },
+          after: {
+            ru: 'Плашка «Категории на октябрь» с кнопкой «Выбрать»',
+            en: 'A “Categories for October” banner with a “Choose” button',
+          },
         },
         {
-          label: 'Когда выбирать',
-          before: 'Каждый месяц, когда он уже начался',
-          after: 'Заранее, и поменять до начала месяца',
+          label: { ru: 'Когда выбирать', en: 'When to choose' },
+          before: {
+            ru: 'Каждый месяц, когда он уже начался',
+            en: 'Every month, once it has already started',
+          },
+          after: {
+            ru: 'Заранее, и поменять до начала месяца',
+            en: 'In advance, and they can be changed before the month starts',
+          },
         },
         {
-          label: 'Подтверждение',
-          before: 'Отдельный экран с юридическими формулировками',
-          after: 'Кнопка «Подключить» под категориями',
+          label: { ru: 'Подтверждение', en: 'Confirmation' },
+          before: {
+            ru: 'Отдельный экран с юридическими формулировками',
+            en: 'A separate screen of legal wording',
+          },
+          after: {
+            ru: 'Кнопка «Подключить» под категориями',
+            en: 'An “Activate” button under the categories',
+          },
         },
       ],
       stats: [
         {
           value: '100%',
-          note: 'сразу начали с правильного действия: выбор как при первом подключении',
+          note: {
+            ru: 'сразу начали с правильного действия: выбор как при первом подключении',
+            en: 'started with the right action: the same choice as at the first activation',
+          },
         },
-        { value: '90%', note: 'прошли без ошибок' },
-        { value: '6,7', unit: 'из 7', note: 'оценка лёгкости, самая высокая в тесте' },
+        { value: '90%', note: { ru: 'прошли без ошибок', en: 'finished without errors' } },
+        {
+          value: { ru: '6,7', en: '6.7' },
+          unit: ofSeven,
+          note: {
+            ru: 'оценка лёгкости, самая высокая в тесте',
+            en: 'ease score, the highest in the test',
+          },
+        },
       ],
     },
   },
 ];
 
-const tests = [
-  { task: 'Подключить кешбэк', done: '30/30', fcs: '83%', seq: '6,5/7' },
-  { task: 'Выбрать категории', done: '30/30', fcs: '100%', seq: '6,7/7' },
-  { task: 'Скопировать данные карты', done: '30/30', fcs: '83%', seq: '6,0/7' },
+const tests: { task: Localized; done: string; fcs: string; seq: Localized }[] = [
+  {
+    task: { ru: 'Подключить кешбэк', en: 'Activate cashback' },
+    done: '30/30',
+    fcs: '83%',
+    seq: { ru: '6,5/7', en: '6.5/7' },
+  },
+  {
+    task: { ru: 'Выбрать категории', en: 'Choose categories' },
+    done: '30/30',
+    fcs: '100%',
+    seq: { ru: '6,7/7', en: '6.7/7' },
+  },
+  {
+    task: { ru: 'Скопировать данные карты', en: 'Copy card details' },
+    done: '30/30',
+    fcs: '83%',
+    seq: { ru: '6,0/7', en: '6.0/7' },
+  },
 ];
 
-const next = [
+const next: { title: Localized; text: Localized }[] = [
   {
-    title: 'Вход в кешбэк',
-    text: 'В тесте кешбэк искали по заданию, а в жизни на него натыкаются случайно. Стоит проверить, заметят ли его самостоятельно, и, если подключение в приоритете, попробовать на главной баннер с выгодой.',
+    title: { ru: 'Вход в кешбэк', en: 'The way into cashback' },
+    text: {
+      ru: 'В тесте кешбэк искали по заданию, а в жизни на него натыкаются случайно. Стоит проверить, заметят ли его самостоятельно, и, если подключение в приоритете, попробовать на главной баннер с выгодой.',
+      en: 'In the test people looked for cashback because the task told them to, while in real life they come across it by chance. It’s worth checking whether they notice it on their own and, if activation is a priority, trying a banner with the benefit on the home screen.',
+    },
   },
   {
-    title: 'Данные карты',
-    text: 'Сравнить переворот карты с блоком данных под ней. Участникам старшей возрастной группы переворот, похоже, давался сложнее, особенно тем, у кого ПСБ — единственный банк.',
+    title: { ru: 'Данные карты', en: 'Card details' },
+    text: {
+      ru: 'Сравнить переворот карты с блоком данных под ней. Участникам старшей возрастной группы переворот, похоже, давался сложнее, особенно тем, у кого ПСБ — единственный банк.',
+      en: 'Compare flipping the card with a block of details under it. Older participants seemed to find the flip harder, especially those whose only bank is PSB.',
+    },
   },
   {
-    title: 'Подключение кешбэка',
-    text: 'Часть участников по пути первым делом цепляла плитки предложений. Можно ослабить их визуальный вес и проверить это в следующих итерациях.',
+    title: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
+    text: {
+      ru: 'Часть участников по пути первым делом цепляла плитки предложений. Можно ослабить их визуальный вес и проверить это в следующих итерациях.',
+      en: 'Along the way, some participants went for the offer tiles first. Their visual weight could be toned down and tested in the next iterations.',
+    },
   },
 ];
 
@@ -466,6 +832,7 @@ const home = withBase('/');
 
 <BaseLayout
   title={`${title} — Даниил Тынчеров`}
+  enTitle={`${title} — Daniil Tyncherov`}
   description="Переосмысление ключевых сценариев в мобильном приложении банка"
 >
   <div class="root">
@@ -475,16 +842,20 @@ const home = withBase('/');
         <span class="back-icon">
           <PixelIcon name="arrow" />
         </span>
-        <span>Все кейсы</span>
+        <span data-en="All cases">Все кейсы</span>
       </a>
       <p class="case-name">{title}</p>
-      <nav class="toc" aria-label="Разделы кейса">
+      <nav class="toc" aria-label="Разделы кейса" data-en-label="Case sections">
         <ol>
           {toc.map((item) => (
             <li class:list={{ sub: item.sub, grouped: item.group }}>
-              {item.group && <span class="toc-group">{item.group}</span>}
-              <a href={`#${item.id}`} data-toc>
-                {item.title}
+              {item.group && (
+                <span class="toc-group" data-en={item.group.en}>
+                  {item.group.ru}
+                </span>
+              )}
+              <a href={`#${item.id}`} data-toc data-en={item.title.en}>
+                {item.title.ru}
               </a>
             </li>
           ))}
@@ -501,7 +872,12 @@ const home = withBase('/');
     <!-- Mobile: a bar pinned to the top — back home, and the current section that opens the list -->
     <header class="bar" data-case-bar>
       <div class="bar-row px-clip">
-        <IconButton href={home} label="Все кейсы">
+        <IconButton
+          href={home}
+          label="Все кейсы"
+          data-en-label="All cases"
+          data-en-title="All cases"
+        >
           <span class="back-icon">
             <PixelIcon name="arrow" />
           </span>
@@ -514,9 +890,11 @@ const home = withBase('/');
           data-case-toggle
         >
           <span class="toggle-text">
-            <span class="toggle-label">Раздел</span>
-            <span class="toggle-current" data-case-current>
-              Обзор
+            <span class="toggle-label" data-en="Section">
+              Раздел
+            </span>
+            <span class="toggle-current" data-case-current data-en={toc[0].title.en}>
+              {toc[0].title.ru}
             </span>
           </span>
           <span class="toggle-icon">
@@ -524,13 +902,24 @@ const home = withBase('/');
           </span>
         </button>
       </div>
-      <nav class="menu px-clip" id="case-menu" aria-label="Разделы кейса" hidden data-case-menu>
+      <nav
+        class="menu px-clip"
+        id="case-menu"
+        aria-label="Разделы кейса"
+        data-en-label="Case sections"
+        hidden
+        data-case-menu
+      >
         <ol>
           {toc.map((item) => (
             <li class:list={{ sub: item.sub, grouped: item.group }}>
-              {item.group && <span class="toc-group">{item.group}</span>}
-              <a href={`#${item.id}`} data-toc data-title={item.title}>
-                {item.title}
+              {item.group && (
+                <span class="toc-group" data-en={item.group.en}>
+                  {item.group.ru}
+                </span>
+              )}
+              <a href={`#${item.id}`} data-toc data-en={item.title.en}>
+                {item.title.ru}
               </a>
             </li>
           ))}
@@ -548,8 +937,13 @@ const home = withBase('/');
       <div class="sheets">
         <!-- ---------- Overview ---------- -->
         <section id="overview" class="sheet px-clip">
-          <p class="eyebrow">ПСБ Mobile — концепт-редизайн</p>
-          <h1 class="title">
+          <p class="eyebrow" data-en="PSB Mobile — redesign concept">
+            ПСБ Mobile — концепт-редизайн
+          </p>
+          <h1
+            class="title"
+            data-en="I simplified everyday actions that felt like a trip to a bank branch"
+          >
             Упростил ежедневные действия, которые в приложении ощущались как поход в отделение
           </h1>
           <!-- The owner's own video about the case goes here -->
@@ -558,7 +952,8 @@ const home = withBase('/');
           </div>
 
           <div class="intro">
-            <div class="prose">
+            <!-- Text with emphasis inside comes in both languages, CSS shows one (global.css) -->
+            <div class="prose" data-lang="ru">
               <p>
                 Я не клиент ПСБ, но не раз слышал от друзей и знакомых, что они{' '}
                 <strong>бросали подключение кешбэка на полпути</strong>. В какой-то момент
@@ -581,18 +976,41 @@ const home = withBase('/');
                 где именно возникают трудности и как сделать эти сценарии удобнее.
               </p>
             </div>
+            <div class="prose" data-lang="en" lang="en">
+              <p>
+                I’m not a PSB customer, but I’ve heard from friends and acquaintances more than once
+                that they <strong>gave up activating cashback halfway through</strong>. At some
+                point curiosity got the better of me: what was confusing people so much? I studied
+                the bank’s app and its terms.
+              </p>
+              <p>
+                The cashback terms are good, but activation <strong>took 12 steps</strong>: jumps to
+                a browser and a mail app, email confirmation, several consents, and at the end it
+                still wasn’t clear whether it had worked.
+              </p>
+              <p>
+                <strong>Other flows had their difficulties too</strong>: account details are buried
+                deep in the menu, the transaction history is split by card, and viewing the CVV
+                takes a code from a text message even after biometric login.
+              </p>
+              <p>
+                Each of these decisions makes sense on its own, but together they{' '}
+                <strong>make simple actions harder than they need to be</strong>. I set out to find
+                where exactly the difficulties arise and how to make these flows easier.
+              </p>
+            </div>
             <dl class="facts">
               <div>
-                <dt>Роль</dt>
-                <dd>Продуктовый дизайнер, в паре</dd>
+                <dt data-en="Role">Роль</dt>
+                <dd data-en="Product designer, in a pair">Продуктовый дизайнер, в паре</dd>
               </div>
               <div>
-                <dt>Формат</dt>
-                <dd>Концепт, 2026</dd>
+                <dt data-en="Format">Формат</dt>
+                <dd data-en="Concept, 2026">Концепт, 2026</dd>
               </div>
               <div>
-                <dt>Сфера</dt>
-                <dd>Банк, B2C, мобильное приложение</dd>
+                <dt data-en="Field">Сфера</dt>
+                <dd data-en="Banking, B2C, mobile app">Банк, B2C, мобильное приложение</dd>
               </div>
             </dl>
           </div>
@@ -602,7 +1020,7 @@ const home = withBase('/');
               <span class="tile-icon px-clip">
                 <PixelIcon name="scroll" />
               </span>
-              Проблемы и решения
+              <span data-en="Problems and solutions">Проблемы и решения</span>
             </h2>
             <QuestDeck quests={quests} />
           </div>
@@ -612,20 +1030,30 @@ const home = withBase('/');
               <span class="tile-icon px-clip">
                 <PixelIcon name="trophy" />
               </span>
-              Результаты
+              <span data-en="Results">Результаты</span>
             </h2>
             <Hud
               stats={stats}
-              note="Юзабилити-тест с 30 клиентами банка: все дошли до конца каждой задачи."
+              note={{
+                ru: 'Юзабилити-тест с 30 клиентами банка: все дошли до конца каждой задачи.',
+                en: 'A usability test with 30 of the bank’s customers: everyone got to the end of every task.',
+              }}
             />
           </div>
         </section>
 
         <!-- ---------- Final screens ---------- -->
         <section id="screens" class="sheet px-clip">
-          <p class="eyebrow">Итог</p>
-          <h2 class="h2">Финальные экраны</h2>
-          <p class="lead">
+          <p class="eyebrow" data-en="Final">
+            Итог
+          </p>
+          <h2 class="h2" data-en="Final screens">
+            Финальные экраны
+          </h2>
+          <p
+            class="lead"
+            data-en="The three working prototypes the usability test ran on. Each opens on its own flow, but inside it’s the whole app. Flip through the fan with a swipe or the arrows."
+          >
             Три рабочих прототипа, на которых проходил юзабилити-тест. Каждый открывается со своего
             сценария, но внутри это всё приложение целиком. Листайте веер свайпом или стрелками.
           </p>
@@ -633,20 +1061,27 @@ const home = withBase('/');
             <PrototypeDeck prototypes={prototypes} />
           </div>
           <div class="kit-note">
-            <p class="body">
+            <p
+              class="body"
+              data-en="The screens are built from a UI kit: every component has a spec with its variants, sizes and states."
+            >
               Экраны собраны из UI-кита: на каждый компонент написана спецификация — варианты,
               размеры и состояния.
             </p>
             <Button href={kitHref} target="_blank" rel="noopener" tone="raised">
-              UI-кит в Figma
+              <span data-en="UI kit in Figma">UI-кит в Figma</span>
             </Button>
           </div>
         </section>
 
         <!-- ---------- Process ---------- -->
         <section id="process" class="sheet px-clip">
-          <p class="eyebrow">Процесс</p>
-          <h2 class="h2">Как мы работали</h2>
+          <p class="eyebrow" data-en="Process">
+            Процесс
+          </p>
+          <h2 class="h2" data-en="How we worked">
+            Как мы работали
+          </h2>
           <div class="chapters" data-chapters>
             <div class="cabinet">
               {steps.map((s, i) => (
@@ -659,10 +1094,12 @@ const home = withBase('/');
                 >
                   <div class="chapter-panel px-clip">
                     <div class="chapter-copy">
-                      <h3 class="h3" id={`process-${s.id}-title`}>
-                        {s.title}
+                      <h3 class="h3" id={`process-${s.id}-title`} data-en={s.title.en}>
+                        {s.title.ru}
                       </h3>
-                      <p class="body">{s.text}</p>
+                      <p class="body" data-en={s.text.en}>
+                        {s.text.ru}
+                      </p>
                     </div>
                     <div class="chapter-media">
                       {s.id === 'team' ? (
@@ -688,9 +1125,16 @@ const home = withBase('/');
 
         <!-- ---------- Interviews ---------- -->
         <section id="interviews" class="sheet px-clip">
-          <p class="eyebrow">Исследование</p>
-          <h2 class="h2">Что показали интервью</h2>
-          <p class="lead">
+          <p class="eyebrow" data-en="Research">
+            Исследование
+          </p>
+          <h2 class="h2" data-en="What the interviews showed">
+            Что показали интервью
+          </h2>
+          <p
+            class="lead"
+            data-en="Once the scope was set, we talked to three PSB customers to check our assumptions against their experience."
+          >
             Когда масштаб был выбран, мы поговорили с тремя клиентами ПСБ, чтобы сопоставить свои
             предположения с их опытом.
           </p>
@@ -709,12 +1153,19 @@ const home = withBase('/');
             {findings.map((f, i) => (
               <li>
                 <span class="step-num">{String(i + 1).padStart(2, '0')}</span>
-                <h3 class="finding-title">{f.title}</h3>
-                <p class="body">{f.text}</p>
+                <h3 class="finding-title" data-en={f.title.en}>
+                  {f.title.ru}
+                </h3>
+                <p class="body" data-en={f.text.en}>
+                  {f.text.ru}
+                </p>
               </li>
             ))}
           </ol>
-          <p class="quote px-clip">
+          <p
+            class="quote px-clip"
+            data-en="Shortening the path alone wasn’t enough. The whole process had to make sense: where to find what you need, how to do it and how to see the result."
+          >
             Одного сокращения пути было недостаточно. Нужно было сделать понятным весь процесс: где
             найти нужное, как выполнить действие и увидеть результат.
           </p>
@@ -723,18 +1174,26 @@ const home = withBase('/');
         <!-- ---------- Directions ---------- -->
         {directions.map((d, i) => (
           <section id={d.id} class="sheet px-clip">
-            <p class="eyebrow">
+            <p class="eyebrow" data-en={`Solution ${i + 1} of ${directions.length}`}>
               Решение {i + 1} из {directions.length}
             </p>
-            <h2 class="h2">{d.title}</h2>
-            <p class="lead">{d.lead}</p>
+            <h2 class="h2" data-en={d.title.en}>
+              {d.title.ru}
+            </h2>
+            <p class="lead" data-en={d.lead.en}>
+              {d.lead.ru}
+            </p>
             <div class:list={['stage', 'px-clip', { 'race-stage': d.race }]}>
               {d.race ? (
                 <Race lanes={d.race} />
               ) : d.compare ? (
                 <>
-                  <span class="stage-tag left px-clip">До</span>
-                  <span class="stage-tag right px-clip">После</span>
+                  <span class="stage-tag left px-clip" data-en="Before">
+                    До
+                  </span>
+                  <span class="stage-tag right px-clip" data-en="After">
+                    После
+                  </span>
                   <div class="stage-phone">
                     <Compare before={d.compare.before} after={d.compare.after} label={d.title} />
                   </div>
@@ -749,9 +1208,16 @@ const home = withBase('/');
 
         <!-- ---------- Testing ---------- -->
         <section id="testing" class="sheet px-clip">
-          <p class="eyebrow">Проверка</p>
-          <h2 class="h2">Тестирование с 30 клиентами</h2>
-          <p class="lead">
+          <p class="eyebrow" data-en="Validation">
+            Проверка
+          </p>
+          <h2 class="h2" data-en="Testing with 30 customers">
+            Тестирование с 30 клиентами
+          </h2>
+          <p
+            class="lead"
+            data-en="Participants went through three tasks in the working prototype on their phones. We looked at whether they reached the goal, their first action and how easy it felt."
+          >
             На телефонах участники проходили три задачи в рабочем прототипе. Мы смотрели на
             достижение цели, первое действие и субъективную лёгкость.
           </p>
@@ -759,8 +1225,12 @@ const home = withBase('/');
             <table>
               <thead>
                 <tr>
-                  <th scope="col">Сценарий</th>
-                  <th scope="col">Завершили</th>
+                  <th scope="col" data-en="Flow">
+                    Сценарий
+                  </th>
+                  <th scope="col" data-en="Completed">
+                    Завершили
+                  </th>
                   <th scope="col">First click success</th>
                   <th scope="col">SEQ</th>
                 </tr>
@@ -768,16 +1238,21 @@ const home = withBase('/');
               <tbody>
                 {tests.map((t) => (
                   <tr>
-                    <th scope="row">{t.task}</th>
+                    <th scope="row" data-en={t.task.en}>
+                      {t.task.ru}
+                    </th>
                     <td>{t.done}</td>
                     <td>{t.fcs}</td>
-                    <td>{t.seq}</td>
+                    <td data-en={t.seq.en}>{t.seq.ru}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p class="note">
+          <p
+            class="note"
+            data-en="The average ease score is 6.4 out of 7. For comparison, five of the bank’s customers went through activating cashback and getting to card details on a clickable copy of the original screens. The “before” time is the median of those who finished."
+          >
             Средняя оценка лёгкости — 6,4 из 7. Для сравнения пять клиентов банка прошли подключение
             кешбэка и путь к данным карты на кликабельной копии исходных экранов. Время «было» —
             медиана выполнивших.
@@ -786,8 +1261,12 @@ const home = withBase('/');
 
         <!-- ---------- Review ---------- -->
         <section id="review" class="sheet px-clip">
-          <p class="eyebrow">Ревью</p>
-          <h2 class="h2">Что сказал сеньор</h2>
+          <p class="eyebrow" data-en="Review">
+            Ревью
+          </p>
+          <h2 class="h2" data-en="What the senior said">
+            Что сказал сеньор
+          </h2>
           <div class="wide">
             <CaseVideo
               src="assets/cases/psb/review.ru.mp4"
@@ -803,31 +1282,43 @@ const home = withBase('/');
 
         <!-- ---------- Outcome ---------- -->
         <section id="outcome" class="sheet px-clip">
-          <p class="eyebrow">Выводы</p>
-          <h2 class="h2">Опыт, который я получил</h2>
+          <p class="eyebrow" data-en="Takeaways">
+            Выводы
+          </p>
+          <h2 class="h2" data-en="The experience I gained">
+            Опыт, который я получил
+          </h2>
           <div class="prose">
-            <p>
+            <p data-en="The project was a new experience for me in many ways. My colleague and I worked together wonderfully and got the hang of vibe coding, a great tool for testing hypotheses. Figma prototypes are very limited and keep breaking for no apparent reason, whereas here you can build a live prototype of the product and get data on how people use it. That opens up more ways to test hypotheses and speeds up iterations.">
               Проект стал для меня новым опытом во многих отношениях. Мы прекрасно сработались с
               коллегой и освоили вайбкодинг — отличный инструмент для проверки гипотез. Прототипы в
               Figma сильно ограничены и то и дело ломаются без видимых причин, а здесь можно собрать
               живой прототип продукта и получить данные о том, как им пользуются люди. Это расширяет
               возможности для проверки гипотез и ускоряет итерации.
             </p>
-            <p>
+            <p data-en="While I was working on the design and studying competitors, I recalled an old holy war in the design community: which matters more, UX or UI? This project finally convinced me that they matter equally. Without good visuals, there’s a good chance a person simply won’t reach the most carefully thought-out solutions. And with visuals alone, without guidance all the way through, they’ll never get to the result.">
               Пока я работал над дизайном и изучал конкурентов, вспомнил давний холивар
               дизайнерского сообщества: что важнее, UX или UI? На этом проекте я окончательно
               убедился, что они важны в равной степени. Без хорошего визуала велик шанс, что человек
               просто не дойдёт до самых продуманных решений. А с одним визуалом, без сопровождения
               на всём пути, он так и не доберётся до результата.
             </p>
-            <p>Отдельное спасибо Игорю Плющу: он делился опытом и ревьюил проект.</p>
+            <p data-en="Special thanks to Igor Plyusch: he shared his experience and reviewed the project.">
+              Отдельное спасибо Игорю Плющу: он делился опытом и ревьюил проект.
+            </p>
           </div>
-          <h3 class="h3 sub-title">Что бы я ещё протестировал</h3>
+          <h3 class="h3 sub-title" data-en="What I’d test next">
+            Что бы я ещё протестировал
+          </h3>
           <div class="trio">
             {next.map((n) => (
               <div class="tile px-clip">
-                <h4 class="tile-title">{n.title}</h4>
-                <p class="body">{n.text}</p>
+                <h4 class="tile-title" data-en={n.title.en}>
+                  {n.title.ru}
+                </h4>
+                <p class="body" data-en={n.text.en}>
+                  {n.text.ru}
+                </p>
               </div>
             ))}
           </div>

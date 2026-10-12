@@ -6,14 +6,18 @@ import Sprite from './Sprite.astro';
  * argue in a cloud of dust, show the result, the elder quest-giver (the senior) descends
  * with a review, the party gets sad, and it starts over.
  */
-const review = 'Карты над счётом, а сумма счёта мелкая. Сам понял, что сделал-то?';
+const review = {
+  ru: 'Карты над счётом, а сумма счёта мелкая. Сам понял, что сделал-то?',
+  en: 'Cards above the account, and the balance is tiny. Do you even get what you’ve made?',
+};
 ---
 
 <div
   class="stage px-clip"
   data-scene="team"
   role="img"
-  aria-label={`Двое дизайнеров спорят, показывают макет сеньору, он отвечает: «${review}»`}
+  aria-label={`Двое дизайнеров спорят, показывают макет сеньору, он отвечает: «${review.ru}»`}
+  data-en-label={`Two designers argue, show the mockup to the senior, and the answer is: “${review.en}”`}
 >
   <div class="desk"></div>
 
@@ -72,9 +76,11 @@ const review = 'Карты над счётом, а сумма счёта мел�
   </div>
 
   <div class="dialog px-clip" aria-hidden="true">
-    <span class="dialog-label">Ревью сеньора</span>
+    <span class="dialog-label" data-en="Senior review">
+      Ревью сеньора
+    </span>
     <p class="dialog-text">
-      <span data-type={review}></span>
+      <span data-type={review.ru} data-en-type={review.en}></span>
     </p>
   </div>
 </div>

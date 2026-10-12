@@ -482,13 +482,7 @@ const home = withBase('/');
                     <ol class="flow-steps">
                       {d.before.map((s, n) => (
                         <li class="flow-step">
-                          <img
-                            class="flow-screen"
-                            src={withBase(s.src)}
-                            alt={`Было, шаг ${n + 1}: ${s.caption}`}
-                            loading="lazy"
-                            decoding="async"
-                          />
+                          <Phone src={s.src} alt={`Было, шаг ${n + 1}: ${s.caption}`} />
                           <p class="flow-caption">
                             <span class="flow-n">{n + 1}</span>
                             {s.caption}
@@ -1134,7 +1128,7 @@ const home = withBase('/');
   }
   .flow-steps {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 24px 16px;
     width: 100%;
     margin: 0;
@@ -1145,12 +1139,6 @@ const home = withBase('/');
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }
-  .flow-screen {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 590 / 1280;
   }
   .flow-caption {
     display: flex;
@@ -1413,7 +1401,7 @@ const home = withBase('/');
       scroll-snap-type: x proximity;
     }
     .flow-step {
-      flex: 0 0 112px;
+      flex: 0 0 120px;
       scroll-snap-align: start;
       scroll-margin-left: 16px;
     }

@@ -246,3 +246,148 @@ export function initRace(root: HTMLElement) {
     { threshold: 0.5 },
   ).observe(root);
 }
+
+/**
+ * "Как мы работали" as a deck, after the co-author's version. On a desktop tall enough for
+ * it the deck holds still while the page scrolls: each next card slides in from below, the
+ * earlier ones step back (up, smaller, darker) and peek out over the top. Where it does not
+ * fit (phone, low laptop) the cards stick one over another as the page scrolls, stepping
+ * back the same way; with reduced motion they stay a plain list. Scenes play on the front
+ * card only (data-front, the chapter:front event, see runScene).
+ */
+export function initChapters(root: HTMLElement) {
+  const cabinet = root.querySelector<HTMLElement>('.cabinet');
+  const run = root.querySelector<HTMLElement>('[data-chapters-run]');
+  const cards = [...root.querySelectorAll<HTMLElement>('[data-chapter]')];
+  if (!cabinet || !run || cards.length < 2) return;
+  const dims = cards.map((card) => card.querySelector<HTMLElement>('[data-chapter-dim]'));
+  const bar = document.querySelector<HTMLElement>('[data-case-bar]');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  // How an earlier card steps back for each card on top of it, and how deep the pile shows
+  const OFFSET = 14;
+  const SCALE = 0.04;
+  const DIM = 0.05;
+  const DEPTH = 3;
+  const ROOM = OFFSET * DEPTH;
+  const PAD = 24;
+  const last = cards.length - 1;
+
+  let mode: 'list' | 'deck' | 'stack' = 'list';
+  let pin = 0; // deck: where the pile holds still
+  let step = 1; // deck: scroll per card
+  let travel = 0; // deck: how far below the pile a coming card starts
+  let stick = 0; // stack: where each card sticks
+  let pitch = 1; // stack: card height and gap
+  let front = -2;
+  let ticking = false;
+
+  const clamp = (t: number, max: number) => Math.min(max, Math.max(0, t));
+
+  const setFront = (index: number) => {
+    if (index === front) return;
+    front = index;
+    cards.forEach((card, i) => {
+      const on = index < 0 || i === index ? 'true' : 'false';
+      if (card.dataset.front === on) return;
+      card.dataset.front = on;
+      card.dispatchEvent(new Event('chapter:front'));
+    });
+  };
+
+  const progress = () =>
+    mode === 'deck'
+      ? clamp((pin - root.getBoundingClientRect().top) / step, last)
+      : clamp((stick - cabinet.getBoundingClientRect().top) / pitch, last);
+
+  const update = () => {
+    ticking = false;
+    if (mode === 'list') return;
+    const p = progress();
+    cards.forEach((card, i) => {
+      const d = p - i;
+      let transform = '';
+      let dim = 0;
+      let opacity = '';
+      if (d < 0 && mode === 'deck') {
+        transform = `translate3d(0, ${(Math.min(1, -d) * travel).toFixed(1)}px, 0)`;
+        // Rises from just under the pile and shows up on the way, rather than flying in
+        // from the bottom of a tall screen across empty space
+        opacity = d < -1 ? '0' : Math.min(1, (1 + d) / 0.3).toFixed(3);
+      } else if (d > 0) {
+        const depth = Math.min(d, DEPTH);
+        transform = `translate3d(0, ${(-OFFSET * depth).toFixed(1)}px, 0) scale(${(1 - SCALE * depth).toFixed(4)})`;
+        dim = DIM * depth;
+      }
+      card.style.transform = transform;
+      card.style.opacity = opacity;
+      card.style.visibility = d > DEPTH + 1 || d < -1 ? 'hidden' : '';
+      const layer = dims[i];
+      if (layer) layer.style.opacity = dim.toFixed(3);
+    });
+    setFront(Math.round(p));
+  };
+
+  const layout = () => {
+    root.classList.remove('is-deck', 'is-stack');
+    ['--deck-pin', '--deck-stage', '--deck-room', '--card-h', '--stick-top'].forEach((name) =>
+      root.style.removeProperty(name),
+    );
+    run.style.height = '';
+    cards.forEach((card, i) => {
+      card.style.transform = card.style.opacity = card.style.visibility = '';
+      const layer = dims[i];
+      if (layer) layer.style.opacity = '';
+    });
+    if (reduced.matches) {
+      mode = 'list';
+      setFront(-1);
+      return;
+    }
+
+    // Natural heights as a list; every card takes the tallest, or a shorter one's bottom
+    // would show from under the next
+    const cardH = Math.max(...cards.map((card) => card.offsetHeight));
+    const gap = parseFloat(getComputedStyle(cabinet).rowGap) || 0;
+    const vh = innerHeight;
+    const top = bar && bar.offsetParent ? bar.offsetHeight : 0;
+    root.style.setProperty('--card-h', `${cardH}px`);
+    root.style.setProperty('--deck-room', `${ROOM}px`);
+
+    if (!top && ROOM + cardH + PAD * 2 <= vh) {
+      mode = 'deck';
+      // The pile holds where it sits under the section heading once the section reaches the
+      // top of the screen. Centred instead, on a tall screen it stopped well below the heading
+      // and the next card was already halfway in while the heading still showed.
+      const section = root.closest('section') ?? root;
+      const natural = root.getBoundingClientRect().top - section.getBoundingClientRect().top;
+      pin = Math.round(Math.max(PAD, Math.min(natural, vh - ROOM - cardH - PAD)));
+      step = Math.round(vh * 0.7);
+      travel = Math.min(vh - pin - ROOM + 48, cardH + PAD * 4);
+      root.style.setProperty('--deck-pin', `${pin}px`);
+      root.style.setProperty('--deck-stage', `${ROOM + cardH}px`);
+      run.style.height = `${step * last}px`;
+      root.classList.add('is-deck');
+    } else {
+      mode = 'stack';
+      // A card taller than the screen scrolls through first and sticks by its bottom
+      stick = Math.min(top + 16 + ROOM, vh - cardH - 16);
+      pitch = cardH + gap;
+      root.style.setProperty('--stick-top', `${stick}px`);
+      root.classList.add('is-stack');
+    }
+    front = -2;
+    update();
+  };
+
+  const schedule = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(update);
+  };
+
+  addEventListener('scroll', schedule, { passive: true });
+  addEventListener('resize', layout, { passive: true });
+  reduced.addEventListener('change', layout);
+  layout();
+  document.fonts?.ready.then(layout);
+}

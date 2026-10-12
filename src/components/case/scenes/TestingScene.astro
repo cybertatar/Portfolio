@@ -192,11 +192,13 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       cursor.style.left = `${x - w * HOT.x}px`;
       cursor.style.top = `${y - w * HOT.y}px`;
     };
+    // Screen rects come scaled while the card steps back in the process deck
     const toElement = (el: HTMLElement | null) => {
       if (!el) return;
       const r = el.getBoundingClientRect();
       const s = root.getBoundingClientRect();
-      point(r.left - s.left + r.width / 2, r.top - s.top + r.height / 2);
+      const z = s.width / root.offsetWidth || 1;
+      point((r.left - s.left + r.width / 2) / z, (r.top - s.top + r.height / 2) / z);
     };
     // The screen fills the phone with object-fit: cover from the top
     const toScreen = ([fx, fy]: readonly [number, number]) => {
@@ -204,7 +206,11 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       const s = root.getBoundingClientRect();
       const k = Math.max(r.width / SCREEN.w, r.height / SCREEN.h);
       const dx = (r.width - SCREEN.w * k) / 2;
-      point(r.left - s.left + dx + fx * SCREEN.w * k, r.top - s.top + fy * SCREEN.h * k);
+      const z = s.width / root.offsetWidth || 1;
+      point(
+        (r.left - s.left + dx + fx * SCREEN.w * k) / z,
+        (r.top - s.top + fy * SCREEN.h * k) / z,
+      );
     };
     const rest = () => point(root.clientWidth * 0.86, root.clientHeight * 0.86);
     const press = () => {

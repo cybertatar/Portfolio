@@ -102,23 +102,24 @@ const stats: HudStat[] = [
 
 const steps = [
   {
+    id: 'team',
     title: 'Дизайнили вдвоём, проверяли у сеньора',
     text: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
-    scene: 'team',
   },
   {
+    id: 'scope',
     title: 'Выбрали четыре направления',
     text: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
-    scene: 'bench',
   },
   {
+    id: 'prototype',
     title: 'Не только макеты',
     text: 'Завайбкодили прототип для быстрого тестирования: в нём можно пройти сценарии на телефоне — подключить кешбэк, выбрать категории и открыть данные карты.',
   },
   {
+    id: 'testing',
     title: 'Видели путь, а не только финал',
     text: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
-    scene: 'testing',
   },
 ];
 
@@ -638,30 +639,43 @@ const home = withBase('/');
         <section id="process" class="sheet px-clip">
           <p class="eyebrow">Процесс</p>
           <h2 class="h2">Как мы работали</h2>
-          <ol class="steps">
-            {steps.map((s, i) => (
-              <li class="step">
-                <div class="step-text">
-                  <span class="step-num">{String(i + 1).padStart(2, '0')}</span>
-                  <h3 class="h3">{s.title}</h3>
-                  <p class="body">{s.text}</p>
-                </div>
-                <div class="step-media">
-                  {s.scene === 'team' ? (
-                    <TeamScene />
-                  ) : s.scene === 'bench' ? (
-                    <BenchScene />
-                  ) : s.scene === 'testing' ? (
-                    <TestingScene />
-                  ) : (
-                    <div class="slot px-clip">
-                      <Media label={{ ru: 'Видео прототипа', en: 'Prototype video' }} />
+          <div class="chapters" data-chapters>
+            <div class="cabinet">
+              {steps.map((s, i) => (
+                <article
+                  class="chapter"
+                  id={`process-${s.id}`}
+                  style={`--order: ${i}`}
+                  aria-labelledby={`process-${s.id}-title`}
+                  data-chapter
+                >
+                  <div class="chapter-panel px-clip">
+                    <div class="chapter-copy">
+                      <h3 class="h3" id={`process-${s.id}-title`}>
+                        {s.title}
+                      </h3>
+                      <p class="body">{s.text}</p>
                     </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
+                    <div class="chapter-media">
+                      {s.id === 'team' ? (
+                        <TeamScene />
+                      ) : s.id === 'scope' ? (
+                        <BenchScene />
+                      ) : s.id === 'testing' ? (
+                        <TestingScene />
+                      ) : (
+                        <div class="slot px-clip">
+                          <Media label={{ ru: 'Видео прототипа', en: 'Prototype video' }} />
+                        </div>
+                      )}
+                    </div>
+                    <div class="chapter-dim" aria-hidden="true" data-chapter-dim></div>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div class="deck-run" aria-hidden="true" data-chapters-run></div>
+          </div>
         </section>
 
         <!-- ---------- Interviews ---------- -->
@@ -822,6 +836,7 @@ const home = withBase('/');
   import {
     initCaseMenu,
     initCompare,
+    initChapters,
     initHud,
     initQuestDeck,
     initRace,
@@ -835,6 +850,7 @@ const home = withBase('/');
   const bar = document.querySelector<HTMLElement>('[data-case-bar]');
   if (bar) initCaseMenu(bar);
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
+  document.querySelectorAll<HTMLElement>('[data-chapters]').forEach(initChapters);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
   document.querySelectorAll<HTMLElement>('[data-race]').forEach(initRace);
@@ -1168,26 +1184,97 @@ const home = withBase('/');
     background: var(--surface-raised);
   }
 
-  /* Process */
-  .steps {
+  /* Process — a deck, after the co-author's version: the section holds still for a while,
+     each next card slides in from below, the earlier ones step back (up, smaller, darker)
+     and peek out over the top. initChapters in case.ts picks the mode: the deck on a desktop
+     tall enough for it, cards stacking as the page scrolls otherwise (phone, low laptop),
+     and a plain list with reduced motion or no JS. The sidebar contents and the peeking
+     edges show where the reader is, so the cards carry no step badges. */
+  .chapters {
+    container-type: inline-size;
+  }
+  .cabinet {
     display: flex;
     flex-direction: column;
-    gap: var(--space-article);
-    margin: var(--space-stack) 0 0;
-    padding: 0;
-    list-style: none;
+    gap: var(--layout-feed-gap);
   }
-  .step {
+  .chapter {
+    position: relative;
+    scroll-margin-top: 24px;
+  }
+  /* Text on the left with the card's own padding, the scene bleeds to the card's edge: the
+     scene's sunken paper is 1.05:1 against the raised card, so an inset left a frame that
+     read as neither a panel nor the card */
+  .chapter-panel {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
-    gap: var(--space-split);
-    align-items: center;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
+    height: 100%;
+    background: var(--surface-raised);
   }
-  .step-text {
+  .chapter-copy {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 12px;
+    padding: var(--space-tile);
   }
+  .chapter-media {
+    align-self: center;
+  }
+  .chapter-media :global(.stage) {
+    background: none;
+  }
+  .chapter-dim {
+    position: absolute;
+    inset: 0;
+    background: var(--ink-1);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .chapters.is-deck .cabinet {
+    position: sticky;
+    top: var(--deck-pin);
+    display: block;
+    height: var(--deck-stage);
+  }
+  .chapters.is-deck .chapter {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--deck-room);
+    z-index: calc(1 + var(--order));
+    height: var(--card-h);
+    transform-origin: 50% 0;
+    will-change: transform;
+  }
+  /* The card on top casts a soft shadow upward, or its edge is lost on the one below
+     (the panel is clipped to pixel corners, so the shadow sits on a layer behind it) */
+  .chapters:is(.is-deck, .is-stack) .chapter::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 50%;
+    box-shadow: 0 -10px 28px rgba(41, 37, 30, 0.1);
+  }
+  .chapters.is-stack .chapter {
+    position: sticky;
+    top: var(--stick-top);
+    height: var(--card-h);
+    transform-origin: 50% 0;
+  }
+
+  @container (max-width: 640px) {
+    .chapter-panel {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: 1fr auto;
+    }
+    .chapter-copy {
+      justify-content: flex-start;
+    }
+  }
+
   .step-num {
     font-family: var(--font-pixel);
     font-size: calc(var(--t-list-num) * 1.2);
@@ -1322,8 +1409,7 @@ const home = withBase('/');
   /* ---------- Narrow desktop ---------- */
 
   @media (max-width: 1280px) {
-    .intro,
-    .step {
+    .intro {
       grid-template-columns: minmax(0, 1fr);
     }
     .trio {

@@ -122,3 +122,103 @@ export function initQuestDeck(root: HTMLElement) {
     { passive: true },
   );
 }
+
+/**
+ * "Before / after" race (Race.astro): both flows start together when the race comes into
+ * view and run at their measured times, sped up. Pauses off screen; "Ещё раз" restarts.
+ * With reduced motion it stays on the finish the page renders.
+ */
+export function initRace(root: HTMLElement) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const speed = Number(root.dataset.speed) || 7;
+  const replay = root.querySelector<HTMLButtonElement>('[data-replay]');
+  const lanes = [...root.querySelectorAll<HTMLElement>('[data-lane]')].map((el) => ({
+    el,
+    seconds: Number(el.dataset.seconds),
+    steps: Number(el.dataset.steps),
+    captions: JSON.parse(el.dataset.captions ?? '[]') as string[],
+    aways: JSON.parse(el.dataset.aways ?? '[]') as string[],
+    away: el.querySelector<HTMLElement>('[data-away]'),
+    shown: -1,
+    screens: [...el.querySelectorAll<HTMLElement>('[data-screen]')],
+    cells: [...el.querySelectorAll<HTMLElement>('[data-cell]')],
+    clock: el.querySelector<HTMLElement>('[data-clock]'),
+    step: el.querySelector<HTMLElement>('[data-step]'),
+    caption: el.querySelector<HTMLElement>('[data-caption]'),
+  }));
+  const longest = Math.max(...lanes.map((l) => l.seconds));
+  const clock = (s: number) =>
+    `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+  // Real seconds of the race shown so far, then paint every lane at that moment
+  let elapsed = 0;
+  let last = 0;
+  let frame = 0;
+  let visible = false;
+  const paint = () => {
+    for (const l of lanes) {
+      const t = Math.min(elapsed, l.seconds);
+      const done = t >= l.seconds;
+      const n = l.screens.length;
+      const screen = done ? n - 1 : Math.min(n - 1, Math.floor((t / l.seconds) * (n - 1)));
+      const steps = done ? l.steps : Math.floor((t / l.seconds) * l.steps);
+      if (screen !== l.shown) {
+        const prev = l.shown;
+        l.screens.forEach((s, i) => {
+          s.classList.toggle('is-on', i === screen);
+          s.classList.toggle('was', i === prev);
+          s.classList.remove('enter');
+        });
+        // Not on the first paint or a replay: the start screen just appears
+        if (prev !== -1 && screen > 0) {
+          const next = l.screens[screen];
+          void next.offsetWidth;
+          next.classList.add('enter');
+          next.addEventListener('animationend', () => l.screens[prev]?.classList.remove('was'), {
+            once: true,
+          });
+        }
+        l.shown = screen;
+      }
+      if (l.away) l.away.textContent = l.aways[screen] ?? '';
+      l.cells.forEach((c, i) => c.classList.toggle('is-on', i < steps));
+      if (l.clock) l.clock.textContent = clock(t);
+      if (l.step) l.step.textContent = String(Math.max(1, steps));
+      if (l.caption) l.caption.textContent = l.captions[screen] ?? '';
+      l.el.classList.toggle('is-done', done);
+    }
+  };
+  const tick = (now: number) => {
+    elapsed = Math.min(longest, elapsed + ((now - last) / 1000) * speed);
+    last = now;
+    paint();
+    frame = elapsed < longest && visible ? requestAnimationFrame(tick) : 0;
+  };
+  const run = () => {
+    if (frame || elapsed >= longest) return;
+    last = performance.now();
+    frame = requestAnimationFrame(tick);
+  };
+
+  paint();
+  if (replay) {
+    replay.hidden = false;
+    replay.addEventListener('click', () => {
+      elapsed = 0;
+      lanes.forEach((l) => (l.shown = -1));
+      paint();
+      run();
+    });
+  }
+  new IntersectionObserver(
+    ([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) run();
+      else {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    },
+    { threshold: 0.5 },
+  ).observe(root);
+}

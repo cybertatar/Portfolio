@@ -1,0 +1,243 @@
+---
+import Phone from './Phone.astro';
+
+export interface RaceScreen {
+  src: string;
+  caption: string;
+  /** Where the flow has left the app on this screen, e.g. "почта". */
+  away?: string;
+}
+export interface RaceLane {
+  label: string;
+  screens: RaceScreen[];
+  /** Taps from start to finish, one cell each. */
+  steps: number;
+  /** Median time of the task, seconds. */
+  seconds: number;
+  /** Said next to the time at the finish. */
+  end: string;
+  /** The finish is a success (sky) or a dead end (ink). */
+  win?: boolean;
+}
+
+interface Props {
+  lanes: RaceLane[];
+  /** Real seconds per second of playback. */
+  speed?: number;
+}
+
+/**
+ * "Before / after" as a race: both flows start together and run at the measured times,
+ * sped up. Screens are spread evenly over the time of the flow (we only measured the total).
+ * Without JS or with reduced motion it shows the finish.
+ */
+const { lanes, speed = 7 } = Astro.props;
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+---
+
+<div class="race" data-race data-speed={speed}>
+  <div class="lanes">
+    {lanes.map((lane) => (
+      <div
+        class:list={['lane', 'is-done', { win: lane.win }]}
+        data-lane
+        data-seconds={lane.seconds}
+        data-steps={lane.steps}
+        data-captions={JSON.stringify(lane.screens.map((s) => s.caption))}
+        data-aways={JSON.stringify(lane.screens.map((s) => s.away ?? ''))}
+      >
+        <p class="lane-label">
+          {lane.label}
+          <span class="away" data-away>
+            {lane.screens.at(-1)?.away}
+          </span>
+        </p>
+        <div class="lane-phone">
+          <Phone
+            src={lane.screens.map((s) => s.src)}
+            alt={`${lane.label}: ${lane.screens.map((s) => s.caption).join(' → ')}`}
+          />
+        </div>
+        <div class="cells" aria-hidden="true">
+          {Array.from({ length: lane.steps }, () => (
+            <span class="cell is-on" data-cell />
+          ))}
+        </div>
+        <p class="time">
+          <span data-clock>{clock(lane.seconds)}</span>
+          <span class="end" data-end>
+            {lane.end}
+          </span>
+        </p>
+        <p class="caption">
+          Шаг <span data-step>{lane.steps}</span> из {lane.steps} ·{' '}
+          <span data-caption>{lane.screens.at(-1)?.caption}</span>
+        </p>
+      </div>
+    ))}
+  </div>
+  <button class="replay px-clip" type="button" data-replay hidden>
+    Ещё раз
+  </button>
+</div>
+
+<style>
+  .race {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+  }
+  .lanes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, clamp(150px, 22vw, 300px)));
+    justify-content: center;
+    gap: clamp(16px, 8vw, 120px);
+    width: 100%;
+  }
+  .lane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    text-align: center;
+  }
+  .lane-label {
+    margin: 0 0 16px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  /* Where the old flow has left the app: the one thing besides the cells that turns sky */
+  .away {
+    color: var(--sky-600);
+  }
+  .away:empty {
+    display: none;
+  }
+  .away::before {
+    content: ' · ';
+    color: var(--text-tertiary);
+  }
+  .lane-phone {
+    width: 100%;
+  }
+  /* The next screen slides in like a push in the app */
+  /* The next screen slides in over the previous one, a short push that stays under the body */
+  .lane-phone :global(.screen.stacked.was) {
+    visibility: visible;
+  }
+  .lane-phone :global(.screen.enter) {
+    z-index: 1;
+    animation: race-push 280ms var(--ease-standard);
+  }
+  @keyframes race-push {
+    from {
+      transform: translateX(4%);
+      opacity: 0;
+    }
+  }
+
+  /* Steps as cells, like the results HUD: grey for the old flow, sky for the new one */
+  .cells {
+    --px-step: 2px;
+    display: flex;
+    gap: 3px;
+    width: 100%;
+    margin-top: 24px;
+  }
+  .cell {
+    flex: 1 1 0;
+    height: 12px;
+    background: var(--paper-4);
+  }
+  .cell.is-on {
+    background: var(--line-3);
+  }
+  .win .cell.is-on {
+    background: var(--sky-400);
+  }
+
+  /* The same sans number as the results HUD (Handjet's zero is slashed) */
+  .time {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0 8px;
+    margin: 16px 0 0;
+    font-size: var(--t-stat);
+    font-weight: var(--fw-semibold);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+  .end {
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0;
+    color: var(--text-tertiary);
+    visibility: hidden;
+  }
+  .is-done .end {
+    visibility: visible;
+  }
+  .win .end {
+    color: var(--sky-600);
+  }
+  .caption {
+    margin: 8px 0 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+    text-wrap: balance;
+  }
+
+  .replay {
+    --px-step: 3px;
+    height: var(--control-h);
+    padding: 0 20px;
+    border: 0;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-button) * 1.3);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+    cursor: inherit;
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .replay:hover {
+    background: var(--surface-active);
+  }
+  .replay[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 560px) {
+    .race {
+      gap: 24px;
+    }
+    .lanes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .cells {
+      gap: 2px;
+      margin-top: 16px;
+    }
+    .cell {
+      height: 10px;
+    }
+    .time {
+      font-size: 28px;
+    }
+    .end {
+      font-size: var(--t-caption);
+    }
+  }
+</style>

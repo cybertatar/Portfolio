@@ -2,8 +2,11 @@
 import { withBase } from '../../scripts/url';
 
 interface Props {
-  /** Screen in /public, 402×874pt (exported at 2x). */
-  src: string;
+  /**
+   * Screen in /public, 402×874pt (exported at 2x). Several screens stack in one body: the
+   * last one shows until a script switches `is-on` (Race.astro).
+   */
+  src: string | string[];
   alt: string;
 }
 
@@ -12,10 +15,21 @@ interface Props {
  * 450×920pt, screen inset 24/23pt, 60pt corners). Scales with the width of its parent.
  */
 const { src, alt } = Astro.props;
+const screens = Array.isArray(src) ? src : [src];
+const stacked = screens.length > 1;
 ---
 
 <div class="phone">
-  <img class="screen" src={withBase(src)} alt={alt} loading="lazy" decoding="async" />
+  {screens.map((s, i) => (
+    <img
+      class:list={['screen', { stacked, 'is-on': i === screens.length - 1 }]}
+      src={withBase(s)}
+      alt={i === screens.length - 1 ? alt : ''}
+      loading="lazy"
+      decoding="async"
+      data-screen={stacked ? '' : undefined}
+    />
+  ))}
   <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
 </div>
 
@@ -36,6 +50,9 @@ const { src, alt } = Astro.props;
     object-fit: cover;
     object-position: top;
     background: #0e1116;
+  }
+  .screen.stacked:not(.is-on) {
+    visibility: hidden;
   }
   .body {
     position: absolute;

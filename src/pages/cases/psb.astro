@@ -6,6 +6,7 @@ import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Phone from '../../components/case/Phone.astro';
+import Race from '../../components/case/Race.astro';
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -165,24 +166,44 @@ const directions = [
     id: 'cashback',
     title: 'Подключение кешбэка',
     lead: 'Кешбэк — самая популярная программа лояльности в российских банках, и подключить его должно быть не сложнее, чем прочитать условия.',
-    // The original flow from the PSB Figma file (section "Пользователь подключает кешбэк")
-    before: [
-      { src: 'assets/cases/psb/before/cb-01.webp', caption: 'Главная' },
-      { src: 'assets/cases/psb/before/cb-02.webp', caption: 'Внизу — «Бонусный счёт»' },
-      { src: 'assets/cases/psb/before/cb-03.webp', caption: 'Условия и «Подключить»' },
-      { src: 'assets/cases/psb/before/cb-04.webp', caption: 'Почта и два согласия' },
-      { src: 'assets/cases/psb/before/cb-05.webp', caption: 'Ждём письмо' },
-      { src: 'assets/cases/psb/before/cb-06.webp', caption: 'Не дождался — ошибка' },
-      { src: 'assets/cases/psb/before/cb-07.webp', caption: 'Письмо в почте' },
-      { src: 'assets/cases/psb/before/cb-08.webp', caption: 'Ссылка в браузере' },
-      { src: 'assets/cases/psb/before/cb-09.webp', caption: 'Согласие не открыть' },
-      { src: 'assets/cases/psb/before/cb-10.webp', caption: 'Готово' },
-      { src: 'assets/cases/psb/before/cb-01.webp', caption: 'А на главной кешбэка нет' },
-    ],
-    after: [
-      'assets/cases/psb/cb-off.webp',
-      'assets/cases/psb/cb-connect.webp',
-      'assets/cases/psb/success.webp',
+    // Before: the original flow from the PSB Figma file (section "Пользователь подключает кешбэк");
+    // steps and times are the medians from the results
+    race: [
+      {
+        label: 'Было',
+        steps: 12,
+        seconds: 105,
+        end: 'кешбэка нет',
+        screens: [
+          { src: 'assets/cases/psb/before/cb-01.webp', caption: 'Главная' },
+          { src: 'assets/cases/psb/before/cb-02.webp', caption: 'Внизу — «Бонусный счёт»' },
+          { src: 'assets/cases/psb/before/cb-03.webp', caption: 'Условия и «Подключить»' },
+          { src: 'assets/cases/psb/before/cb-04.webp', caption: 'Почта и два согласия' },
+          { src: 'assets/cases/psb/before/cb-05.webp', caption: 'Ждём письмо' },
+          { src: 'assets/cases/psb/before/cb-06.webp', caption: 'Не дождался — ошибка' },
+          { src: 'assets/cases/psb/before/cb-07.webp', caption: 'Письмо в почте', away: 'почта' },
+          {
+            src: 'assets/cases/psb/before/cb-08.webp',
+            caption: 'Ссылка в браузере',
+            away: 'браузер',
+          },
+          { src: 'assets/cases/psb/before/cb-09.webp', caption: 'Согласие не открыть' },
+          { src: 'assets/cases/psb/before/cb-10.webp', caption: 'Готово' },
+          { src: 'assets/cases/psb/before/cb-01.webp', caption: 'А на главной кешбэка нет' },
+        ],
+      },
+      {
+        label: 'Стало',
+        steps: 5,
+        seconds: 23,
+        end: 'готово',
+        win: true,
+        screens: [
+          { src: 'assets/cases/psb/cb-off.webp', caption: '«Хочу подключить» в «Выгоде»' },
+          { src: 'assets/cases/psb/cb-connect.webp', caption: 'Выбор категорий' },
+          { src: 'assets/cases/psb/success.webp', caption: 'Кешбэк подключён' },
+        ],
+      },
     ],
     problem:
       'Кешбэк прятался внизу главной под названием «Бонусный счёт». Подключение занимало 12 шагов и дважды уводило из приложения: в почту за письмом и в браузер по ссылке из него. Нажмёшь «Далее» раньше письма — ошибка. А после всех шагов главная выглядела как раньше: кешбэк появлялся, только если перезайти.',
@@ -475,33 +496,8 @@ const home = withBase('/');
             <h2 class="h2">{d.title}</h2>
             <p class="lead">{d.lead}</p>
             <div class="stage px-clip">
-              {d.before ? (
-                <div class="flow">
-                  <div class="flow-row">
-                    <span class="flow-tag px-clip">До</span>
-                    <ol class="flow-steps">
-                      {d.before.map((s, n) => (
-                        <li class="flow-step">
-                          <Phone src={s.src} alt={`Было, шаг ${n + 1}: ${s.caption}`} />
-                          <p class="flow-caption">
-                            <span class="flow-n">{n + 1}</span>
-                            {s.caption}
-                          </p>
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                  <div class="flow-row">
-                    <span class="flow-tag px-clip">После</span>
-                    <div class="stage-phones">
-                      {d.after?.map((src) => (
-                        <div class="stage-phone">
-                          <Phone src={src} alt={`${d.title}: новый экран`} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+              {d.race ? (
+                <Race lanes={d.race} />
               ) : d.compare ? (
                 <>
                   <span class="stage-tag left px-clip">До</span>
@@ -640,6 +636,7 @@ const home = withBase('/');
     initCompare,
     initHud,
     initQuestDeck,
+    initRace,
     initScrollSpy,
   } from '../../scripts/case';
 
@@ -652,6 +649,7 @@ const home = withBase('/');
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
+  document.querySelectorAll<HTMLElement>('[data-race]').forEach(initRace);
 </script>
 
 <style>
@@ -1103,60 +1101,6 @@ const home = withBase('/');
     font-size: var(--t-caption);
     color: var(--text-tertiary);
   }
-  /* "Before" as the whole original flow, small screens in reading order, then the new screens */
-  .flow {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(40px, 4vw, 64px);
-    width: 100%;
-  }
-  .flow-row {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  .flow-tag {
-    --px-step: 2px;
-    padding: 4px 10px;
-    background: var(--surface-card);
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
-    color: var(--text-primary);
-  }
-  .flow-steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 24px 16px;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .flow-step {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .flow-caption {
-    display: flex;
-    gap: 6px;
-    margin: 0;
-    font-size: var(--t-caption);
-    line-height: var(--lh-snug);
-    color: var(--text-secondary);
-    text-wrap: pretty;
-  }
-  .flow-n {
-    flex: none;
-    font-family: var(--font-pixel);
-    color: var(--text-primary);
-  }
-  .flow .stage-phones {
-    width: 100%;
-  }
   .psr {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1389,21 +1333,6 @@ const home = withBase('/');
       flex: 0 0 min(240px, 66%);
       width: auto;
       scroll-snap-align: center;
-    }
-    /* The original flow scrolls sideways too, so it stays one line of steps */
-    .flow-steps {
-      display: flex;
-      gap: 12px;
-      margin: 0 -16px;
-      padding: 0 16px;
-      width: calc(100% + 32px);
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-    }
-    .flow-step {
-      flex: 0 0 120px;
-      scroll-snap-align: start;
-      scroll-margin-left: 16px;
     }
     .stage-phones .stage-phone:only-child {
       margin: 0 auto;

@@ -5,7 +5,6 @@ import CaseVideo from '../../components/case/CaseVideo.astro';
 import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
-import Phone from '../../components/case/Phone.astro';
 import Race from '../../components/case/Race.astro';
 import Versus from '../../components/case/Versus.astro';
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
@@ -144,24 +143,135 @@ const directions = [
     title: 'Главная страница',
     lead: 'Повседневные задачи и предложения банка должны быть заметны одновременно, но не конкурировать между собой.',
     compare: { before: 'assets/cases/psb/main-before.webp', after: 'assets/cases/psb/main.webp' },
-    problem:
-      'Повседневные операции, промо и другие продукты имели близкий визуальный вес. Историю и кешбэк было трудно найти.',
-    solution:
-      'Сгруппировали баланс, действия и историю; показали карты внутри счетов. Сначала на главной был ещё и отдельный блок кешбэка, но вместе с вкладкой и бейджем получалось три входа. Блок убрали и оставили бейдж, чтобы проверить, заметят ли его.',
-    result:
-      'Кешбэк нашли все 30 участников: 63% — через «Выгоду», 37% — через бейдж у суммы, так что второй вход не остался незамеченным.',
+    // Facts row by row under the before/after slider, then the result
+    versus: {
+      rows: [
+        {
+          label: 'Баланс',
+          before: '«Всего доступно средств» в отдельной карточке',
+          after: '«Всего на счетах» наверху, рядом бейдж кешбэка',
+        },
+        {
+          label: 'Карты и счета',
+          before: 'Два отдельных списка',
+          after: 'Карты внутри своих счетов',
+        },
+        {
+          label: 'Частые действия',
+          before: 'Нет на главной',
+          after: 'QR, перевод, по номеру и пополнение под счетами',
+        },
+        {
+          label: 'История',
+          before: 'Отдельная вкладка, у каждой карты своя',
+          after: 'На главной, сразу под действиями',
+        },
+        {
+          label: 'Предложения банка',
+          before: 'Вес как у продуктов, среди счетов и карт',
+          after: 'Баннеры сверху, их можно закрыть',
+        },
+        {
+          label: 'Кешбэк',
+          before: '«Бонусный счёт» в конце главной',
+          after: 'Бейдж у баланса и вкладка «Выгода»',
+        },
+      ],
+      stats: [
+        { value: '63%', note: 'нашли кешбэк через вкладку «Выгода»' },
+        {
+          value: '37%',
+          note: 'через бейдж у баланса: второй вход не остался незамеченным',
+        },
+      ],
+    },
   },
   {
     id: 'card-data',
     title: 'Данные карты',
     lead: 'Посмотреть и скопировать данные карты должно быть простым и понятным действием сразу после входа в приложение.',
-    after: ['assets/cases/psb/account.webp'],
-    problem:
-      'Данные лежали на третьей вкладке и защищались пушами и кодами: CVV открывался только по коду из СМС, даже после входа по биометрии. Один участник из-за сложного поиска доставал физическую карту.',
-    solution:
-      'Показали связь счёта и карты и собрали просмотр и копирование на одном экране. Код из СМС перед показом CVV убрали: клиент уже вошёл по ПИН-коду или биометрии, и во многих банках этого достаточно, пока активен токен. Короткий toast подтверждает, что данные скопированы.',
-    result:
-      'Большинство нашли данные сразу: first click success — 83%. Но клиентам, у которых ПСБ — единственный банк, было непривычно видеть карты внутри счёта, а переворот карты оказался не самым явным способом показать данные. Это отразилось на SEQ — 6,0 из 7.',
+    // Before: the original flow from the PSB Figma file (section "Пользователь просматривает и
+    // копирует данные карты"); steps and times are the medians from the results
+    race: [
+      {
+        label: 'Было',
+        steps: 7,
+        seconds: 42,
+        end: 'через СМС',
+        screens: [
+          { src: 'assets/cases/psb/before/card-01.webp', caption: 'Главная, карта в «Картах»' },
+          { src: 'assets/cases/psb/before/card-02.webp', caption: 'Открылись «Настройки» карты' },
+          { src: 'assets/cases/psb/before/card-03.webp', caption: 'Свайп — «История»' },
+          { src: 'assets/cases/psb/before/card-04.webp', caption: 'Третья вкладка — «О карте»' },
+          { src: 'assets/cases/psb/before/card-05.webp', caption: 'Данные карты, номер скрыт' },
+          { src: 'assets/cases/psb/before/card-06.webp', caption: 'Показал номер', same: true },
+          {
+            src: 'assets/cases/psb/before/card-07.webp',
+            caption: 'Удержал поле — скопировано',
+            same: true,
+          },
+          { src: 'assets/cases/psb/before/card-08.webp', caption: 'CVV — только по СМС' },
+          {
+            src: 'assets/cases/psb/before/card-09.webp',
+            caption: 'Код не подставился',
+            away: 'сообщения',
+          },
+          { src: 'assets/cases/psb/before/card-10.webp', caption: 'Согласие подтверждено' },
+        ],
+      },
+      {
+        label: 'Стало',
+        steps: 4,
+        seconds: 17,
+        end: 'готово',
+        win: true,
+        screens: [
+          // Captured from the live prototype (Финальные экраны) by tools/psb-race/capture.mjs
+          { src: 'assets/cases/psb/race/card-home.webp', caption: 'Главная, текущий счёт' },
+          { src: 'assets/cases/psb/race/card-account.webp', caption: 'Карта внутри счёта' },
+          { src: 'assets/cases/psb/race/card-card.webp', caption: '«Данные карты» на карте' },
+          {
+            src: 'assets/cases/psb/race/card-data.webp',
+            caption: 'Номер, срок и CVV сразу',
+            same: true,
+          },
+          { src: 'assets/cases/psb/race/card-copied.webp', caption: 'Скопировано', same: true },
+        ],
+      },
+    ],
+    versus: {
+      rows: [
+        {
+          label: 'Где найти',
+          before: 'Третья вкладка в карточке карты',
+          after: 'Карта внутри счёта, данные на ней',
+        },
+        { label: 'Путь', before: '7 шагов, 42 секунды', after: '4 шага, 17 секунд' },
+        {
+          label: 'CVV',
+          before: 'Только по коду из СМС, даже после входа по биометрии',
+          after: 'Сразу, вместе с номером и сроком',
+        },
+        {
+          label: 'Выход из приложения',
+          before: 'В сообщения за кодом: сам он не подставлялся',
+          after: 'Не нужен',
+        },
+        {
+          label: 'Копирование',
+          before: 'Удержать поле, пока внизу не появится подсказка',
+          after: 'Кнопка у каждого поля и плашка «Скопировано»',
+        },
+      ],
+      stats: [
+        { value: '83%', note: 'сразу начали с правильного действия' },
+        {
+          value: '6,0',
+          unit: 'из 7',
+          note: 'оценка лёгкости: тем, у кого ПСБ — единственный банк, карты внутри счёта были непривычны, а переворот карты — не самый явный способ показать данные',
+        },
+      ],
+    },
   },
   {
     id: 'cashback',
@@ -253,13 +363,77 @@ const directions = [
     id: 'categories',
     title: 'Кешбэк после подключения',
     lead: 'Кешбэк должен приносить выгоду каждый месяц, а не только после первого подключения.',
-    after: ['assets/cases/psb/cb-on.webp'],
-    problem:
-      'Категории нужно было выбирать каждый месяц, но приложение об этом не напоминало, а кнопка выбора на экране кешбэка была не очень заметной.',
-    solution:
-      'Категории на следующий месяц можно выбрать заранее, чтобы не вспоминать о кешбэке в начале месяца. Выбор можно изменить до начала периода.',
-    result:
-      'Выбор на следующий месяц устроен так же, как при первом подключении, поэтому разбираться заново не пришлось: first click success вырос до 100%. На выбор уходило около 14 секунд, без ошибок справились 90%, а SEQ 6,7 из 7 оказался самым высоким в тесте.',
+    // Before: the original flow from the PSB Figma file (section "Пользователь выбирает категории
+    // кешбека"); the category screen isn't in it, the flow goes from the bonus account to the
+    // check. Steps are taps by the scenario, times the medians
+    race: [
+      {
+        label: 'Было',
+        steps: 7,
+        seconds: 28.7,
+        end: 'готово',
+        screens: [
+          { src: 'assets/cases/psb/before/card-01.webp', caption: 'Главная' },
+          { src: 'assets/cases/psb/before/cats-02.webp', caption: 'Ищет кешбэк, листая главную' },
+          { src: 'assets/cases/psb/before/cats-03.webp', caption: '«Бонусный счёт» внизу' },
+          {
+            src: 'assets/cases/psb/before/cats-04.webp',
+            caption: 'Выбрал категории — проверка данных',
+          },
+          { src: 'assets/cases/psb/before/cats-05.webp', caption: 'Операция выполнена' },
+        ],
+      },
+      {
+        label: 'Стало',
+        steps: 6,
+        seconds: 14,
+        end: 'готово',
+        win: true,
+        screens: [
+          // Captured from the live prototype with cashback connected by tools/psb-race/capture.mjs
+          { src: 'assets/cases/psb/race/next-home.webp', caption: 'Главная, вкладка «Выгода»' },
+          { src: 'assets/cases/psb/race/next-cashback.webp', caption: '«Категории на октябрь»' },
+          { src: 'assets/cases/psb/race/next-0.webp', caption: 'Выбор трёх категорий' },
+          { src: 'assets/cases/psb/race/next-1.webp', caption: 'Отметил «Самокаты»', same: true },
+          { src: 'assets/cases/psb/race/next-2.webp', caption: 'Отметил «Такси»', same: true },
+          { src: 'assets/cases/psb/race/next-3.webp', caption: 'Отметил «Деливери»', same: true },
+          { src: 'assets/cases/psb/race/next-success.webp', caption: 'Категории выбраны' },
+        ],
+      },
+    ],
+    versus: {
+      rows: [
+        {
+          label: 'Где найти',
+          before: '«Бонусный счёт» в конце главной',
+          after: '«Выгода» в таббаре',
+        },
+        { label: 'Путь', before: '7 шагов, 28,7 секунды', after: '6 шагов, 14 секунд' },
+        {
+          label: 'Напоминание',
+          before: 'Нет, о новом месяце нужно помнить самому',
+          after: 'Плашка «Категории на октябрь» с кнопкой «Выбрать»',
+        },
+        {
+          label: 'Когда выбирать',
+          before: 'Каждый месяц, когда он уже начался',
+          after: 'Заранее, и поменять до начала месяца',
+        },
+        {
+          label: 'Подтверждение',
+          before: 'Отдельный экран с юридическими формулировками',
+          after: 'Кнопка «Подключить» под категориями',
+        },
+      ],
+      stats: [
+        {
+          value: '100%',
+          note: 'сразу начали с правильного действия: выбор как при первом подключении',
+        },
+        { value: '90%', note: 'прошли без ошибок' },
+        { value: '6,7', unit: 'из 7', note: 'оценка лёгкости, самая высокая в тесте' },
+      ],
+    },
   },
 ];
 
@@ -543,40 +717,11 @@ const home = withBase('/');
                     <Compare before={d.compare.before} after={d.compare.after} label={d.title} />
                   </div>
                 </>
-              ) : (
-                <>
-                  <span class="stage-tag left px-clip">После</span>
-                  <div class="stage-phones">
-                    {d.after?.map((src) => (
-                      <div class="stage-phone">
-                        <Phone src={src} alt={`${d.title}: новый экран`} />
-                      </div>
-                    ))}
-                  </div>
-                  <span class="stage-note">Экраны «до» добавим</span>
-                </>
-              )}
+              ) : null}
             </div>
-            {d.versus ? (
-              <div>
-                <Versus rows={d.versus.rows} stats={d.versus.stats} />
-              </div>
-            ) : (
-              <div class="psr">
-                <div>
-                  <h3 class="psr-title">Проблема</h3>
-                  <p class="body">{d.problem}</p>
-                </div>
-                <div>
-                  <h3 class="psr-title">Решение</h3>
-                  <p class="body">{d.solution}</p>
-                </div>
-                <div>
-                  <h3 class="psr-title">Результат</h3>
-                  <p class="body">{d.result}</p>
-                </div>
-              </div>
-            )}
+            <div>
+              <Versus rows={d.versus.rows} stats={d.versus.stats} />
+            </div>
           </section>
         ))}
 
@@ -1104,15 +1249,6 @@ const home = withBase('/');
   .stage-phone {
     width: clamp(220px, 26vw, 340px);
   }
-  .stage-phones {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-media-grid);
-    width: 100%;
-  }
-  .stage-phones .stage-phone {
-    flex: 0 1 clamp(180px, 22vw, 300px);
-  }
   /* The fan of prototypes spills its decor to the edges, so the stage keeps a narrower inset */
   .stage.deck-stage {
     display: block;
@@ -1136,33 +1272,6 @@ const home = withBase('/');
   }
   .stage-tag.right {
     right: 16px;
-  }
-  .stage-note {
-    position: absolute;
-    right: 16px;
-    bottom: 12px;
-    font-size: var(--t-caption);
-    color: var(--text-tertiary);
-  }
-  .psr {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-grid);
-  }
-  .psr > div {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 16px;
-    border-top: var(--border-width-keyline) solid var(--border-default);
-  }
-  .psr-title {
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
-    color: var(--text-primary);
   }
 
   /* Testing */
@@ -1217,8 +1326,7 @@ const home = withBase('/');
     .step {
       grid-template-columns: minmax(0, 1fr);
     }
-    .trio,
-    .psr {
+    .trio {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .findings li {
@@ -1350,12 +1458,8 @@ const home = withBase('/');
     .h2 {
       font-size: 26px;
     }
-    .trio,
-    .psr {
+    .trio {
       grid-template-columns: minmax(0, 1fr);
-    }
-    .psr {
-      gap: 20px;
     }
     .stage {
       padding: 56px 16px 40px;
@@ -1366,27 +1470,6 @@ const home = withBase('/');
     }
     .stage-phone {
       width: min(260px, 72%);
-    }
-    /* Several "after" screens scroll sideways */
-    .stage-phones {
-      justify-content: flex-start;
-      margin: 0 -16px;
-      padding: 0 16px;
-      width: calc(100% + 32px);
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-    }
-    .stage-phones .stage-phone {
-      flex: 0 0 min(240px, 66%);
-      width: auto;
-      scroll-snap-align: center;
-    }
-    .stage-phones .stage-phone:only-child {
-      margin: 0 auto;
-    }
-    .stage-note {
-      left: 16px;
-      right: auto;
     }
     .findings li {
       grid-template-columns: 40px minmax(0, 1fr);

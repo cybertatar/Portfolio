@@ -7,6 +7,7 @@ import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Phone from '../../components/case/Phone.astro';
 import Race from '../../components/case/Race.astro';
+import Versus from '../../components/case/Versus.astro';
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -209,12 +210,45 @@ const directions = [
         ],
       },
     ],
-    problem:
-      'Кешбэк прятался внизу главной под названием «Бонусный счёт». Подключение занимало 12 шагов и дважды уводило из приложения: в почту за письмом и в браузер по ссылке из него. Нажмёшь «Далее» раньше письма — ошибка. А после всех шагов главная выглядела как раньше: кешбэк появлялся, только если перезайти.',
-    solution:
-      'Подключение собрали внутри приложения: «Хочу подключить» рядом с условиями, выбор категорий — и готово. Почту, браузер и отдельные экраны согласий из пути убрали, саму программу не меняли. Подключённый кешбэк сразу виден у баланса на главной.',
-    result:
-      'Все 30 участников подключили кешбэк — за 23 секунды вместо 105 на исходных экранах, 83% сразу начали с правильного действия. Слабое место осталось: без ошибок прошли 63%, остальные по пути отвлекались на условия и плитки предложений.',
+    // Facts row by row under the race, then the result
+    versus: {
+      rows: [
+        {
+          label: 'Где найти',
+          before: '«Бонусный счёт» внизу главной',
+          after: '«Выгода» в таббаре и бейдж у баланса',
+        },
+        { label: 'Путь', before: '12 шагов, 105 секунд', after: '5 шагов, 23 секунды' },
+        {
+          label: 'Выход из приложения',
+          before: 'В почту за письмом, в браузер по ссылке',
+          after: 'Не нужен',
+        },
+        {
+          label: 'Согласия',
+          before: 'Два переключателя и экран, который не открыть',
+          after: 'Одна кнопка рядом с условиями',
+        },
+        {
+          label: 'Категории',
+          before: 'Отдельно, после подключения',
+          after: 'Сразу, кнопка считает выбранные',
+        },
+        {
+          label: 'После подключения',
+          before: 'Главная как раньше, пока не перезайдёшь',
+          after: 'Кешбэк сразу виден у баланса',
+        },
+      ],
+      stats: [
+        { value: '30', unit: 'из 30', note: 'участников подключили кешбэк' },
+        { value: '83%', note: 'сразу начали с правильного действия' },
+        {
+          value: '63%',
+          note: 'прошли без ошибок: по пути отвлекались на условия и плитки предложений, это следующий шаг',
+        },
+      ],
+    },
   },
   {
     id: 'categories',
@@ -524,20 +558,26 @@ const home = withBase('/');
                 </>
               )}
             </div>
-            <div class="psr">
+            {d.versus ? (
               <div>
-                <h3 class="psr-title">Проблема</h3>
-                <p class="body">{d.problem}</p>
+                <Versus rows={d.versus.rows} stats={d.versus.stats} />
               </div>
-              <div>
-                <h3 class="psr-title">Решение</h3>
-                <p class="body">{d.solution}</p>
+            ) : (
+              <div class="psr">
+                <div>
+                  <h3 class="psr-title">Проблема</h3>
+                  <p class="body">{d.problem}</p>
+                </div>
+                <div>
+                  <h3 class="psr-title">Решение</h3>
+                  <p class="body">{d.solution}</p>
+                </div>
+                <div>
+                  <h3 class="psr-title">Результат</h3>
+                  <p class="body">{d.result}</p>
+                </div>
               </div>
-              <div>
-                <h3 class="psr-title">Результат</h3>
-                <p class="body">{d.result}</p>
-              </div>
-            </div>
+            )}
           </section>
         ))}
 

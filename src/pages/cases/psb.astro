@@ -6,6 +6,8 @@ import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Phone from '../../components/case/Phone.astro';
+import Race from '../../components/case/Race.astro';
+import Versus from '../../components/case/Versus.astro';
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -164,18 +166,88 @@ const directions = [
   {
     id: 'cashback',
     title: 'Подключение кешбэка',
-    lead: 'Выгоду было видно на странице предложения, но путь к подключению проходил через почту, браузер и повторные подтверждения.',
-    after: [
-      'assets/cases/psb/cb-off.webp',
-      'assets/cases/psb/cb-connect.webp',
-      'assets/cases/psb/success.webp',
+    lead: 'Кешбэк — самая популярная программа лояльности в российских банках, и подключить его должно быть не сложнее, чем прочитать условия.',
+    // Before: the original flow from the PSB Figma file (section "Пользователь подключает кешбэк");
+    // steps and times are the medians from the results
+    race: [
+      {
+        label: 'Было',
+        steps: 12,
+        seconds: 105,
+        end: 'кешбэка нет',
+        screens: [
+          { src: 'assets/cases/psb/before/cb-01.webp', caption: 'Главная' },
+          { src: 'assets/cases/psb/before/cb-02.webp', caption: 'Внизу — «Бонусный счёт»' },
+          { src: 'assets/cases/psb/before/cb-03.webp', caption: 'Условия и «Подключить»' },
+          { src: 'assets/cases/psb/before/cb-04.webp', caption: 'Почта и два согласия' },
+          { src: 'assets/cases/psb/before/cb-05.webp', caption: 'Ждём письмо' },
+          { src: 'assets/cases/psb/before/cb-06.webp', caption: 'Не дождался — ошибка' },
+          { src: 'assets/cases/psb/before/cb-07.webp', caption: 'Письмо в почте', away: 'почта' },
+          {
+            src: 'assets/cases/psb/before/cb-08.webp',
+            caption: 'Ссылка в браузере',
+            away: 'браузер',
+          },
+          { src: 'assets/cases/psb/before/cb-09.webp', caption: 'Согласие не открыть' },
+          { src: 'assets/cases/psb/before/cb-10.webp', caption: 'Готово' },
+          { src: 'assets/cases/psb/before/cb-01.webp', caption: 'А на главной кешбэка нет' },
+        ],
+      },
+      {
+        label: 'Стало',
+        steps: 5,
+        seconds: 23,
+        end: 'готово',
+        win: true,
+        screens: [
+          // Captured from the live prototype (Финальные экраны): three categories, the button counts them
+          { src: 'assets/cases/psb/race/start.webp', caption: '«Хочу подключить» в «Выгоде»' },
+          { src: 'assets/cases/psb/race/cats-0.webp', caption: 'Выбор трёх категорий' },
+          { src: 'assets/cases/psb/race/cats-1.webp', caption: 'Отметил «Авиабилеты»', same: true },
+          { src: 'assets/cases/psb/race/cats-2.webp', caption: 'Отметил «Такси»', same: true },
+          { src: 'assets/cases/psb/race/cats-3.webp', caption: 'Отметил «Деливери»', same: true },
+          { src: 'assets/cases/psb/race/success.webp', caption: 'Кешбэк подключён' },
+        ],
+      },
     ],
-    problem:
-      'Путь был длинным и заканчивался тупиком: из-за ошибки подключённый кешбэк не появлялся, пока не обновишь экран или не перезайдёшь в приложение. Вероятно, это снижало долю клиентов, которые начинали им пользоваться.',
-    solution:
-      'Логику программы не трогали, убрали только лишние танцы: почту, браузер, повторный ввод данных и экраны согласий. Осталась одна кнопка «Подключить кешбэк» рядом с условиями. Подключение объединили с выбором категорий, поэтому кешбэк начинает работать сразу.',
-    result:
-      'Все участники подключили кешбэк, и большинство сразу начали с правильного действия: first click success — 83%. Обычно уходило около 23 секунд. Без ошибок прошли 63%: по пути часто отвлекались на условия и плитки предложений, это стоит проработать дальше. SEQ — 6,5 из 7.',
+    // Facts row by row under the race, then the result
+    versus: {
+      rows: [
+        {
+          label: 'Где найти',
+          before: '«Бонусный счёт» внизу главной',
+          after: '«Выгода» в таббаре и бейдж у баланса',
+        },
+        { label: 'Путь', before: '12 шагов, 105 секунд', after: '5 шагов, 23 секунды' },
+        {
+          label: 'Выход из приложения',
+          before: 'В почту за письмом, в браузер по ссылке',
+          after: 'Не нужен',
+        },
+        {
+          label: 'Согласия',
+          before: 'Два переключателя и экран, который не открыть',
+          after: 'Одна кнопка рядом с условиями',
+        },
+        {
+          label: 'Категории',
+          before: 'Отдельно, после подключения',
+          after: 'Сразу, кнопка считает выбранные',
+        },
+        {
+          label: 'После подключения',
+          before: 'Главная как раньше, пока не перезайдёшь',
+          after: 'Кешбэк сразу виден у баланса',
+        },
+      ],
+      stats: [
+        { value: '83%', note: 'сразу начали с правильного действия' },
+        {
+          value: '63%',
+          note: 'прошли без ошибок: по пути отвлекались на условия и плитки предложений, это следующий шаг',
+        },
+      ],
+    },
   },
   {
     id: 'categories',
@@ -460,8 +532,10 @@ const home = withBase('/');
             </p>
             <h2 class="h2">{d.title}</h2>
             <p class="lead">{d.lead}</p>
-            <div class="stage px-clip">
-              {d.compare ? (
+            <div class:list={['stage', 'px-clip', { 'race-stage': d.race }]}>
+              {d.race ? (
+                <Race lanes={d.race} />
+              ) : d.compare ? (
                 <>
                   <span class="stage-tag left px-clip">До</span>
                   <span class="stage-tag right px-clip">После</span>
@@ -483,20 +557,26 @@ const home = withBase('/');
                 </>
               )}
             </div>
-            <div class="psr">
+            {d.versus ? (
               <div>
-                <h3 class="psr-title">Проблема</h3>
-                <p class="body">{d.problem}</p>
+                <Versus rows={d.versus.rows} stats={d.versus.stats} />
               </div>
-              <div>
-                <h3 class="psr-title">Решение</h3>
-                <p class="body">{d.solution}</p>
+            ) : (
+              <div class="psr">
+                <div>
+                  <h3 class="psr-title">Проблема</h3>
+                  <p class="body">{d.problem}</p>
+                </div>
+                <div>
+                  <h3 class="psr-title">Решение</h3>
+                  <p class="body">{d.solution}</p>
+                </div>
+                <div>
+                  <h3 class="psr-title">Результат</h3>
+                  <p class="body">{d.result}</p>
+                </div>
               </div>
-              <div>
-                <h3 class="psr-title">Результат</h3>
-                <p class="body">{d.result}</p>
-              </div>
-            </div>
+            )}
           </section>
         ))}
 
@@ -599,6 +679,7 @@ const home = withBase('/');
     initCompare,
     initHud,
     initQuestDeck,
+    initRace,
     initScrollSpy,
   } from '../../scripts/case';
 
@@ -611,6 +692,7 @@ const home = withBase('/');
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
+  document.querySelectorAll<HTMLElement>('[data-race]').forEach(initRace);
 </script>
 
 <style>
@@ -1277,6 +1359,10 @@ const home = withBase('/');
     }
     .stage {
       padding: 56px 16px 40px;
+    }
+    /* The race has no "До / После" tags to make room for at the top */
+    .stage.race-stage {
+      padding-top: 40px;
     }
     .stage-phone {
       width: min(260px, 72%);

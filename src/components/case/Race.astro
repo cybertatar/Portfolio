@@ -1,0 +1,241 @@
+---
+import Phone from './Phone.astro';
+
+export interface RaceScreen {
+  src: string;
+  caption: string;
+  /** Where the flow has left the app on this screen, e.g. "почта". */
+  away?: string;
+  /** The same view as the screen before (a box ticked): it swaps without the push. */
+  same?: boolean;
+}
+export interface RaceLane {
+  label: string;
+  screens: RaceScreen[];
+  /** Taps from start to finish, shown as "Шаг N из M". */
+  steps: number;
+  /** Median time of the task, seconds. */
+  seconds: number;
+  /** Said next to the time at the finish. */
+  end: string;
+  /** The finish is a success (sky) or a dead end (ink). */
+  win?: boolean;
+}
+
+interface Props {
+  lanes: RaceLane[];
+  /** Real seconds per second of playback. */
+  speed?: number;
+}
+
+/**
+ * "Before / after" as a race: both flows start together and run at the measured times,
+ * sped up. Screens are spread evenly over the time of the flow (we only measured the total).
+ * The time bars share one scale, so the faster flow's bar stops short.
+ * Without JS or with reduced motion it shows the finish.
+ */
+const { lanes, speed = 7 } = Astro.props;
+const longest = Math.max(...lanes.map((l) => l.seconds));
+const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+---
+
+<div class="race" data-race data-speed={speed}>
+  <div class="lanes">
+    {lanes.map((lane) => (
+      <div
+        class:list={['lane', 'is-done', { win: lane.win }]}
+        data-lane
+        data-seconds={lane.seconds}
+        data-steps={lane.steps}
+        data-captions={JSON.stringify(lane.screens.map((s) => s.caption))}
+        data-aways={JSON.stringify(lane.screens.map((s) => s.away ?? ''))}
+        data-sames={JSON.stringify(lane.screens.map((s) => Boolean(s.same)))}
+      >
+        <p class="lane-label">
+          {lane.label}
+          <span class="away" data-away>
+            {lane.screens.at(-1)?.away}
+          </span>
+        </p>
+        <div class="lane-phone">
+          <Phone
+            src={lane.screens.map((s) => s.src)}
+            alt={`${lane.label}: ${lane.screens.map((s) => s.caption).join(' → ')}`}
+          />
+        </div>
+        <div class="bar px-clip" aria-hidden="true">
+          <span class="bar-fill" data-bar style={`width: ${(lane.seconds / longest) * 100}%`} />
+        </div>
+        <p class="time">
+          <span data-clock>{clock(lane.seconds)}</span>
+          <span class="end" data-end>
+            {lane.end}
+          </span>
+        </p>
+        <p class="caption">
+          Шаг <span data-step>{lane.steps}</span> из {lane.steps} ·{' '}
+          <span data-caption>{lane.screens.at(-1)?.caption}</span>
+        </p>
+      </div>
+    ))}
+  </div>
+  <button class="replay px-clip" type="button" data-replay hidden>
+    Ещё раз
+  </button>
+</div>
+
+<style>
+  .race {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+  }
+  .lanes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, clamp(150px, 22vw, 300px)));
+    justify-content: center;
+    gap: clamp(16px, 8vw, 120px);
+    width: 100%;
+  }
+  /* The readout (bar, clock, step) keeps to the left edge of the bar; the label stays over the phone */
+  .lane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .lane-label {
+    align-self: center;
+    margin: 0 0 16px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  /* Where the old flow has left the app: in sky like the new flow */
+  .away {
+    color: var(--sky-600);
+  }
+  .away:empty {
+    display: none;
+  }
+  .away::before {
+    content: ' · ';
+    color: var(--text-tertiary);
+  }
+  .lane-phone {
+    width: 100%;
+  }
+  /* The next screen slides in like a push in the app */
+  /* The next screen slides in over the previous one, a short push that stays under the body */
+  .lane-phone :global(.screen.stacked.was) {
+    visibility: visible;
+  }
+  .lane-phone :global(.screen.enter) {
+    z-index: 1;
+    animation: race-push 280ms var(--ease-standard);
+  }
+  @keyframes race-push {
+    from {
+      transform: translateX(4%);
+      opacity: 0;
+    }
+  }
+
+  /* One time bar per lane on a shared scale: the old flow fills it, the new one stops short */
+  .bar {
+    --px-step: 2px;
+    display: flex;
+    width: 100%;
+    height: 10px;
+    margin-top: 24px;
+    background: color-mix(in srgb, var(--sky-300) 35%, var(--surface-card));
+  }
+  .bar-fill {
+    display: block;
+    background: var(--line-3);
+  }
+  .win .bar-fill {
+    background: var(--sky-400);
+  }
+
+  /* The same sans number as the results HUD (Handjet's zero is slashed) */
+  .time {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0 8px;
+    margin: 16px 0 0;
+    font-size: var(--t-stat);
+    font-weight: var(--fw-semibold);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+  .end {
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0;
+    color: var(--text-tertiary);
+    visibility: hidden;
+  }
+  .is-done .end {
+    visibility: visible;
+  }
+  .win .end {
+    color: var(--sky-600);
+  }
+  .caption {
+    margin: 8px 0 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+    text-wrap: balance;
+  }
+
+  .replay {
+    --px-step: 3px;
+    height: var(--control-h);
+    padding: 0 20px;
+    border: 0;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-button) * 1.3);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+    cursor: inherit;
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .replay:hover {
+    background: var(--surface-active);
+  }
+  .replay[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 560px) {
+    .race {
+      gap: 24px;
+    }
+    .lanes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .bar {
+      height: 8px;
+      margin-top: 16px;
+    }
+    /* The bar reads with the clock under it, not the phone above (12 < 16) */
+    .time {
+      margin-top: 12px;
+      font-size: 28px;
+    }
+    .end {
+      font-size: var(--t-caption);
+    }
+  }
+</style>

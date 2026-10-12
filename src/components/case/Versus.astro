@@ -1,6 +1,4 @@
 ---
-import PixelIcon from '../ui/PixelIcon.astro';
-
 export interface VersusRow {
   label: string;
   before: string;
@@ -18,42 +16,30 @@ interface Props {
 }
 
 /**
- * What changed, fact by fact, then the result in a few numbers.
- * SKETCH: three layouts of the same markup, switched by data-versus on <html> (the switcher in
- * psb.astro); the one the owner picks stays, the rest go.
- *  a — a list of changes: one left edge, "стало" first, "было" a muted line under it
- *  b — cards like "Проблемы и решения": muted "было", arrow down, "стало"
- *  c — a table read left to right: subject, "было", "стало", every column left-aligned
+ * What changed, fact by fact, then the result in a few numbers. Each change reads top to bottom
+ * on one left edge: the subject, what it is now, and under it, quieter, what it was. A table with
+ * a right-aligned "было", a centred subject and a left-aligned "стало" made the eye zigzag across
+ * every row (NN/g, zigzag layouts; grids: align to column edges). Short columns of a modular grid
+ * instead of long lines, so it reads as a few facts, not a sheet of text: three across, two when
+ * there are four (2 + 2 rather than 3 + 1), one on a narrow sheet. The steps and time are not
+ * repeated here, the race above shows them.
  */
 const { rows, stats } = Astro.props;
 ---
 
 <div class="versus">
-  <div class="changes-wrap">
-    <div class="head" aria-hidden="true">
-      <span>Что</span>
-      <span>Было</span>
-      <span>Стало</span>
-    </div>
-    <ul class="changes" aria-label="Было и стало">
-      {rows.map((r) => (
-        <li class="change px-clip">
-          <span class="label">{r.label}</span>
-          <p class="before">
-            <span class="tag">Было: </span>
-            {r.before}
-          </p>
-          <span class="arrow" aria-hidden="true">
-            <PixelIcon name="arrow" size={24} />
-          </span>
-          <p class="after">
-            <span class="tag">Стало: </span>
-            {r.after}
-          </p>
-        </li>
-      ))}
-    </ul>
-  </div>
+  <ul class="changes" style={`--cols: ${rows.length === 4 ? 2 : 3}`} aria-label="Было и стало">
+    {rows.map((r) => (
+      <li class="change">
+        <span class="label">{r.label}</span>
+        <p class="after">
+          <span class="sr">Стало: </span>
+          {r.after}
+        </p>
+        <p class="before">Было: {r.before}</p>
+      </li>
+    ))}
+  </ul>
   <!-- The result is its own card: the boundary groups the numbers (NN/g, common region) -->
   <div class="result px-clip">
     <p class="result-title">Итог теста</p>
@@ -79,150 +65,57 @@ const { rows, stats } = Astro.props;
     container-type: inline-size;
   }
   .changes {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+    column-gap: 40px;
+    row-gap: 32px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
+  /* The keyline on top ties the subject to its column; inside an item the lines sit closer
+     (8, 6) than the items to each other (32) */
   .change {
+    /* Holds the hidden "Стало:" */
     position: relative;
-    margin: 0;
-    font-size: var(--t-body);
-    line-height: var(--lh-snug);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding-top: 14px;
+    border-top: var(--border-width-keyline) solid var(--border-default);
     text-wrap: pretty;
   }
-  .before,
-  .after {
-    margin: 0;
-  }
   .label {
+    margin-bottom: 2px;
     font-family: var(--font-pixel);
     font-size: var(--t-pixel-label);
     letter-spacing: var(--ls-caps);
     text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  .after,
+  .before {
+    margin: 0;
+  }
+  .after {
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-snug);
     color: var(--text-primary);
   }
   .before {
+    font-size: var(--t-caption);
+    line-height: var(--lh-normal);
     color: var(--text-secondary);
   }
-  .after {
-    font-weight: var(--fw-medium);
-    color: var(--text-primary);
-  }
-  .arrow {
-    display: none;
-  }
-  .head {
-    display: none;
-  }
-  .tag {
+  .sr {
     position: absolute;
     width: 1px;
     height: 1px;
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
-  }
-
-  /* ---------- a: a list of changes ----------
-     One left edge for everything, read top to bottom: the subject, what it is now, and under it,
-     quieter, what it was. Two columns of a modular grid on a wide sheet, one on a narrow one. */
-  :global(html[data-versus='a']) .changes {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 40px;
-  }
-  :global(html[data-versus='a']) .change {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    clip-path: none;
-    padding: 16px 0 20px;
-    border-top: var(--border-width-keyline) solid var(--border-default);
-  }
-  :global(html[data-versus='a']) .after {
-    order: 1;
-  }
-  :global(html[data-versus='a']) .before {
-    order: 2;
-    font-size: var(--t-caption);
-    line-height: var(--lh-normal);
-  }
-  :global(html[data-versus='a']) .before .tag {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-  }
-  :global(html[data-versus='a']) .label {
-    margin-bottom: 2px;
-    color: var(--text-tertiary);
-  }
-
-  /* ---------- b: cards ----------
-     The "Проблемы и решения" card: a title, the muted old way, an arrow down, the new way. Arrow
-     and "стало" sit at the bottom so they line up across a row. */
-  :global(html[data-versus='b']) .changes {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-  }
-  :global(html[data-versus='b']) .change {
-    --px-step: 3px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: var(--space-tile);
-    background: var(--surface-raised);
-  }
-  :global(html[data-versus='b']) .label {
-    font-family: inherit;
-    font-size: var(--t-body);
-    font-weight: var(--fw-semibold);
-    letter-spacing: 0;
-    text-transform: none;
-  }
-  :global(html[data-versus='b']) .before {
-    color: var(--text-tertiary);
-  }
-  :global(html[data-versus='b']) .arrow {
-    display: block;
-    width: 20px;
-    margin: auto 0 -4px;
-    color: var(--text-disabled);
-    transform: rotate(90deg);
-  }
-  :global(html[data-versus='b']) .arrow :global(svg) {
-    display: block;
-    width: 20px;
-    height: 20px;
-  }
-
-  /* ---------- c: a table read left to right ----------
-     Subject, "было", "стало" in reading order, every column left-aligned to its own edge. */
-  :global(html[data-versus='c']) .head,
-  :global(html[data-versus='c']) .change {
-    display: grid;
-    grid-template-columns: clamp(120px, 20%, 200px) minmax(0, 1fr) minmax(0, 1fr);
-    column-gap: 32px;
-    align-items: baseline;
-  }
-  :global(html[data-versus='c']) .head {
-    padding-bottom: 8px;
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
-    color: var(--text-tertiary);
-  }
-  :global(html[data-versus='c']) .head span:last-child {
-    color: var(--sky-600);
-  }
-  :global(html[data-versus='c']) .change {
-    clip-path: none;
-    padding: 14px 0;
-    border-top: var(--border-width-keyline) solid var(--border-default);
   }
 
   /* The result card, built like the quest and HUD cards: title, then the numbers */
@@ -276,40 +169,21 @@ const { rows, stats } = Astro.props;
     text-wrap: pretty;
   }
 
-  @container (max-width: 820px) {
-    :global(html[data-versus='b']) .changes {
+  @container (max-width: 720px) {
+    .changes {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 24px;
     }
   }
-
   @container (max-width: 560px) {
+    .changes {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 24px;
+    }
     /* Two numbers stay side by side, a third goes under them */
     .stats {
       grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
       gap: 24px;
-    }
-    :global(html[data-versus='a']) .changes,
-    :global(html[data-versus='b']) .changes {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    :global(html[data-versus='b']) .changes {
-      gap: 16px;
-    }
-    /* c: the subject on top, "было" and "стало" side by side under it */
-    :global(html[data-versus='c']) .change {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      column-gap: 16px;
-      row-gap: 6px;
-    }
-    :global(html[data-versus='c']) .label {
-      grid-column: 1 / -1;
-    }
-    :global(html[data-versus='c']) .head {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      column-gap: 16px;
-    }
-    :global(html[data-versus='c']) .head span:first-child {
-      display: none;
     }
   }
 </style>

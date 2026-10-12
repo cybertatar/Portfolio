@@ -14,7 +14,6 @@ import TestingScene from '../../components/case/scenes/TestingScene.astro';
 import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import Media from '../../components/ui/Media.astro';
-import Kit from '../../components/case/Kit.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
 import { withBase } from '../../scripts/url';
 
@@ -28,7 +27,6 @@ const toc = [
   { id: 'card-data', title: 'Данные карты', sub: true },
   { id: 'cashback', title: 'Подключение кешбэка', sub: true },
   { id: 'categories', title: 'Кешбэк после подключения', sub: true },
-  { id: 'kit', title: 'UI-кит' },
   { id: 'testing', title: 'Тестирование' },
   { id: 'review', title: 'Ревью' },
   { id: 'outcome', title: 'Выводы' },
@@ -461,6 +459,9 @@ const next = [
 ];
 
 const title = 'PSB-Bank Redesign concept';
+// The UI kit page of the same Figma file
+const kitHref =
+  'https://www.figma.com/design/CzUlWtfXzInfjatugJLjQ1/PSB-Bank-Redesign-Concept?node-id=0-1';
 const figmaHref =
   'https://www.figma.com/design/CzUlWtfXzInfjatugJLjQ1/PSB-Bank-Redesign-Concept?node-id=25-284';
 const home = withBase('/');
@@ -634,6 +635,15 @@ const home = withBase('/');
           <div class="stage deck-stage px-clip">
             <PrototypeDeck prototypes={prototypes} />
           </div>
+          <div class="kit-note">
+            <p class="body">
+              Экраны собраны из UI-кита: на каждый компонент написана спецификация — варианты,
+              размеры и состояния.
+            </p>
+            <Button href={kitHref} target="_blank" rel="noopener" tone="raised">
+              UI-кит в Figma
+            </Button>
+          </div>
         </section>
 
         <!-- ---------- Process ---------- -->
@@ -740,17 +750,6 @@ const home = withBase('/');
           </section>
         ))}
 
-        <!-- ---------- UI kit ---------- -->
-        <section id="kit" class="sheet px-clip">
-          <p class="eyebrow">Система</p>
-          <h2 class="h2">Спеки и UI-кит</h2>
-          <p class="lead">
-            Хоть это и концепт, на каждый компонент я написал спецификацию и разложил компоненты
-            так, чтобы с ними было удобно работать.
-          </p>
-          <Kit />
-        </section>
-
         <!-- ---------- Testing ---------- -->
         <section id="testing" class="sheet px-clip">
           <p class="eyebrow">Проверка</p>
@@ -837,7 +836,6 @@ const home = withBase('/');
     initCompare,
     initChapters,
     initHud,
-    initKit,
     initQuestDeck,
     initRace,
     initScrollSpy,
@@ -854,7 +852,6 @@ const home = withBase('/');
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
   document.querySelectorAll<HTMLElement>('[data-race]').forEach(initRace);
-  document.querySelectorAll<HTMLElement>('[data-kit]').forEach(initKit);
 </script>
 
 <style>
@@ -1290,6 +1287,18 @@ const home = withBase('/');
   }
   .wide-slot {
     aspect-ratio: 16 / 9;
+  }
+
+  /* UI kit: one line and the link, under the prototypes */
+  .kit-note {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+  }
+  .kit-note .body {
+    max-width: var(--measure-body);
   }
 
   /* Interviews */

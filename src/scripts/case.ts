@@ -253,8 +253,7 @@ export function initRace(root: HTMLElement) {
  * earlier ones step back (up, smaller, darker) and peek out over the top. Where it does not
  * fit (phone, low laptop) the cards stick one over another as the page scrolls, stepping
  * back the same way; with reduced motion they stay a plain list. Scenes play on the front
- * card only (data-front, the chapter:front event, see runScene). Step pills bring their card
- * to the front.
+ * card only (data-front, the chapter:front event, see runScene).
  */
 export function initChapters(root: HTMLElement) {
   const cabinet = root.querySelector<HTMLElement>('.cabinet');
@@ -375,19 +374,6 @@ export function initChapters(root: HTMLElement) {
     ticking = true;
     requestAnimationFrame(update);
   };
-
-  root.querySelectorAll<HTMLAnchorElement>('[data-chapter-step]').forEach((link) =>
-    link.addEventListener('click', (event) => {
-      if (mode === 'list') return;
-      event.preventDefault();
-      const i = Number(link.dataset.chapterStep);
-      const y =
-        mode === 'deck'
-          ? root.getBoundingClientRect().top - pin + i * step
-          : cabinet.getBoundingClientRect().top - stick + i * pitch;
-      scrollTo({ top: scrollY + y + 1, behavior: 'smooth' });
-    }),
-  );
 
   addEventListener('scroll', schedule, { passive: true });
   addEventListener('resize', layout, { passive: true });

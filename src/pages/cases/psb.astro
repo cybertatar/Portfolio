@@ -103,31 +103,25 @@ const stats: HudStat[] = [
 const steps = [
   {
     id: 'team',
-    label: 'Работа в команде',
     title: 'Дизайнили вдвоём, проверяли у сеньора',
     text: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
   },
   {
     id: 'scope',
-    label: 'Выбор масштаба',
     title: 'Выбрали четыре направления',
     text: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
   },
   {
     id: 'prototype',
-    label: 'Прототип в руках',
     title: 'Не только макеты',
     text: 'Завайбкодили прототип для быстрого тестирования: в нём можно пройти сценарии на телефоне — подключить кешбэк, выбрать категории и открыть данные карты.',
   },
   {
     id: 'testing',
-    label: 'Тестирование',
     title: 'Видели путь, а не только финал',
     text: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
   },
 ];
-
-const num = (i: number) => String(i + 1).padStart(2, '0');
 
 const findings = [
   {
@@ -657,26 +651,10 @@ const home = withBase('/');
                 >
                   <div class="chapter-panel px-clip">
                     <div class="chapter-copy">
-                      <nav class="chapter-steps" aria-label="Шаги процесса">
-                        {steps.map((t, j) => (
-                          <a
-                            class="chapter-step px-clip"
-                            href={`#process-${t.id}`}
-                            aria-current={i === j ? 'step' : undefined}
-                            aria-label={i === j ? undefined : `${num(j)} ${t.label}`}
-                            data-chapter-step={j}
-                          >
-                            {num(j)}
-                            {i === j && <span>{t.label}</span>}
-                          </a>
-                        ))}
-                      </nav>
-                      <div class="chapter-text">
-                        <h3 class="h3" id={`process-${s.id}-title`}>
-                          {s.title}
-                        </h3>
-                        <p class="body">{s.text}</p>
-                      </div>
+                      <h3 class="h3" id={`process-${s.id}-title`}>
+                        {s.title}
+                      </h3>
+                      <p class="body">{s.text}</p>
                     </div>
                     <div class="chapter-media">
                       {s.id === 'team' ? (
@@ -1210,7 +1188,8 @@ const home = withBase('/');
      each next card slides in from below, the earlier ones step back (up, smaller, darker)
      and peek out over the top. initChapters in case.ts picks the mode: the deck on a desktop
      tall enough for it, cards stacking as the page scrolls otherwise (phone, low laptop),
-     and a plain list with reduced motion or no JS. */
+     and a plain list with reduced motion or no JS. The sidebar contents and the peeking
+     edges show where the reader is, so the cards carry no step badges. */
   .chapters {
     container-type: inline-size;
   }
@@ -1223,29 +1202,28 @@ const home = withBase('/');
     position: relative;
     scroll-margin-top: 24px;
   }
+  /* Text on the left with the card's own padding, the scene bleeds to the card's edge: the
+     scene's sunken paper is 1.05:1 against the raised card, so an inset left a frame that
+     read as neither a panel nor the card */
   .chapter-panel {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr);
-    gap: clamp(24px, 2.6vw, 56px);
     height: 100%;
-    padding: 8px 8px 8px clamp(24px, 2.6vw, 56px);
     background: var(--surface-raised);
   }
   .chapter-copy {
     display: flex;
     flex-direction: column;
-    gap: var(--space-stack);
-    padding: 16px 0;
-  }
-  .chapter-text {
-    display: flex;
-    flex-direction: column;
+    justify-content: center;
     gap: 12px;
-    margin-block: auto;
+    padding: var(--space-tile);
   }
   .chapter-media {
     align-self: center;
+  }
+  .chapter-media :global(.stage) {
+    background: none;
   }
   .chapter-dim {
     position: absolute;
@@ -1253,41 +1231,6 @@ const home = withBase('/');
     background: var(--ink-1);
     opacity: 0;
     pointer-events: none;
-  }
-
-  /* Step pills: the current one with its name, the rest just a number */
-  .chapter-steps {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .chapter-step {
-    --px-step: 3px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-width: 34px;
-    height: 34px;
-    padding: 0 10px;
-    background: var(--surface-active);
-    font-family: var(--font-pixel);
-    font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    line-height: 1;
-    color: var(--text-tertiary);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .chapter-step:hover {
-    color: var(--text-primary);
-  }
-  .chapter-step[aria-current] {
-    background: var(--surface-card);
-    color: var(--text-accent);
-  }
-  .chapter-step span {
-    color: var(--text-primary);
   }
 
   .chapters.is-deck .cabinet {
@@ -1311,7 +1254,7 @@ const home = withBase('/');
   .chapters:is(.is-deck, .is-stack) .chapter::before {
     content: '';
     position: absolute;
-    inset: 8px 8px auto;
+    inset: 0 0 auto;
     height: 50%;
     box-shadow: 0 -10px 28px rgba(41, 37, 30, 0.1);
   }
@@ -1326,15 +1269,9 @@ const home = withBase('/');
     .chapter-panel {
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: 1fr auto;
-      gap: 20px;
-      padding: 8px;
     }
     .chapter-copy {
-      padding: 12px 12px 0;
-      gap: 20px;
-    }
-    .chapter-text {
-      margin-block: 0 auto;
+      justify-content: flex-start;
     }
   }
 

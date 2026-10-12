@@ -141,7 +141,7 @@ export function initRace(root: HTMLElement) {
     away: el.querySelector<HTMLElement>('[data-away]'),
     shown: -1,
     screens: [...el.querySelectorAll<HTMLElement>('[data-screen]')],
-    cells: [...el.querySelectorAll<HTMLElement>('[data-cell]')],
+    bar: el.querySelector<HTMLElement>('[data-bar]'),
     clock: el.querySelector<HTMLElement>('[data-clock]'),
     step: el.querySelector<HTMLElement>('[data-step]'),
     caption: el.querySelector<HTMLElement>('[data-caption]'),
@@ -181,7 +181,7 @@ export function initRace(root: HTMLElement) {
         l.shown = screen;
       }
       if (l.away) l.away.textContent = l.aways[screen] ?? '';
-      l.cells.forEach((c, i) => c.classList.toggle('is-on', i < steps));
+      if (l.bar) l.bar.style.width = `${(t / longest) * 100}%`;
       if (l.clock) l.clock.textContent = clock(t);
       if (l.step) l.step.textContent = String(Math.max(1, steps));
       if (l.caption) l.caption.textContent = l.captions[screen] ?? '';

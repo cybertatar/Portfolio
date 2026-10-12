@@ -10,7 +10,7 @@ export interface RaceScreen {
 export interface RaceLane {
   label: string;
   screens: RaceScreen[];
-  /** Taps from start to finish, one cell each. */
+  /** Taps from start to finish, shown as "Шаг N из M". */
   steps: number;
   /** Median time of the task, seconds. */
   seconds: number;
@@ -29,9 +29,11 @@ interface Props {
 /**
  * "Before / after" as a race: both flows start together and run at the measured times,
  * sped up. Screens are spread evenly over the time of the flow (we only measured the total).
+ * The time bars share one scale, so the faster flow's bar stops short.
  * Without JS or with reduced motion it shows the finish.
  */
 const { lanes, speed = 7 } = Astro.props;
+const longest = Math.max(...lanes.map((l) => l.seconds));
 const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
 ---
 
@@ -58,10 +60,8 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
             alt={`${lane.label}: ${lane.screens.map((s) => s.caption).join(' → ')}`}
           />
         </div>
-        <div class="cells" aria-hidden="true">
-          {Array.from({ length: lane.steps }, () => (
-            <span class="cell is-on" data-cell />
-          ))}
+        <div class="bar px-clip" aria-hidden="true">
+          <span class="bar-fill" data-bar style={`width: ${(lane.seconds / longest) * 100}%`} />
         </div>
         <p class="time">
           <span data-clock>{clock(lane.seconds)}</span>
@@ -111,7 +111,7 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
     text-transform: uppercase;
     color: var(--text-primary);
   }
-  /* Where the old flow has left the app: the one thing besides the cells that turns sky */
+  /* Where the old flow has left the app: in sky like the new flow */
   .away {
     color: var(--sky-600);
   }
@@ -141,23 +141,20 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
     }
   }
 
-  /* Steps as cells, like the results HUD: grey for the old flow, sky for the new one */
-  .cells {
+  /* One time bar per lane on a shared scale: the old flow fills it, the new one stops short */
+  .bar {
     --px-step: 2px;
     display: flex;
-    gap: 3px;
     width: 100%;
+    height: 10px;
     margin-top: 24px;
+    background: color-mix(in srgb, var(--sky-300) 35%, var(--surface-card));
   }
-  .cell {
-    flex: 1 1 0;
-    height: 12px;
-    background: var(--paper-4);
-  }
-  .cell.is-on {
+  .bar-fill {
+    display: block;
     background: var(--line-3);
   }
-  .win .cell.is-on {
+  .win .bar-fill {
     background: var(--sky-400);
   }
 
@@ -226,12 +223,9 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
     }
-    .cells {
-      gap: 2px;
+    .bar {
+      height: 8px;
       margin-top: 16px;
-    }
-    .cell {
-      height: 10px;
     }
     .time {
       font-size: 28px;

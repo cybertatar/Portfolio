@@ -246,7 +246,6 @@ const directions = [
           before: 'Третья вкладка в карточке карты',
           after: 'Карта внутри счёта, данные на ней',
         },
-        { label: 'Путь', before: '7 шагов, 42 секунды', after: '4 шага, 17 секунд' },
         {
           label: 'CVV',
           before: 'Только по коду из СМС, даже после входа по биометрии',
@@ -328,7 +327,6 @@ const directions = [
           before: '«Бонусный счёт» внизу главной',
           after: '«Выгода» в таббаре и бейдж у баланса',
         },
-        { label: 'Путь', before: '12 шагов, 105 секунд', after: '5 шагов, 23 секунды' },
         {
           label: 'Выход из приложения',
           before: 'В почту за письмом, в браузер по ссылке',
@@ -408,7 +406,6 @@ const directions = [
           before: '«Бонусный счёт» в конце главной',
           after: '«Выгода» в таббаре',
         },
-        { label: 'Путь', before: '7 шагов, 28,7 секунды', after: '6 шагов, 14 секунд' },
         {
           label: 'Напоминание',
           before: 'Нет, о новом месяце нужно помнить самому',
@@ -744,7 +741,7 @@ const home = withBase('/');
                 </>
               ) : null}
             </div>
-            <div>
+            <div class="versus-wrap">
               <Versus rows={d.versus.rows} stats={d.versus.stats} />
             </div>
           </section>
@@ -1336,6 +1333,11 @@ const home = withBase('/');
   }
 
   /* Directions */
+  /* The list under the race (or slider) sits as far from it as the result card sits from the
+     list, and further than its own rows sit from each other */
+  .sheet > .versus-wrap {
+    margin-top: 40px;
+  }
   .stage {
     position: relative;
     display: flex;

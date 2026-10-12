@@ -199,11 +199,13 @@ const directions = [
         end: 'готово',
         win: true,
         screens: [
-          { src: 'assets/cases/psb/cb-off.webp', caption: '«Хочу подключить» в «Выгоде»' },
-          { src: 'assets/cases/psb/cb-connect-0.webp', caption: 'Категории на месяц' },
-          { src: 'assets/cases/psb/cb-connect-1.webp', caption: 'Отметил «Деливери»' },
-          { src: 'assets/cases/psb/cb-connect.webp', caption: 'Отметил «Бензин»' },
-          { src: 'assets/cases/psb/success.webp', caption: 'Кешбэк подключён' },
+          // Captured from the live prototype (Финальные экраны): three categories, the button counts them
+          { src: 'assets/cases/psb/race/start.webp', caption: '«Хочу подключить» в «Выгоде»' },
+          { src: 'assets/cases/psb/race/cats-0.webp', caption: 'Выбор трёх категорий' },
+          { src: 'assets/cases/psb/race/cats-1.webp', caption: 'Отметил «Авиабилеты»', same: true },
+          { src: 'assets/cases/psb/race/cats-2.webp', caption: 'Отметил «Такси»', same: true },
+          { src: 'assets/cases/psb/race/cats-3.webp', caption: 'Отметил «Деливери»', same: true },
+          { src: 'assets/cases/psb/race/success.webp', caption: 'Кешбэк подключён' },
         ],
       },
     ],

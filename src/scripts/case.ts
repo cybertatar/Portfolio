@@ -138,6 +138,7 @@ export function initRace(root: HTMLElement) {
     steps: Number(el.dataset.steps),
     captions: JSON.parse(el.dataset.captions ?? '[]') as string[],
     aways: JSON.parse(el.dataset.aways ?? '[]') as string[],
+    sames: JSON.parse(el.dataset.sames ?? '[]') as boolean[],
     away: el.querySelector<HTMLElement>('[data-away]'),
     shown: -1,
     screens: [...el.querySelectorAll<HTMLElement>('[data-screen]')],
@@ -169,8 +170,9 @@ export function initRace(root: HTMLElement) {
           s.classList.toggle('was', i === prev);
           s.classList.remove('enter');
         });
-        // Not on the first paint or a replay: the start screen just appears
-        if (prev !== -1 && screen > 0) {
+        // Not on the first paint or a replay (the start screen just appears), and not within
+        // one view, where only a box gets ticked
+        if (prev !== -1 && screen > 0 && !l.sames[screen]) {
           const next = l.screens[screen];
           void next.offsetWidth;
           next.classList.add('enter');
@@ -210,10 +212,30 @@ export function initRace(root: HTMLElement) {
       run();
     });
   }
+  // Screens load lazily; fetch them all before the race nears and start only once they're
+  // decoded, or a lane flashes black on its first swap
+  const shots = lanes.flatMap((l) => l.screens) as HTMLImageElement[];
+  let ready: Promise<unknown> | undefined;
+  const preload = () =>
+    (ready ??= Promise.all(
+      shots.map((img) => {
+        img.loading = 'eager';
+        return img.decode().catch(() => undefined);
+      }),
+    ));
+  new IntersectionObserver(
+    ([entry], obs) => {
+      if (entry.isIntersecting) {
+        preload();
+        obs.disconnect();
+      }
+    },
+    { rootMargin: '800px 0px' },
+  ).observe(root);
   new IntersectionObserver(
     ([entry]) => {
       visible = entry.isIntersecting;
-      if (visible) run();
+      if (visible) void preload().then(() => visible && run());
       else {
         cancelAnimationFrame(frame);
         frame = 0;

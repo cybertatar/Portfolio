@@ -6,6 +6,8 @@ export interface RaceScreen {
   caption: string;
   /** Where the flow has left the app on this screen, e.g. "почта". */
   away?: string;
+  /** The same view as the screen before (a box ticked): it swaps without the push. */
+  same?: boolean;
 }
 export interface RaceLane {
   label: string;
@@ -47,6 +49,7 @@ const clock = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60))
         data-steps={lane.steps}
         data-captions={JSON.stringify(lane.screens.map((s) => s.caption))}
         data-aways={JSON.stringify(lane.screens.map((s) => s.away ?? ''))}
+        data-sames={JSON.stringify(lane.screens.map((s) => Boolean(s.same)))}
       >
         <p class="lane-label">
           {lane.label}

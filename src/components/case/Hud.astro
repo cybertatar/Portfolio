@@ -1,5 +1,6 @@
 ---
 import { heartPaths } from '../../content/pixel-heart';
+import { en, ru, type Localized, type Text } from '../../content/site';
 
 /**
  * Results as a row of game HUD stats, after Zelda. Every stat has the same build: a title, the
@@ -16,18 +17,18 @@ export type HudGauge =
   | { kind: 'hearts'; value: number; max: number };
 
 export interface HudStat {
-  label: string;
+  label: Text;
   /** The big number, and a smaller unit after it */
-  value: string;
-  unit?: string;
+  value: Text;
+  unit?: Localized;
   /** Context lines under the number */
-  notes: string[];
+  notes: Localized[];
   gauge: HudGauge;
 }
 
 interface Props {
   stats: HudStat[];
-  note?: string;
+  note?: Localized;
 }
 
 const { stats, note } = Astro.props;
@@ -41,10 +42,16 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
   <ul class="hud" data-hud>
     {stats.map((s) => (
       <li class="stat">
-        <span class="label">{s.label}</span>
+        <span class="label" data-en={en(s.label)}>
+          {ru(s.label)}
+        </span>
         <span class="value">
-          {s.value}
-          {s.unit && <span class="unit">{s.unit}</span>}
+          <span data-en={en(s.value)}>{ru(s.value)}</span>
+          {s.unit && (
+            <span class="unit" data-en={s.unit.en}>
+              {s.unit.ru}
+            </span>
+          )}
         </span>
 
         <span class="gauge" aria-hidden="true">
@@ -91,12 +98,18 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
           )}
         </span>
         {s.notes.map((n) => (
-          <span class="note-line">{n}</span>
+          <span class="note-line" data-en={n.en}>
+            {n.ru}
+          </span>
         ))}
       </li>
     ))}
   </ul>
-  {note && <p class="note">{note}</p>}
+  {note && (
+    <p class="note" data-en={note.en}>
+      {note.ru}
+    </p>
+  )}
 </div>
 
 <style>

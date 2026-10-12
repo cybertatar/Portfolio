@@ -1,4 +1,5 @@
 ---
+import type { Localized } from '../../content/site';
 import PixelIcon from '../ui/PixelIcon.astro';
 
 /**
@@ -12,10 +13,10 @@ import PixelIcon from '../ui/PixelIcon.astro';
 export interface Quest {
   /** Section id of the full write-up further down the page */
   id: string;
-  title: string;
+  title: Localized;
   /** One whole thought each, clear on its own; the section below has the detail */
-  problem: string;
-  solution: string;
+  problem: Localized;
+  solution: Localized;
 }
 
 interface Props {
@@ -26,22 +27,32 @@ const { quests } = Astro.props;
 ---
 
 <div class="deck-wrap" data-quest-deck>
-  <ul class="deck" data-quest-track tabindex="0" aria-label="Проблемы и решения">
+  <ul
+    class="deck"
+    data-quest-track
+    tabindex="0"
+    aria-label="Проблемы и решения"
+    data-en-label="Problems and solutions"
+  >
     {quests.map((q) => (
       <li class="quest px-clip" data-quest-card>
-        <a class="title" href={`#${q.id}`}>
-          {q.title}
+        <a class="title" href={`#${q.id}`} data-en={q.title.en}>
+          {q.title.ru}
         </a>
         <p class="problem">
-          <span class="visually-hidden">Было: </span>
-          {q.problem}
+          <span class="visually-hidden" data-en="Before: ">
+            Было:{' '}
+          </span>
+          <span data-en={q.problem.en}>{q.problem.ru}</span>
         </p>
         <span class="arrow" aria-hidden="true">
           <PixelIcon name="arrow" size={24} />
         </span>
         <p class="solution">
-          <span class="visually-hidden">Стало: </span>
-          {q.solution}
+          <span class="visually-hidden" data-en="After: ">
+            Стало:{' '}
+          </span>
+          <span data-en={q.solution.en}>{q.solution.ru}</span>
         </p>
       </li>
     ))}

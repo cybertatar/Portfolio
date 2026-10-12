@@ -1,11 +1,12 @@
 ---
+import type { Localized } from '../../content/site';
 import { withBase } from '../../scripts/url';
 
 interface Props {
   before: string;
   after: string;
   /** What the screens show, for alt text and the slider label. */
-  label: string;
+  label: Localized;
 }
 
 /**
@@ -17,8 +18,20 @@ const { before, after, label } = Astro.props;
 
 <div class="compare" data-compare style="--pos: 50%">
   <div class="phone">
-    <img class="screen" src={withBase(after)} alt={`${label}: после`} loading="lazy" />
-    <img class="screen before" src={withBase(before)} alt={`${label}: до`} loading="lazy" />
+    <img
+      class="screen"
+      src={withBase(after)}
+      alt={`${label.ru}: после`}
+      data-en-alt={`${label.en}: after`}
+      loading="lazy"
+    />
+    <img
+      class="screen before"
+      src={withBase(before)}
+      alt={`${label.ru}: до`}
+      data-en-alt={`${label.en}: before`}
+      loading="lazy"
+    />
     <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
     <span class="line" aria-hidden="true"></span>
     <span class="handle px-clip" aria-hidden="true">
@@ -36,7 +49,8 @@ const { before, after, label } = Astro.props;
     min="0"
     max="100"
     value="50"
-    aria-label={`${label}: до и после`}
+    aria-label={`${label.ru}: до и после`}
+    data-en-label={`${label.en}: before and after`}
     data-compare-range
   />
 </div>

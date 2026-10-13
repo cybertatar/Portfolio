@@ -86,8 +86,8 @@ const quests: Quest[] = [
     id: 'cashback',
     title: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
     problem: {
-      ru: '12 шагов через почту и браузер, а подключённый кешбэк не появлялся до обновления экрана',
-      en: '12 steps through email and a browser, and the activated cashback didn’t show up until the screen was refreshed',
+      ru: '12 шагов через почту и браузер, а подключённый кешбэк не появлялся, пока не перезайдёшь в приложение',
+      en: '12 steps through email and a browser, and the activated cashback didn’t show up until you reopened the app',
     },
     solution: {
       ru: 'Одна кнопка рядом с условиями, и сразу выбор категорий',
@@ -605,8 +605,8 @@ const directions: Direction[] = [
         {
           label: { ru: 'После подключения', en: 'After activation' },
           before: {
-            ru: 'Главная как раньше, пока не перезайдёшь',
-            en: 'The home screen stays the same until you log in again',
+            ru: 'Главная как раньше, пока не перезайдёшь в приложение',
+            en: 'The home screen stays the same until you reopen the app',
           },
           after: {
             ru: 'Кешбэк сразу виден у баланса',

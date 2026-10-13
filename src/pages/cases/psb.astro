@@ -75,11 +75,11 @@ const quests: Quest[] = [
     title: { ru: 'Данные карты', en: 'Card details' },
     problem: {
       ru: 'Данные лежали на третьей вкладке, а CVV открывался только по коду из СМС',
-      en: 'The details sat on the third tab, and the CVV only opened with a code from a text message',
+      en: 'The details were on the third tab, and the CVV was only shown after entering a code from a text message',
     },
     solution: {
       ru: 'Их можно посмотреть и скопировать на одном экране, без кода из СМС',
-      en: 'They can be viewed and copied on one screen, no text message code',
+      en: 'They can be viewed and copied on one screen, with no text message code',
     },
   },
   {
@@ -150,7 +150,7 @@ const steps: { id: string; title: Localized; text: Localized }[] = [
     id: 'team',
     title: {
       ru: 'Дизайнили вдвоём, проверяли у сеньора',
-      en: 'Designed as a pair, checked with a senior',
+      en: 'Designed as a pair, reviewed by a senior designer',
     },
     text: {
       ru: 'Пока один предлагал концепцию, другой искал в ней слабые места, потом менялись ролями. Результат показывали сеньору и, если было нужно, дорабатывали по его правкам.',
@@ -159,7 +159,7 @@ const steps: { id: string; title: Localized; text: Localized }[] = [
   },
   {
     id: 'scope',
-    title: { ru: 'Выбрали четыре направления', en: 'Picked four directions' },
+    title: { ru: 'Выбрали четыре направления', en: 'Picked four focus areas' },
     text: {
       ru: 'Разобрали исходные сценарии и сравнили их в пяти банках. У каждого взяли лучшее и сосредоточились на главной, данных карты, подключении кешбэка и выборе категорий.',
       en: 'We broke down the original flows and compared them across five banks. We took the best from each and focused on the home screen, card details, activating cashback and choosing categories.',
@@ -178,7 +178,7 @@ const steps: { id: string; title: Localized; text: Localized }[] = [
     title: { ru: 'Видели путь, а не только финал', en: 'We saw the path, not just the finish' },
     text: {
       ru: 'Прототип автоматически фиксировал действия участников: нажатия, прокрутку, переходы между экранами, начало и завершение заданий.',
-      en: 'The prototype automatically logged what participants did: taps, scrolling, moves between screens, the start and the end of each task.',
+      en: 'The prototype automatically logged what participants did: taps, scrolling, screen transitions, the start and the end of each task.',
     },
   },
 ];
@@ -194,7 +194,7 @@ const findings: { title: Localized; text: Localized }[] = [
   {
     title: {
       ru: 'Данные карты искали вне приложения',
-      en: 'Card details were looked up outside the app',
+      en: 'Card details came from the physical card',
     },
     text: {
       ru: 'Лояльный клиент искал данные своей карты не в приложении: он достал её из кошелька.',
@@ -202,7 +202,7 @@ const findings: { title: Localized; text: Localized }[] = [
     },
   },
   {
-    title: { ru: 'Не сразу верилось, что это банк', en: 'Hard to believe it was a bank' },
+    title: { ru: 'Не сразу верилось, что это банк', en: 'Hard to believe it was a real bank' },
     text: {
       ru: 'Экраны выглядели собранными по шаблону, и один участник при первом знакомстве засомневался, что перед ним настоящее приложение банка.',
       en: 'The screens looked like they were put together from a template, and at first sight one participant doubted it was a real banking app.',
@@ -262,14 +262,14 @@ const directions: Direction[] = [
           before: { ru: 'Нет на главной', en: 'Not on the home screen' },
           after: {
             ru: 'QR, перевод, по номеру и пополнение под счетами',
-            en: 'QR, transfer, by phone number and top-up under the accounts',
+            en: 'QR payments, transfers, transfers by phone number and top-ups under the accounts',
           },
         },
         {
           label: { ru: 'История', en: 'History' },
           before: {
             ru: 'Отдельная вкладка, у каждой карты своя',
-            en: 'A separate tab, with its own for every card',
+            en: 'A separate tab, split by card',
           },
           after: {
             ru: 'На главной, сразу под действиями',
@@ -280,7 +280,7 @@ const directions: Direction[] = [
           label: { ru: 'Предложения банка', en: 'Bank offers' },
           before: {
             ru: 'Вес как у продуктов, среди счетов и карт',
-            en: 'As much weight as products, among the accounts and cards',
+            en: 'As prominent as products, mixed in with the accounts and cards',
           },
           after: {
             ru: 'Баннеры сверху, их можно закрыть',
@@ -295,7 +295,7 @@ const directions: Direction[] = [
           },
           after: {
             ru: 'Бейдж у баланса и вкладка «Выгода»',
-            en: 'A badge by the balance and the “Benefits” tab',
+            en: 'A badge next to the balance and the “Benefits” tab',
           },
         },
       ],
@@ -311,7 +311,7 @@ const directions: Direction[] = [
           value: '37%',
           note: {
             ru: 'через бейдж у баланса: второй вход не остался незамеченным',
-            en: 'through the badge by the balance: the second way in didn’t go unnoticed',
+            en: 'through the badge next to the balance: the second way in didn’t go unnoticed',
           },
         },
       ],
@@ -339,7 +339,7 @@ const directions: Direction[] = [
           },
           {
             src: 'assets/cases/psb/before/card-02.webp',
-            caption: { ru: 'Открылись «Настройки» карты', en: 'The card’s “Settings” opened' },
+            caption: { ru: 'Открылись «Настройки» карты', en: 'Opened the card’s “Settings”' },
           },
           {
             src: 'assets/cases/psb/before/card-03.webp',
@@ -365,11 +365,11 @@ const directions: Direction[] = [
           },
           {
             src: 'assets/cases/psb/before/card-08.webp',
-            caption: { ru: 'CVV — только по СМС', en: 'CVV — only by text message' },
+            caption: { ru: 'CVV — только по СМС', en: 'CVV — only via text message' },
           },
           {
             src: 'assets/cases/psb/before/card-09.webp',
-            caption: { ru: 'Код не подставился', en: 'The code didn’t fill in' },
+            caption: { ru: 'Код не подставился', en: 'The code didn’t autofill' },
             away: { ru: 'сообщения', en: 'messages' },
           },
           {
@@ -436,7 +436,7 @@ const directions: Direction[] = [
           label: { ru: 'Выход из приложения', en: 'Leaving the app' },
           before: {
             ru: 'В сообщения за кодом: сам он не подставлялся',
-            en: 'To messages for the code: it didn’t fill in on its own',
+            en: 'Off to Messages for the code, which didn’t autofill',
           },
           after: notNeeded,
         },
@@ -470,7 +470,7 @@ const directions: Direction[] = [
     title: { ru: 'Подключение кешбэка', en: 'Activating cashback' },
     lead: {
       ru: 'Кешбэк — самая популярная программа лояльности в российских банках, и подключить его должно быть не сложнее, чем прочитать условия.',
-      en: 'Cashback is the most popular loyalty programme in Russian banks, and activating it should be no harder than reading the terms.',
+      en: 'Cashback is the most popular loyalty program at Russian banks, and activating it should be no harder than reading the terms.',
     },
     // Before: the original flow from the PSB Figma file (section "Пользователь подключает кешбэк");
     // steps and times are the medians from the results
@@ -500,7 +500,7 @@ const directions: Direction[] = [
           },
           {
             src: 'assets/cases/psb/before/cb-06.webp',
-            caption: { ru: 'Не дождался — ошибка', en: 'Didn’t wait — an error' },
+            caption: { ru: 'Не дождался — ошибка', en: 'Gave up waiting — an error' },
           },
           {
             src: 'assets/cases/psb/before/cb-07.webp',
@@ -509,17 +509,17 @@ const directions: Direction[] = [
           },
           {
             src: 'assets/cases/psb/before/cb-08.webp',
-            caption: { ru: 'Ссылка в браузере', en: 'The link in a browser' },
+            caption: { ru: 'Ссылка в браузере', en: 'The link opens in a browser' },
             away: { ru: 'браузер', en: 'browser' },
           },
           {
             src: 'assets/cases/psb/before/cb-09.webp',
-            caption: { ru: 'Согласие не открыть', en: 'The consent won’t open' },
+            caption: { ru: 'Согласие не открыть', en: 'The consent form won’t open' },
           },
           { src: 'assets/cases/psb/before/cb-10.webp', caption: { ru: 'Готово', en: 'Done' } },
           {
             src: 'assets/cases/psb/before/cb-01.webp',
-            caption: { ru: 'А на главной кешбэка нет', en: 'Yet no cashback on the home screen' },
+            caption: { ru: 'А на главной кешбэка нет', en: 'Still no cashback on the home screen' },
           },
         ],
       },
@@ -575,7 +575,7 @@ const directions: Direction[] = [
           },
           after: {
             ru: '«Выгода» в таббаре и бейдж у баланса',
-            en: '“Benefits” in the tab bar and a badge by the balance',
+            en: '“Benefits” in the tab bar and a badge next to the balance',
           },
         },
         {
@@ -599,7 +599,7 @@ const directions: Direction[] = [
           before: { ru: 'Отдельно, после подключения', en: 'Separately, after activation' },
           after: {
             ru: 'Сразу, кнопка считает выбранные',
-            en: 'Right away, the button counts the chosen ones',
+            en: 'Right away, with a counter on the button',
           },
         },
         {
@@ -610,7 +610,7 @@ const directions: Direction[] = [
           },
           after: {
             ru: 'Кешбэк сразу виден у баланса',
-            en: 'Cashback shows by the balance right away',
+            en: 'Cashback shows next to the balance right away',
           },
         },
       ],
@@ -620,7 +620,7 @@ const directions: Direction[] = [
           value: '63%',
           note: {
             ru: 'прошли без ошибок: по пути отвлекались на условия и плитки предложений, это следующий шаг',
-            en: 'finished without errors: along the way people got distracted by the terms and the offer tiles, that’s the next step',
+            en: 'finished without errors: along the way people got distracted by the terms and the offer tiles, which is what to fix next',
           },
         },
       ],
@@ -648,7 +648,7 @@ const directions: Direction[] = [
             src: 'assets/cases/psb/before/cats-02.webp',
             caption: {
               ru: 'Ищет кешбэк, листая главную',
-              en: 'Looking for cashback down the home screen',
+              en: 'Scrolling down the home screen for cashback',
             },
           },
           {
@@ -724,7 +724,7 @@ const directions: Direction[] = [
           label: { ru: 'Напоминание', en: 'Reminder' },
           before: {
             ru: 'Нет, о новом месяце нужно помнить самому',
-            en: 'None, you have to remember the new month yourself',
+            en: 'None — you have to remember the new month yourself',
           },
           after: {
             ru: 'Плашка «Категории на октябрь» с кнопкой «Выбрать»',
@@ -759,7 +759,7 @@ const directions: Direction[] = [
           value: '100%',
           note: {
             ru: 'сразу начали с правильного действия: выбор как при первом подключении',
-            en: 'started with the right action: the same choice as at the first activation',
+            en: 'started with the right action: the same selection screen as on first activation',
           },
         },
         { value: '90%', note: { ru: 'прошли без ошибок', en: 'finished without errors' } },
@@ -1007,14 +1007,14 @@ const home = withBase('/');
             <dl class="facts">
               <div>
                 <dt data-en="Role">Роль</dt>
-                <dd data-en="Product designer, in a pair">Продуктовый дизайнер, в паре</dd>
+                <dd data-en="Product designer, in a team of two">Продуктовый дизайнер, в паре</dd>
               </div>
               <div>
                 <dt data-en="Format">Формат</dt>
                 <dd data-en="Concept, 2026">Концепт, 2026</dd>
               </div>
               <div>
-                <dt data-en="Field">Сфера</dt>
+                <dt data-en="Industry">Сфера</dt>
                 <dd data-en="Banking, B2C, mobile app">Банк, B2C, мобильное приложение</dd>
               </div>
             </dl>
@@ -1049,7 +1049,7 @@ const home = withBase('/');
 
         <!-- ---------- Final screens ---------- -->
         <section id="screens" class="sheet px-clip">
-          <p class="eyebrow" data-en="Final">
+          <p class="eyebrow" data-en="Outcome">
             Итог
           </p>
           <h2 class="h2" data-en="Final screens">
@@ -1057,7 +1057,7 @@ const home = withBase('/');
           </h2>
           <p
             class="lead"
-            data-en="The three working prototypes the usability test ran on. Each opens on its own flow, but inside it’s the whole app. Flip through the fan with a swipe or the arrows."
+            data-en="These are the three working prototypes we ran the usability test on. Each opens on its own flow, but the whole app is inside. Swipe or use the arrows to flip through them."
           >
             Три рабочих прототипа, на которых проходил юзабилити-тест. Каждый открывается со своего
             сценария, но внутри это всё приложение целиком. Листайте веер свайпом или стрелками.
@@ -1269,7 +1269,7 @@ const home = withBase('/');
           <p class="eyebrow" data-en="Review">
             Ревью
           </p>
-          <h2 class="h2" data-en="What the senior said">
+          <h2 class="h2" data-en="What the senior designer said">
             Что сказал сеньор
           </h2>
           <div class="wide">

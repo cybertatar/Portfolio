@@ -11,7 +11,11 @@ import { cases, profile, ui } from '../content/site';
 import { levelOn } from '../scripts/level';
 ---
 
-<BaseLayout title={`${profile.name.ru} — ${profile.role}`} description={profile.bio.ru}>
+<BaseLayout
+  title={`${profile.name.ru} — ${profile.role}`}
+  enTitle={`${profile.name.en} — ${profile.role}`}
+  description={profile.bio.ru}
+>
   <div class="root">
     <aside class="aside px-clip" data-stage="0" data-profile>
       <div class="head">

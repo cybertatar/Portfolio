@@ -36,10 +36,10 @@ export const profile = {
   portrait: 'assets/portrait.jpg' as string | undefined,
   bio: {
     ru: 'Проектирую мобильные приложения и веб-сервисы. Веду задачу от исследования до передачи в разработку.',
-    en: 'I design mobile apps and web services. I take a task from research through to developer handoff.',
+    en: 'I design mobile apps and web services. I take projects from research through to developer handoff.',
   } satisfies Localized,
   /** Availability line under the role; set to undefined to hide it. */
-  status: { ru: 'Открыт к предложениям', en: 'Open to offers' } as Localized | undefined,
+  status: { ru: 'Открыт к предложениям', en: 'Open to opportunities' } as Localized | undefined,
   contacts: [
     {
       label: 'Email',
@@ -99,7 +99,7 @@ export const cases: CaseItem[] = [
     title: 'PSB-Bank Redesign concept',
     description: {
       ru: 'Переосмысление ключевых сценариев в мобильном приложении банка',
-      en: "Rethinking the core flows in a bank's mobile app",
+      en: 'Rethinking the core flows in a bank’s mobile app',
     },
     tags: ['B2C', '2026'],
     status: 'default',
@@ -112,7 +112,7 @@ export const cases: CaseItem[] = [
     title: 'Ozon Bank payment sticker reimagined',
     description: {
       ru: 'Переосмысление платёжного стикера Ozon Банка',
-      en: "Reimagining Ozon Bank's payment sticker",
+      en: 'Reimagining Ozon Bank’s payment sticker',
     },
     tags: ['Suppose', '2026'],
     status: 'soon',
@@ -156,7 +156,7 @@ export const ui = {
     ru: 'В эти края пути нет. Кейс под NDA.',
     en: 'There is no road to these lands. This case is under NDA.',
   },
-  levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now {n} lvl.' },
+  levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now level {n}.' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
 } satisfies Record<string, Localized>;

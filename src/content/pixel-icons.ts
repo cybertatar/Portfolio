@@ -1,6 +1,7 @@
 /**
  * 12×12 pixel icons. Each row is a string; characters map to fills:
- * `#` full colour, `+` mid shade, `-` dim shade, `o` accent, `.` empty.
+ * `#` full colour, `+` mid shade, `-` dim shade, `o` accent, `.` empty;
+ * `R` `A` `P` `B` `G` are the Figma brand colours (figmaColor only).
  */
 export const pixelIcons = {
   mail: [
@@ -100,6 +101,21 @@ export const pixelIcons = {
     '..####......',
     '...##.......',
     '............',
+  ],
+  /** The Figma logo in its brand colours: five shapes, two columns of three. */
+  figmaColor: [
+    '...RRRAAA...',
+    '..RRRRAAAA..',
+    '..RRRRAAAA..',
+    '...RRRAAA...',
+    '...PPP.BB...',
+    '..PPPPBBBB..',
+    '..PPPPBBBB..',
+    '...PPP.BB...',
+    '...GGG......',
+    '..GGGG......',
+    '..GGGG......',
+    '...GG.......',
   ],
   chevron: [
     '............',

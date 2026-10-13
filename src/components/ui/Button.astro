@@ -38,9 +38,11 @@ const { href, full = false, tone = 'inverse', ...rest } = Astro.props;
     background: var(--surface-inverse-hover);
     color: var(--text-inverse);
   }
+  /* Light secondary: a lighter weight, the dark ink already carries it */
   .raised {
     background: var(--surface-raised);
     color: var(--text-primary);
+    font-weight: var(--fw-medium);
   }
   .raised:hover {
     background: var(--surface-active);

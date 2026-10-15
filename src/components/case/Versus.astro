@@ -139,9 +139,9 @@ const { rows, stats } = Astro.props;
     white-space: nowrap;
   }
 
-  /* The result card, built like the quest and HUD cards: title, then the numbers */
+  /* The result card, built like the quest and HUD cards: title, then the numbers; the same
+     4px corner step as the other cards on the sheet */
   .result {
-    --px-step: 3px;
     display: flex;
     flex-direction: column;
     gap: 16px;

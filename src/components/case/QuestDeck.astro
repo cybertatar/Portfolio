@@ -72,7 +72,7 @@ const { quests } = Astro.props;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     /* The site's 24px frame between cards, more than a card's inner padding */
-    gap: 24px;
+    gap: var(--space-tile-gap);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -145,7 +145,7 @@ const { quests } = Astro.props;
   @container (max-width: 560px) {
     .deck {
       display: flex;
-      gap: 8px;
+      gap: var(--space-tile-gap);
       margin: 0 calc(-1 * var(--pad, 16px));
       padding: 0 var(--pad, 16px);
       overflow-x: auto;

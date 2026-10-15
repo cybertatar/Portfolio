@@ -1652,7 +1652,7 @@ const home = withBase('/');
   .trio {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-grid);
+    gap: var(--space-tile-gap);
   }
   .trio {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1711,7 +1711,7 @@ const home = withBase('/');
   .cabinet {
     display: flex;
     flex-direction: column;
-    gap: var(--layout-feed-gap);
+    gap: var(--space-tile-gap);
   }
   .chapter {
     position: relative;
@@ -1929,13 +1929,13 @@ const home = withBase('/');
     color: var(--text-accent);
   }
 
-  .sub-title,
+  .sheet > .sub-title,
   .sheet > .quests,
   .sheet > .results {
     margin-top: var(--space-article);
   }
   .sheet > .sub-title + .trio {
-    margin-top: 20px;
+    margin-top: 16px;
   }
 
   /* ---------- Narrow desktop ---------- */

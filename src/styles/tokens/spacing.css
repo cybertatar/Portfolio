@@ -23,6 +23,8 @@
   --space-split: clamp(32px, 4vw, 80px); /* media | text split */
   --space-zone: clamp(40px, 2.6vw, 56px); /* between sidebar zones */
   --space-tile: clamp(20px, 1.4vw, 30px); /* tile padding */
+  /* Between tiles: the 24px frame, kept ahead of the padding as it grows on wide screens */
+  --space-tile-gap: max(var(--layout-feed-gap), calc(var(--space-tile) + 4px));
   --space-note-y: clamp(18px, 1.2vw, 26px);
   --space-note-x: clamp(20px, 1.4vw, 30px);
   --space-shell: 24px; /* card / panel padding */

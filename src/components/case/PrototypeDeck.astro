@@ -246,7 +246,8 @@ const place = (x: number, y: number, size: number, rot = 0) =>
     position: absolute;
     left: calc(50% + var(--pw) * var(--x) * var(--spread, 1));
     top: calc(var(--pw) * 0.06 + var(--pw) * 1.022 + var(--pw) * var(--y));
-    translate: -50% -50%;
+    /* --nudge: keepHintsInside in deck.ts pulls a hint back onto the stage */
+    translate: calc(-50% + var(--nudge, 0px)) -50%;
     rotate: var(--rot);
     scale: 0.94;
     opacity: 0;
@@ -401,10 +402,11 @@ const place = (x: number, y: number, size: number, rot = 0) =>
 </style>
 
 <script>
-  import { initDeck, initMoods } from '../../scripts/deck';
+  import { initDeck, initMoods, keepHintsInside } from '../../scripts/deck';
 
   document.querySelectorAll<HTMLElement>('[data-deck]').forEach((deck) => {
     initDeck(deck);
     initMoods(deck);
+    keepHintsInside(deck);
   });
 </script>

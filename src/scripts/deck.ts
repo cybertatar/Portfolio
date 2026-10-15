@@ -376,3 +376,27 @@ export function initMoods(root: HTMLElement) {
     setTimeout(tick, wait(1500, 5000));
   }
 }
+
+/**
+ * The hints sit around the front phone by its width, but their own width depends on the text
+ * and the language: on a narrow phone "Кликай прототип" ran past the stage and lost its
+ * stepped corner to the stage's clip. Each hint is nudged back inside, 12px off the edge.
+ */
+export function keepHintsInside(root: HTMLElement) {
+  const stage = root.closest<HTMLElement>('.px-clip') ?? root;
+  const hints = [...root.querySelectorAll<HTMLElement>('.hint')];
+  if (!hints.length) return;
+  const EDGE = 12;
+  const fit = () => {
+    const s = stage.getBoundingClientRect();
+    for (const hint of hints) {
+      hint.style.setProperty('--nudge', '0px');
+      const r = hint.getBoundingClientRect();
+      const dx = Math.max(0, s.left + EDGE - r.left) - Math.max(0, r.right - (s.right - EDGE));
+      hint.style.setProperty('--nudge', `${Math.round(dx)}px`);
+    }
+  };
+  fit();
+  document.fonts?.ready.then(fit);
+  new ResizeObserver(fit).observe(stage);
+}

@@ -1115,12 +1115,14 @@ const home = withBase('/');
                         <TestingScene />
                       ) : (
                         <div class="slot">
-                          <LoopVideo
-                            src="assets/cases/psb/walkthrough.mp4"
-                            poster="assets/cases/psb/walkthrough-poster.webp"
-                            label="Прохождение прототипа на телефоне"
-                            enLabel="Going through the prototype on a phone"
-                          />
+                          <div class="clip px-clip">
+                            <LoopVideo
+                              src="assets/cases/psb/walkthrough.mp4"
+                              poster="assets/cases/psb/walkthrough-poster.webp"
+                              label="Прохождение прототипа на телефоне"
+                              enLabel="Going through the prototype on a phone"
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1652,7 +1654,7 @@ const home = withBase('/');
   .trio {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-grid);
+    gap: var(--space-tile-gap);
   }
   .trio {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1664,8 +1666,8 @@ const home = withBase('/');
     padding: var(--space-tile);
     background: var(--surface-raised);
   }
+  /* The 4px step of the 44px icon buttons, the same size */
   .tile-icon {
-    --px-step: 3px;
     display: grid;
     place-items: center;
     flex: none;
@@ -1711,7 +1713,7 @@ const home = withBase('/');
   .cabinet {
     display: flex;
     flex-direction: column;
-    gap: var(--layout-feed-gap);
+    gap: var(--space-tile-gap);
   }
   .chapter {
     position: relative;
@@ -1780,6 +1782,16 @@ const home = withBase('/');
     transform-origin: 50% 0;
   }
 
+  /* The prototype video is a dark photo, unlike the light scenes: bled to the card's edge it
+     read as a heavy slab, so it sits inside the card's padding as a framed shot (the copy's
+     own padding already sets it apart on the left). Inset within the scenes' 4:3 box, so the
+     card stays as tall as the others in the deck */
+  .clip {
+    position: absolute;
+    inset: var(--space-tile) var(--space-tile) var(--space-tile) 0;
+    overflow: hidden;
+  }
+
   @container (max-width: 640px) {
     .chapter-panel {
       grid-template-columns: minmax(0, 1fr);
@@ -1787,6 +1799,9 @@ const home = withBase('/');
     }
     .chapter-copy {
       justify-content: flex-start;
+    }
+    .clip {
+      inset: 0 var(--space-tile) var(--space-tile);
     }
   }
 
@@ -1929,13 +1944,13 @@ const home = withBase('/');
     color: var(--text-accent);
   }
 
-  .sub-title,
+  .sheet > .sub-title,
   .sheet > .quests,
   .sheet > .results {
     margin-top: var(--space-article);
   }
   .sheet > .sub-title + .trio {
-    margin-top: 20px;
+    margin-top: 16px;
   }
 
   /* ---------- Narrow desktop ---------- */

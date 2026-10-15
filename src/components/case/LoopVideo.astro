@@ -1,0 +1,45 @@
+---
+import { withBase } from '../../scripts/url';
+
+interface Props {
+  src: string;
+  poster: string;
+  label: string;
+  enLabel?: string;
+}
+
+/** A muted clip that loops like the pixel scenes: only on screen and, in the process deck,
+    on the front card; with reduced motion it stays on the poster. Fills a positioned parent. */
+const { src, poster, label, enLabel } = Astro.props;
+---
+
+<video
+  class="loop-video"
+  src={withBase(src)}
+  poster={withBase(poster)}
+  muted
+  loop
+  playsinline
+  preload="none"
+  disablepictureinpicture
+  aria-label={label}
+  data-en-label={enLabel}
+  data-loop-video
+></video>
+
+<style>
+  .loop-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+</style>
+
+<script>
+  import { playWhileShown } from '../../scripts/scenes';
+
+  document.querySelectorAll<HTMLVideoElement>('[data-loop-video]').forEach(playWhileShown);
+</script>

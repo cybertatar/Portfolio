@@ -68,3 +68,25 @@ export function typeOut(el: HTMLElement | null, perChar = 32) {
   });
   (el as HTMLElement & { _t?: ReturnType<typeof setTimeout>[] })._t = next;
 }
+
+/** A muted looping video on the same terms as runScene: it plays only while on screen and,
+ * inside the process deck, on the front card; with reduced motion it stays on its poster. */
+export function playWhileShown(video: HTMLVideoElement) {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const card = video.closest<HTMLElement>('[data-chapter]');
+  let visible = false;
+  const sync = () => {
+    const on = visible && card?.dataset.front !== 'false';
+    if (on === !video.paused) return;
+    if (on) video.play().catch(() => {});
+    else video.pause();
+  };
+  card?.addEventListener('chapter:front', sync);
+  new IntersectionObserver(
+    ([entry]) => {
+      visible = entry.isIntersecting;
+      sync();
+    },
+    { threshold: 0.3 },
+  ).observe(video);
+}

@@ -1115,12 +1115,14 @@ const home = withBase('/');
                         <TestingScene />
                       ) : (
                         <div class="slot">
-                          <LoopVideo
-                            src="assets/cases/psb/walkthrough.mp4"
-                            poster="assets/cases/psb/walkthrough-poster.webp"
-                            label="Прохождение прототипа на телефоне"
-                            enLabel="Going through the prototype on a phone"
-                          />
+                          <div class="clip px-clip">
+                            <LoopVideo
+                              src="assets/cases/psb/walkthrough.mp4"
+                              poster="assets/cases/psb/walkthrough-poster.webp"
+                              label="Прохождение прототипа на телефоне"
+                              enLabel="Going through the prototype on a phone"
+                            />
+                          </div>
                         </div>
                       )}
                     </div>
@@ -1780,6 +1782,16 @@ const home = withBase('/');
     transform-origin: 50% 0;
   }
 
+  /* The prototype video is a dark photo, unlike the light scenes: bled to the card's edge it
+     read as a heavy slab, so it sits inside the card's padding as a framed shot (the copy's
+     own padding already sets it apart on the left). Inset within the scenes' 4:3 box, so the
+     card stays as tall as the others in the deck */
+  .clip {
+    position: absolute;
+    inset: var(--space-tile) var(--space-tile) var(--space-tile) 0;
+    overflow: hidden;
+  }
+
   @container (max-width: 640px) {
     .chapter-panel {
       grid-template-columns: minmax(0, 1fr);
@@ -1787,6 +1799,9 @@ const home = withBase('/');
     }
     .chapter-copy {
       justify-content: flex-start;
+    }
+    .clip {
+      inset: 0 var(--space-tile) var(--space-tile);
     }
   }
 

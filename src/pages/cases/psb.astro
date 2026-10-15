@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Footer from '../../components/Footer.astro';
 import CaseVideo from '../../components/case/CaseVideo.astro';
+import LoopVideo from '../../components/case/LoopVideo.astro';
 import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
@@ -13,7 +14,6 @@ import TeamScene from '../../components/case/scenes/TeamScene.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
 import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
-import Media from '../../components/ui/Media.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
 import { type Localized } from '../../content/site';
 import { withBase } from '../../scripts/url';
@@ -1114,8 +1114,13 @@ const home = withBase('/');
                       ) : s.id === 'testing' ? (
                         <TestingScene />
                       ) : (
-                        <div class="slot px-clip">
-                          <Media label={{ ru: 'Видео прототипа', en: 'Prototype video' }} />
+                        <div class="slot">
+                          <LoopVideo
+                            src="assets/cases/psb/walkthrough.mp4"
+                            poster="assets/cases/psb/walkthrough-poster.webp"
+                            label="Прохождение прототипа на телефоне"
+                            enLabel="Going through the prototype on a phone"
+                          />
                         </div>
                       )}
                     </div>

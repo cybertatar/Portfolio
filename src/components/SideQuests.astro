@@ -1,0 +1,232 @@
+---
+import { en, ru, sideQuests, ui } from '../content/site';
+import Button from './ui/Button.astro';
+import IconButton from './ui/IconButton.astro';
+import PixelIcon from './ui/PixelIcon.astro';
+import { withBase } from '../scripts/url';
+
+/**
+ * Small side projects above the cases, like pinned repos on GitHub. No heading: their small
+ * size keeps the cases the main line. The row simply scrolls away; the sticky case stack
+ * below starts as before. As many whole cards as fit; when there are more, the next one
+ * peeks in faded under an arrow (initSideQuests in home.ts).
+ */
+---
+
+<section class="side" aria-label={ui.sideQuests.ru} data-en-label={ui.sideQuests.en} data-side>
+  <ul class="row" data-side-row>
+    {sideQuests.map((q) => {
+      const name = { ru: ru(q.title), en: en(q.title) ?? ru(q.title) };
+      const label = (what: { ru: string; en: string }) => ({
+        label: `${what.ru}: ${name.ru}`,
+        'data-en-label': `${what.en}: ${name.en}`,
+        'data-en-title': `${what.en}: ${name.en}`,
+      });
+      return (
+        <li class="quest px-clip">
+          <div class="head">
+            <img class="icon" src={withBase(q.icon)} alt="" width="48" height="48" loading="lazy" />
+            <div class="text">
+              <h2 class="title" data-en={en(q.title)}>
+                {name.ru}
+              </h2>
+              <p class="description" data-en={q.description.en}>
+                {q.description.ru}
+              </p>
+            </div>
+          </div>
+          <div class="links">
+            {/* The project itself comes first, when there is one to open */}
+            {q.app && (
+              <Button
+                href={q.app}
+                tone="raised"
+                target="_blank"
+                rel="noopener"
+                aria-label={`${ui.bot.ru}: ${name.ru}`}
+                data-en-label={`${ui.bot.en}: ${name.en}`}
+              >
+                <PixelIcon name="telegram" />
+                <span data-en={ui.bot.en}>{ui.bot.ru}</span>
+              </Button>
+            )}
+            <IconButton href={q.github} target="_blank" rel="noopener" {...label(ui.repo)}>
+              <PixelIcon name="github" />
+            </IconButton>
+            <IconButton href={q.instagram} target="_blank" rel="noopener" {...label(ui.post)}>
+              <PixelIcon name="instagram" />
+            </IconButton>
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+  <button
+    type="button"
+    class="nav prev px-clip"
+    aria-label={ui.prev.ru}
+    data-en-label={ui.prev.en}
+    data-side-prev
+    hidden
+  >
+    <PixelIcon name="arrow" />
+  </button>
+  <button
+    type="button"
+    class="nav next px-clip"
+    aria-label={ui.next.ru}
+    data-en-label={ui.next.en}
+    data-side-next
+    hidden
+  >
+    <PixelIcon name="arrow" />
+  </button>
+</section>
+
+<style>
+  .side {
+    /* Width of the faded edge where the next card peeks in */
+    --peek: 32px;
+    --gap: var(--layout-feed-gap);
+    position: relative;
+    margin-bottom: var(--layout-feed-gap);
+  }
+  .row {
+    display: flex;
+    gap: var(--gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .row::-webkit-scrollbar {
+    display: none;
+  }
+  /* More cards on a side: they fade out under the arrow instead of being cut */
+  .side[data-more-left] .row,
+  .side[data-more-right] .row {
+    --fade-l: 0px;
+    --fade-r: 0px;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--fade-l),
+      #000 calc(100% - var(--fade-r)),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--fade-l),
+      #000 calc(100% - var(--fade-r)),
+      transparent
+    );
+  }
+  .side[data-more-left] .row {
+    --fade-l: calc(var(--peek) + var(--gap));
+  }
+  .side[data-more-right] .row {
+    --fade-r: calc(var(--peek) + var(--gap));
+  }
+  .quest {
+    /* Set by the script so that whole cards fill the row; 300px without it */
+    flex: 0 0 var(--card-w, 300px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    background: var(--surface-card);
+    scroll-snap-align: start;
+  }
+  .head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-width: 0;
+  }
+  .icon {
+    display: block;
+    flex: none;
+    width: 48px;
+    height: 48px;
+  }
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .title {
+    margin: 0;
+    font-size: var(--t-button);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+  .description {
+    margin: 0;
+    font-size: var(--t-caption);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .links {
+    display: flex;
+    gap: 8px;
+  }
+  /* Lighter than the CV button: an extra link here, not the page's main action */
+  .links > :global(.button) {
+    padding: 0 16px;
+  }
+
+  /* Arrows sit on the faded edges, over the peeking card */
+  .nav {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-h);
+    height: var(--control-h);
+    padding: 0;
+    border: 0;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .nav:hover {
+    background: var(--surface-active);
+  }
+  .nav[hidden] {
+    display: none;
+  }
+  .prev {
+    left: 0;
+  }
+  .prev :global(svg) {
+    transform: scaleX(-1);
+  }
+  .next {
+    right: 0;
+  }
+  /* Fingers swipe; the arrows are for the mouse */
+  @media (pointer: coarse) {
+    .nav {
+      display: none;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .side {
+      --peek: 24px;
+      --gap: 16px;
+      margin-bottom: 16px;
+    }
+  }
+</style>

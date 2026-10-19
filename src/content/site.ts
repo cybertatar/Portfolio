@@ -145,6 +145,56 @@ export const cases: CaseItem[] = [
   },
 ];
 
+/** Small side projects: a repo and an Instagram post each, shown above the cases. */
+export interface SideQuest {
+  id: string;
+  title: Text;
+  description: Localized;
+  /** Square app icon in /public. */
+  icon: string;
+  /** Where the project itself runs (a Telegram bot), if anywhere: the main button. */
+  app?: string;
+  github: string;
+  instagram: string;
+}
+
+export const sideQuests: SideQuest[] = [
+  {
+    id: 'ux-trainer',
+    title: { ru: 'UX-тренажёр', en: 'UX Trainer' },
+    description: {
+      ru: 'Тесты по UX и UI в Telegram, для дизайн-сообщества',
+      en: 'UX and UI quizzes in Telegram, for the design community',
+    },
+    icon: 'assets/side/kegl.webp',
+    app: 'https://t.me/uxuitrainer_bot',
+    github: 'https://github.com/cybertatar/uxuieducationminiapp',
+    instagram: 'https://www.instagram.com/p/DesDduPEYEN/',
+  },
+  {
+    id: 'sunboy-shaman',
+    title: { ru: 'Санбой Шаман', en: 'Sunboy Shaman' },
+    description: {
+      ru: 'Приложение для Mac: пишешь как Пророк Санбой',
+      en: 'A Mac app: type like Prophet Sunboy',
+    },
+    icon: 'assets/side/shaman.webp',
+    github: 'https://github.com/cybertatar/sunnyshamanlang',
+    instagram: 'https://www.instagram.com/p/Depdy6fkVX7/',
+  },
+  {
+    id: 'dobro',
+    title: { ru: '=Добро и позитив=', en: '=Kindness and Positivity=' },
+    description: {
+      ru: 'Приложение для Mac: =добро и позитив= в каждом сообщении',
+      en: 'A Mac app: =kindness and positivity= in every message',
+    },
+    icon: 'assets/side/dobro.webp',
+    github: 'https://github.com/cybertatar/DOBROANDPOZITIV',
+    instagram: 'https://www.instagram.com/p/DepKV4VDKQ9/',
+  },
+];
+
 export const ui = {
   class: { ru: 'Класс', en: 'Class' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },
@@ -159,4 +209,10 @@ export const ui = {
   levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now level {n}.' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
+  bot: { ru: 'Бот', en: 'Bot' },
+  prev: { ru: 'Назад', en: 'Previous' },
+  next: { ru: 'Дальше', en: 'Next' },
+  sideQuests: { ru: 'Побочные квесты', en: 'Side quests' },
+  repo: { ru: 'Код на GitHub', en: 'Code on GitHub' },
+  post: { ru: 'Пост в Instagram', en: 'Post on Instagram' },
 } satisfies Record<string, Localized>;

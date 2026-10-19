@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import SideQuests from '../components/SideQuests.astro';
 import Button from '../components/ui/Button.astro';
 import ContactRow from '../components/ui/ContactRow.astro';
 import Footer from '../components/Footer.astro';
@@ -76,6 +77,8 @@ import { levelOn } from '../scripts/level';
 
     <main class="feed" data-feed>
       <div class="inner">
+        <SideQuests />
+
         <div class="list">
           {cases.map((item) => (
             <article class="slot" data-slot>
@@ -92,7 +95,13 @@ import { levelOn } from '../scripts/level';
 
 <script>
   import { profile, ui } from '../content/site';
-  import { initCardStack, initLevel, initLocked, initProfileFit } from '../scripts/home';
+  import {
+    initCardStack,
+    initLevel,
+    initLocked,
+    initProfileFit,
+    initSideQuests,
+  } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
@@ -100,6 +109,8 @@ import { levelOn } from '../scripts/level';
   const level = document.querySelector<HTMLElement>('[data-level]');
   if (level) initLevel(level, profile.birthday, ui.levelUp);
   initLocked([...document.querySelectorAll<HTMLElement>('[data-locked]')]);
+  const side = document.querySelector<HTMLElement>('[data-side]');
+  if (side) initSideQuests(side);
   if (feed) {
     initCardStack(
       feed,

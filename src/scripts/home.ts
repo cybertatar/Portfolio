@@ -128,8 +128,8 @@ export function initLocked(cards: HTMLElement[]) {
   });
 }
 
-/** Narrowest side-quest card that keeps the icon, text and three buttons side by side. */
-const SIDE_CARD_MIN = 260;
+/** Narrowest side-quest card: narrower ones turn squarish (owner), wider ones stay a strip. */
+const SIDE_CARD_MIN = 360;
 
 /**
  * Side quests: as many whole cards as fit the row. When there are more, the cards narrow a

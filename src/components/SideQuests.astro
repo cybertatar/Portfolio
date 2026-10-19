@@ -53,9 +53,11 @@ import { withBase } from '../scripts/url';
             <IconButton href={q.github} target="_blank" rel="noopener" {...label(ui.repo)}>
               <PixelIcon name="github" />
             </IconButton>
-            <IconButton href={q.instagram} target="_blank" rel="noopener" {...label(ui.post)}>
-              <PixelIcon name="instagram" />
-            </IconButton>
+            {q.instagram && (
+              <IconButton href={q.instagram} target="_blank" rel="noopener" {...label(ui.post)}>
+                <PixelIcon name="instagram" />
+              </IconButton>
+            )}
           </div>
         </li>
       );

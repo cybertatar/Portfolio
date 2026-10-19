@@ -155,7 +155,8 @@ export interface SideQuest {
   /** Where the project itself runs (a Telegram bot), if anywhere: the main button. */
   app?: string;
   github: string;
-  instagram: string;
+  /** Post with the carousel about it, if there is one. */
+  instagram?: string;
 }
 
 export const sideQuests: SideQuest[] = [
@@ -192,6 +193,16 @@ export const sideQuests: SideQuest[] = [
     icon: 'assets/side/dobro.webp',
     github: 'https://github.com/cybertatar/DOBROANDPOZITIV',
     instagram: 'https://www.instagram.com/p/DepKV4VDKQ9/',
+  },
+  {
+    id: 'ytm-timecodes',
+    title: { ru: 'Таймкоды для YouTube Music', en: 'YouTube Music Timecodes' },
+    description: {
+      ru: 'Расширение для браузера: треклист прямо в плеере',
+      en: 'A browser extension: the tracklist right in the player',
+    },
+    icon: 'assets/side/ytm.webp',
+    github: 'https://github.com/cybertatar/YouTubeMusicTimecodePlugin',
   },
 ];
 

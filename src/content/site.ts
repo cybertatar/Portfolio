@@ -173,6 +173,16 @@ export const sideQuests: SideQuest[] = [
     instagram: 'https://www.instagram.com/p/DesDduPEYEN/',
   },
   {
+    id: 'ytm-timecodes',
+    title: { ru: 'Таймкоды для YouTube Music', en: 'YouTube Music Timecodes' },
+    description: {
+      ru: 'Расширение для браузера: треклист прямо в плеере',
+      en: 'A browser extension: the tracklist right in the player',
+    },
+    icon: 'assets/side/ytm.webp',
+    github: 'https://github.com/cybertatar/YouTubeMusicTimecodePlugin',
+  },
+  {
     id: 'sunboy-shaman',
     title: { ru: 'Санбой Шаман', en: 'Sunboy Shaman' },
     description: {
@@ -193,16 +203,6 @@ export const sideQuests: SideQuest[] = [
     icon: 'assets/side/dobro.webp',
     github: 'https://github.com/cybertatar/DOBROANDPOZITIV',
     instagram: 'https://www.instagram.com/p/DepKV4VDKQ9/',
-  },
-  {
-    id: 'ytm-timecodes',
-    title: { ru: 'Таймкоды для YouTube Music', en: 'YouTube Music Timecodes' },
-    description: {
-      ru: 'Расширение для браузера: треклист прямо в плеере',
-      en: 'A browser extension: the tracklist right in the player',
-    },
-    icon: 'assets/side/ytm.webp',
-    github: 'https://github.com/cybertatar/YouTubeMusicTimecodePlugin',
   },
 ];
 

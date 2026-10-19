@@ -107,34 +107,35 @@ import { withBase } from '../scripts/url';
   .row::-webkit-scrollbar {
     display: none;
   }
-  /* More cards on a side: they fade out under the arrow instead of being cut */
+  /* More cards on a side: they fade out under the arrow instead of being cut. The fade spans
+     what the whole cards leave of the row (--fade-l / --fade-r from initSideQuests). */
   .side[data-more-left] .row,
   .side[data-more-right] .row {
-    --fade-l: 0px;
-    --fade-r: 0px;
+    --l: 0px;
+    --r: 0px;
     -webkit-mask-image: linear-gradient(
       to right,
       transparent,
-      #000 var(--fade-l),
-      #000 calc(100% - var(--fade-r)),
+      #000 var(--l),
+      #000 calc(100% - var(--r)),
       transparent
     );
     mask-image: linear-gradient(
       to right,
       transparent,
-      #000 var(--fade-l),
-      #000 calc(100% - var(--fade-r)),
+      #000 var(--l),
+      #000 calc(100% - var(--r)),
       transparent
     );
   }
   .side[data-more-left] .row {
-    --fade-l: calc(var(--peek) + var(--gap));
+    --l: var(--fade-l, calc(var(--peek) + var(--gap)));
   }
   .side[data-more-right] .row {
-    --fade-r: calc(var(--peek) + var(--gap));
+    --r: var(--fade-r, calc(var(--peek) + var(--gap)));
   }
   .quest {
-    /* Set by the script so that whole cards fill the row; 300px without it */
+    /* Set by the script: whole cards, 300–380px; 300px without it */
     flex: 0 0 var(--card-w, 300px);
     display: flex;
     flex-direction: column;

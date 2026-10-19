@@ -127,3 +127,68 @@ export function initLocked(cards: HTMLElement[]) {
     });
   });
 }
+
+/** Narrowest side-quest card that keeps the icon, text and three buttons side by side. */
+const SIDE_CARD_MIN = 260;
+
+/**
+ * Side quests: as many whole cards as fit the row. When there are more, the cards narrow a
+ * little so the neighbours peek in by --peek past the gap, faded under the arrows; the arrows
+ * and a swipe move one card at a time and always stop on whole cards.
+ */
+export function initSideQuests(side: HTMLElement) {
+  const row = side.querySelector<HTMLElement>('[data-side-row]');
+  const prev = side.querySelector<HTMLButtonElement>('[data-side-prev]');
+  const next = side.querySelector<HTMLButtonElement>('[data-side-next]');
+  if (!row || !prev || !next) return;
+  const cards = [...row.children] as HTMLElement[];
+  let step = 0;
+  let pad = 0;
+
+  const edges = () => {
+    const max = row.scrollWidth - row.clientWidth;
+    const left = row.scrollLeft > 2;
+    const right = row.scrollLeft < max - 2;
+    side.toggleAttribute('data-more-left', left);
+    side.toggleAttribute('data-more-right', right);
+    prev.hidden = !left;
+    next.hidden = !right;
+  };
+
+  const layout = () => {
+    const w = row.clientWidth;
+    const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
+    const peek = parseFloat(getComputedStyle(side).getPropertyValue('--peek')) || 0;
+    const fit = (room: number) => Math.max(1, Math.floor((room + gap) / (SIDE_CARD_MIN + gap)));
+    let n = fit(w);
+    let room = w;
+    pad = 0;
+    if (cards.length > n) {
+      // Between two peeks: whole cards in the middle, a neighbour faded on each side
+      pad = gap + peek;
+      room = w - 2 * pad;
+      n = fit(room);
+    } else {
+      n = cards.length;
+    }
+    const cardW = Math.floor((room - gap * (n - 1)) / n);
+    side.style.setProperty('--card-w', `${cardW}px`);
+    row.style.scrollPaddingInline = `${pad}px`;
+    step = cardW + gap;
+    edges();
+  };
+
+  const go = (dir: 1 | -1) => {
+    const max = row.scrollWidth - row.clientWidth;
+    const at = Math.round((row.scrollLeft + (row.scrollLeft > 2 ? pad : 0)) / step);
+    const to = Math.min(cards.length - 1, Math.max(0, at + dir));
+    const left = Math.min(max, Math.max(0, to * step - (to > 0 ? pad : 0)));
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    row.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
+  };
+  prev.addEventListener('click', () => go(-1));
+  next.addEventListener('click', () => go(1));
+  row.addEventListener('scroll', edges, { passive: true });
+  new ResizeObserver(layout).observe(row);
+  layout();
+}

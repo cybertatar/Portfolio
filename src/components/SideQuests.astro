@@ -8,12 +8,13 @@ import { withBase } from '../scripts/url';
 /**
  * Small side projects above the cases, like pinned repos on GitHub. No heading: their small
  * size keeps the cases the main line. The row simply scrolls away; the sticky case stack
- * below starts as before.
+ * below starts as before. As many whole cards as fit; when there are more, the next one
+ * peeks in faded under an arrow (initSideQuests in home.ts).
  */
 ---
 
-<section class="side" aria-label={ui.sideQuests.ru} data-en-label={ui.sideQuests.en}>
-  <ul class="row">
+<section class="side" aria-label={ui.sideQuests.ru} data-en-label={ui.sideQuests.en} data-side>
+  <ul class="row" data-side-row>
     {sideQuests.map((q) => {
       const name = { ru: ru(q.title), en: en(q.title) ?? ru(q.title) };
       const label = (what: { ru: string; en: string }) => ({
@@ -60,28 +61,86 @@ import { withBase } from '../scripts/url';
       );
     })}
   </ul>
+  <button
+    type="button"
+    class="nav prev px-clip"
+    aria-label={ui.prev.ru}
+    data-en-label={ui.prev.en}
+    data-side-prev
+    hidden
+  >
+    <PixelIcon name="arrow" />
+  </button>
+  <button
+    type="button"
+    class="nav next px-clip"
+    aria-label={ui.next.ru}
+    data-en-label={ui.next.en}
+    data-side-next
+    hidden
+  >
+    <PixelIcon name="arrow" />
+  </button>
 </section>
 
 <style>
   .side {
+    /* Width of the faded edge where the next card peeks in */
+    --peek: 32px;
+    --gap: var(--layout-feed-gap);
+    position: relative;
     margin-bottom: var(--layout-feed-gap);
   }
   .row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--layout-feed-gap);
+    display: flex;
+    gap: var(--gap);
     margin: 0;
     padding: 0;
     list-style: none;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .row::-webkit-scrollbar {
+    display: none;
+  }
+  /* More cards on a side: they fade out under the arrow instead of being cut */
+  .side[data-more-left] .row,
+  .side[data-more-right] .row {
+    --fade-l: 0px;
+    --fade-r: 0px;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--fade-l),
+      #000 calc(100% - var(--fade-r)),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--fade-l),
+      #000 calc(100% - var(--fade-r)),
+      transparent
+    );
+  }
+  .side[data-more-left] .row {
+    --fade-l: calc(var(--peek) + var(--gap));
+  }
+  .side[data-more-right] .row {
+    --fade-r: calc(var(--peek) + var(--gap));
   }
   .quest {
+    /* Set by the script so that whole cards fill the row; 300px without it */
+    flex: 0 0 var(--card-w, 300px);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     gap: 12px;
     padding: 16px;
     background: var(--surface-card);
-    container: quest / inline-size;
+    scroll-snap-align: start;
   }
   .head {
     display: flex;
@@ -124,42 +183,50 @@ import { withBase } from '../scripts/url';
     padding: 0 16px;
   }
 
-  /* Narrow column (a desktop just above the phone layout): the icon goes above the text */
-  @container quest (max-width: 220px) {
-    .head {
-      flex-direction: column;
-    }
-    /* Three buttons don't fit in a row: the bot gets its own */
-    .links {
-      flex-wrap: wrap;
-    }
-    .links > :global(.button) {
-      flex: 1 1 100%;
+  /* Arrows sit on the faded edges, over the peeking card */
+  .nav {
+    position: absolute;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-h);
+    height: var(--control-h);
+    padding: 0;
+    border: 0;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .nav:hover {
+    background: var(--surface-active);
+  }
+  .nav[hidden] {
+    display: none;
+  }
+  .prev {
+    left: 0;
+  }
+  .prev :global(svg) {
+    transform: scaleX(-1);
+  }
+  .next {
+    right: 0;
+  }
+  /* Fingers swipe; the arrows are for the mouse */
+  @media (pointer: coarse) {
+    .nav {
+      display: none;
     }
   }
 
-  /* Phone: one swipeable row to the screen edges, the next card peeks in */
   @media (max-width: 960px) {
     .side {
+      --peek: 24px;
+      --gap: 16px;
       margin-bottom: 16px;
-    }
-    .row {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      gap: 16px;
-      /* Swipe to the screen edge, cards still line up with the 16px frame */
-      margin: 0 -16px;
-      padding: 0 16px;
-      scroll-padding: 0 16px;
-    }
-    .row::-webkit-scrollbar {
-      display: none;
-    }
-    .quest {
-      flex: 0 0 min(82%, 300px);
-      scroll-snap-align: start;
     }
   }
 </style>

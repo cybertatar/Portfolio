@@ -210,6 +210,8 @@ export const ui = {
   portrait: { ru: 'Портрет', en: 'Portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
   bot: { ru: 'Бот', en: 'Bot' },
+  prev: { ru: 'Назад', en: 'Previous' },
+  next: { ru: 'Дальше', en: 'Next' },
   sideQuests: { ru: 'Побочные квесты', en: 'Side quests' },
   repo: { ru: 'Код на GitHub', en: 'Code on GitHub' },
   post: { ru: 'Пост в Instagram', en: 'Post on Instagram' },

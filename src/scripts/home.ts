@@ -156,6 +156,14 @@ export function initSideQuests(side: HTMLElement) {
   };
 
   const layout = () => {
+    if (matchMedia(MOBILE).matches) {
+      // Phone: CSS sizes the cards, the row runs to the screen edges
+      side.style.removeProperty('--card-w');
+      row.style.removeProperty('scroll-padding-inline');
+      step = (cards[0]?.offsetWidth ?? 0) + (parseFloat(getComputedStyle(row).columnGap) || 0);
+      edges();
+      return;
+    }
     const w = row.clientWidth;
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
     const peek = parseFloat(getComputedStyle(side).getPropertyValue('--peek')) || 0;

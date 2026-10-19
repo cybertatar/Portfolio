@@ -1791,6 +1791,12 @@ const home = withBase('/');
     inset: var(--space-tile) var(--space-tile) var(--space-tile) 0;
     overflow: hidden;
   }
+  /* Safari drops a playing video to an empty box when it sits under clip-path ancestors that
+     are not layers of their own while the card's transform changes: both clips get a layer */
+  .chapter-panel:has(.clip),
+  .clip {
+    transform: translateZ(0);
+  }
 
   @container (max-width: 640px) {
     .chapter-panel {

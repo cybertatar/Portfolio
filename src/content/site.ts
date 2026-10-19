@@ -174,7 +174,7 @@ export const sideQuests: SideQuest[] = [
   },
   {
     id: 'ytm-timecodes',
-    title: { ru: 'Таймкоды для YouTube Music', en: 'YouTube Music Timecodes' },
+    title: { ru: 'Таймкоды YT Music', en: 'YT Music Timecodes' },
     description: {
       ru: 'Расширение для браузера: треклист прямо в плеере',
       en: 'A browser extension: the tracklist right in the player',

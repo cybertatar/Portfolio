@@ -1,0 +1,184 @@
+---
+import { en, ru, sideQuests, ui } from '../content/site';
+import IconButton from './ui/IconButton.astro';
+import PixelIcon from './ui/PixelIcon.astro';
+import { withBase } from '../scripts/url';
+
+/**
+ * Small side projects above the cases, like pinned repos on GitHub. No heading: the quest
+ * marker on each card and the small size say "side quest", the cases stay the main line.
+ * The row simply scrolls away; the sticky case stack below starts as before.
+ */
+---
+
+<section class="side" aria-label={ui.sideQuests.ru} data-en-label={ui.sideQuests.en}>
+  <ul class="row">
+    {sideQuests.map((q) => (
+      <li class="quest px-clip">
+        <div class="head">
+          <span class="icon">
+            <img src={withBase(q.icon)} alt="" width="64" height="64" loading="lazy" />
+            <span
+              class="marker"
+              title={ui.sideQuest.ru}
+              data-en-title={ui.sideQuest.en}
+              aria-label={ui.sideQuest.ru}
+              data-en-label={ui.sideQuest.en}
+              role="img"
+            >
+              <PixelIcon name="quest" size={36} />
+            </span>
+          </span>
+          <span class="name">
+            <h2 class="title" data-en={en(q.title)}>
+              {ru(q.title)}
+            </h2>
+            <span class="platform">{q.platform}</span>
+          </span>
+        </div>
+        <p class="description" data-en={q.description.en}>
+          {q.description.ru}
+        </p>
+        <div class="links">
+          <IconButton
+            href={q.github}
+            label={`${ui.repo.ru}: ${ru(q.title)}`}
+            data-en-label={`${ui.repo.en}: ${en(q.title) ?? ru(q.title)}`}
+            data-en-title={`${ui.repo.en}: ${en(q.title) ?? ru(q.title)}`}
+            target="_blank"
+            rel="noopener"
+          >
+            <PixelIcon name="github" />
+          </IconButton>
+          <IconButton
+            href={q.instagram}
+            label={`${ui.post.ru}: ${ru(q.title)}`}
+            data-en-label={`${ui.post.en}: ${en(q.title) ?? ru(q.title)}`}
+            data-en-title={`${ui.post.en}: ${en(q.title) ?? ru(q.title)}`}
+            target="_blank"
+            rel="noopener"
+          >
+            <PixelIcon name="instagram" />
+          </IconButton>
+        </div>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+  .side {
+    margin-bottom: var(--layout-feed-gap);
+  }
+  .row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--layout-feed-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .quest {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background: var(--surface-card);
+  }
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+  .icon {
+    position: relative;
+    flex: none;
+    width: 64px;
+    height: 64px;
+  }
+  .icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  /* Quest marker over the icon, like the "!" over a quest giver in an MMO */
+  .marker {
+    position: absolute;
+    top: -16px;
+    right: -20px;
+    display: block;
+    color: var(--accent);
+    filter: drop-shadow(2px 0 0 var(--surface-card)) drop-shadow(-2px 0 0 var(--surface-card))
+      drop-shadow(0 2px 0 var(--surface-card)) drop-shadow(0 -2px 0 var(--surface-card));
+  }
+  .marker :global(svg) {
+    display: block;
+  }
+  .name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .title {
+    margin: 0;
+    font-size: var(--t-lead);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+  .platform {
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    line-height: var(--lh-snug);
+    color: var(--text-tertiary);
+  }
+  .description {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: var(--t-body-sm);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .links {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Narrow feed: one swipeable row, the next card peeks in */
+  @media (max-width: 1200px) {
+    .row {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .row::-webkit-scrollbar {
+      display: none;
+    }
+    .quest {
+      flex: 0 0 min(82%, max(260px, 44%));
+      scroll-snap-align: start;
+    }
+  }
+  @media (max-width: 960px) {
+    .side {
+      margin-bottom: 16px;
+    }
+    .row {
+      gap: 16px;
+      /* Swipe to the screen edge, cards still line up with the 16px frame */
+      margin: 0 -16px;
+      padding: 0 16px;
+      scroll-padding: 0 16px;
+    }
+    .quest {
+      gap: 12px;
+      padding: 16px;
+    }
+  }
+</style>

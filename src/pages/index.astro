@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import SideQuests from '../components/SideQuests.astro';
 import Button from '../components/ui/Button.astro';
 import ContactRow from '../components/ui/ContactRow.astro';
 import Footer from '../components/Footer.astro';
@@ -76,6 +77,8 @@ import { levelOn } from '../scripts/level';
 
     <main class="feed" data-feed>
       <div class="inner">
+        <SideQuests />
+
         <div class="list">
           {cases.map((item) => (
             <article class="slot" data-slot>

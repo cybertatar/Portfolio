@@ -39,6 +39,7 @@ import { withBase } from '../scripts/url';
             {q.app && (
               <Button
                 href={q.app}
+                tone="raised"
                 target="_blank"
                 rel="noopener"
                 aria-label={`${ui.bot.ru}: ${name.ru}`}
@@ -80,6 +81,7 @@ import { withBase } from '../scripts/url';
     gap: 12px;
     padding: 16px;
     background: var(--surface-card);
+    container: quest / inline-size;
   }
   .head {
     display: flex;
@@ -117,33 +119,47 @@ import { withBase } from '../scripts/url';
     display: flex;
     gap: 8px;
   }
+  /* Lighter than the CV button: an extra link here, not the page's main action */
+  .links > :global(.button) {
+    padding: 0 16px;
+  }
 
-  /* Narrow feed: one swipeable row, the next card peeks in */
-  @media (max-width: 1200px) {
-    .row {
-      display: flex;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
+  /* Narrow column (a desktop just above the phone layout): the icon goes above the text */
+  @container quest (max-width: 220px) {
+    .head {
+      flex-direction: column;
     }
-    .row::-webkit-scrollbar {
-      display: none;
+    /* Three buttons don't fit in a row: the bot gets its own */
+    .links {
+      flex-wrap: wrap;
     }
-    .quest {
-      flex: 0 0 min(82%, max(260px, 44%));
-      scroll-snap-align: start;
+    .links > :global(.button) {
+      flex: 1 1 100%;
     }
   }
+
+  /* Phone: one swipeable row to the screen edges, the next card peeks in */
   @media (max-width: 960px) {
     .side {
       margin-bottom: 16px;
     }
     .row {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
       gap: 16px;
       /* Swipe to the screen edge, cards still line up with the 16px frame */
       margin: 0 -16px;
       padding: 0 16px;
       scroll-padding: 0 16px;
+    }
+    .row::-webkit-scrollbar {
+      display: none;
+    }
+    .quest {
+      flex: 0 0 min(82%, 300px);
+      scroll-snap-align: start;
     }
   }
 </style>

@@ -128,13 +128,13 @@ export function initLocked(cards: HTMLElement[]) {
   });
 }
 
-/** Narrowest side-quest card: narrower ones turn squarish (owner), wider ones stay a strip. */
-const SIDE_CARD_MIN = 360;
+/** Side-quest card width on desktop: narrower ones turn squarish, wider ones too long (owner). */
+const SIDE_CARD = { min: 300, max: 380 };
 
 /**
- * Side quests: as many whole cards as fit the row. When there are more, the cards narrow a
- * little so the neighbours peek in by --peek past the gap, faded under the arrows; the arrows
- * and a swipe move one card at a time and always stop on whole cards.
+ * Side quests: as many whole cards as fit the row, 300–380px each. When there are more, the
+ * neighbours peek in at the sides, faded under the arrows; the arrows and a swipe move one card
+ * at a time and always stop on whole cards.
  */
 export function initSideQuests(side: HTMLElement) {
   const row = side.querySelector<HTMLElement>('[data-side-row]');
@@ -144,6 +144,20 @@ export function initSideQuests(side: HTMLElement) {
   const cards = [...row.children] as HTMLElement[];
   let step = 0;
   let pad = 0;
+
+  // The fade covers exactly what the whole cards leave of the row on each side
+  const fades = () => {
+    const box = row.getBoundingClientRect();
+    const whole = cards
+      .map((c) => c.getBoundingClientRect())
+      .filter((r) => r.left >= box.left - 1 && r.right <= box.right + 1);
+    if (!whole.length) return;
+    side.style.setProperty('--fade-l', `${Math.max(0, whole[0].left - box.left)}px`);
+    side.style.setProperty(
+      '--fade-r',
+      `${Math.max(0, box.right - whole[whole.length - 1].right)}px`,
+    );
+  };
 
   const edges = () => {
     const max = row.scrollWidth - row.clientWidth;
@@ -167,23 +181,24 @@ export function initSideQuests(side: HTMLElement) {
     const w = row.clientWidth;
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
     const peek = parseFloat(getComputedStyle(side).getPropertyValue('--peek')) || 0;
-    const fit = (room: number) => Math.max(1, Math.floor((room + gap) / (SIDE_CARD_MIN + gap)));
+    const fit = (room: number) => Math.max(1, Math.floor((room + gap) / (SIDE_CARD.min + gap)));
     let n = fit(w);
     let room = w;
-    pad = 0;
     if (cards.length > n) {
-      // Between two peeks: whole cards in the middle, a neighbour faded on each side
-      pad = gap + peek;
-      room = w - 2 * pad;
+      // Leave at least a peek of a neighbour on each side
+      room = w - 2 * (gap + peek);
       n = fit(room);
     } else {
       n = cards.length;
     }
-    const cardW = Math.floor((room - gap * (n - 1)) / n);
+    const cardW = Math.min(SIDE_CARD.max, Math.floor((room - gap * (n - 1)) / n));
+    // Whole cards stop in the middle, with equal peeks on both sides
+    pad = cards.length > n ? Math.floor((w - n * cardW - (n - 1) * gap) / 2) : 0;
     side.style.setProperty('--card-w', `${cardW}px`);
     row.style.scrollPaddingInline = `${pad}px`;
     step = cardW + gap;
     edges();
+    fades();
   };
 
   const go = (dir: 1 | -1) => {
@@ -196,7 +211,16 @@ export function initSideQuests(side: HTMLElement) {
   };
   prev.addEventListener('click', () => go(-1));
   next.addEventListener('click', () => go(1));
-  row.addEventListener('scroll', edges, { passive: true });
+  let settle: ReturnType<typeof setTimeout> | undefined;
+  row.addEventListener(
+    'scroll',
+    () => {
+      edges();
+      clearTimeout(settle);
+      settle = setTimeout(fades, 120);
+    },
+    { passive: true },
+  );
   new ResizeObserver(layout).observe(row);
   layout();
 }

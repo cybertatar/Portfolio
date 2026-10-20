@@ -8,7 +8,7 @@ import Footer from '../components/Footer.astro';
 import IconButton from '../components/ui/IconButton.astro';
 import Media from '../components/ui/Media.astro';
 import PixelIcon from '../components/ui/PixelIcon.astro';
-import { cases, profile, ui } from '../content/site';
+import { cases, pokes, profile, ui } from '../content/site';
 import { levelOn } from '../scripts/level';
 ---
 
@@ -21,9 +21,17 @@ import { levelOn } from '../scripts/level';
     <aside class="aside px-clip" data-stage="0" data-profile>
       <div class="head">
         <div class="portrait">
-          <div class="portrait-media px-clip">
+          <button
+            type="button"
+            class="portrait-media px-clip"
+            aria-label={ui.poke.ru}
+            data-en-label={ui.poke.en}
+            data-pokes={JSON.stringify(pokes.map((p) => p.ru))}
+            data-en-pokes={JSON.stringify(pokes.map((p) => p.en))}
+            data-poke
+          >
             <Media src={profile.portrait} label={ui.portrait} />
-          </div>
+          </button>
           <span class="lvl px-clip">
             <span class="lvl-num" data-level>
               {levelOn(profile.birthday)}
@@ -99,6 +107,7 @@ import { levelOn } from '../scripts/level';
     initCardStack,
     initLevel,
     initLocked,
+    initPoke,
     initProfileFit,
     initSideQuests,
   } from '../scripts/home';
@@ -109,6 +118,8 @@ import { levelOn } from '../scripts/level';
   const level = document.querySelector<HTMLElement>('[data-level]');
   if (level) initLevel(level, profile.birthday, ui.levelUp);
   initLocked([...document.querySelectorAll<HTMLElement>('[data-locked]')]);
+  const poke = document.querySelector<HTMLElement>('[data-poke]');
+  if (poke) initPoke(poke);
   const side = document.querySelector<HTMLElement>('[data-side]');
   if (side) initSideQuests(side);
   if (feed) {
@@ -167,8 +178,56 @@ import { levelOn } from '../scripts/level';
   .portrait-media {
     position: absolute;
     inset: 0;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: none;
     overflow: hidden;
     color: var(--text-tertiary);
+  }
+  /* px-clip cuts an outer ring off, so the focus ring sits inside */
+  .portrait-media:focus-visible {
+    outline-offset: -2px;
+  }
+  /* Poke: the portrait flinches like a hit unit, with a one-frame flash */
+  .portrait-media::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--surface-raised);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .portrait-media:global(.is-hit) {
+    animation: flinch 320ms steps(1, end);
+  }
+  .portrait-media:global(.is-hit)::after {
+    animation: flash 320ms steps(1, end);
+  }
+  @keyframes flinch {
+    0% {
+      transform: translate(-4px, 2px);
+    }
+    25% {
+      transform: translate(4px, -2px);
+    }
+    50% {
+      transform: translate(-2px, 0);
+    }
+    75%,
+    100% {
+      transform: none;
+    }
+  }
+  @keyframes flash {
+    0% {
+      opacity: 0.5;
+    }
+    25%,
+    100% {
+      opacity: 0;
+    }
   }
 
   /* Level badge: sits on the portrait's bottom edge, like a unit frame in an MMO */

@@ -46,16 +46,16 @@ import { withBase } from '../scripts/url';
                 aria-label={`${ui.bot.ru}: ${name.ru}`}
                 data-en-label={`${ui.bot.en}: ${name.en}`}
               >
-                <PixelIcon name="telegram" />
+                <PixelIcon name="telegram" size={18} />
                 <span data-en={ui.bot.en}>{ui.bot.ru}</span>
               </Button>
             )}
             <IconButton href={q.github} target="_blank" rel="noopener" {...label(ui.repo)}>
-              <PixelIcon name="github" />
+              <PixelIcon name="github" size={18} />
             </IconButton>
             {q.instagram && (
               <IconButton href={q.instagram} target="_blank" rel="noopener" {...label(ui.post)}>
-                <PixelIcon name="instagram" />
+                <PixelIcon name="instagram" size={18} />
               </IconButton>
             )}
           </div>
@@ -184,6 +184,19 @@ import { withBase } from '../scripts/url';
   /* Lighter than the CV button: an extra link here, not the page's main action */
   .links > :global(.button) {
     padding: 0 16px;
+  }
+  /* Links out to the project, not controls of the page: smaller than the page's buttons.
+     Fingers keep the full 44px */
+  @media (pointer: fine) {
+    .links {
+      --control-h: 32px;
+      gap: 6px;
+    }
+    .links > :global(.button) {
+      gap: 6px;
+      padding: 0 12px;
+      font-size: calc(var(--t-button) * 1.15);
+    }
   }
 
   /* Arrows sit on the faded edges, over the peeking card */

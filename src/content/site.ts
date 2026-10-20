@@ -218,7 +218,7 @@ export const pokes: Localized[] = [
     ru: 'Кейсы — в ленте. А я тут просто стою.',
     en: 'The cases are in the feed. I just stand here.',
   },
-  { ru: 'Да, это я. Без фильтров.', en: 'Yes, that is me. No filters.' },
+  { ru: 'Да, это я. Без фильтров.', en: 'Yes, that’s me. No filters.' },
   { ru: 'Ткнёшь ещё раз — будет урон.', en: 'Poke me once more and it will hurt.' },
   { ru: 'Ай! −1 HP.', en: 'Ouch! −1 HP.' },
   { ru: 'Ладно, давай лучше в Telegram.', en: 'Fine, let’s talk on Telegram instead.' },

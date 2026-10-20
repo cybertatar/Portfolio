@@ -171,6 +171,17 @@ export const sideQuests: SideQuest[] = [
     github: 'https://github.com/cybertatar/YouTubeMusicTimecodePlugin',
   },
   {
+    id: 'vermis',
+    title: 'Vermis librorum',
+    description: {
+      ru: 'Мини-приложение в Telegram: книги по одному слову',
+      en: 'A Telegram mini app: books one word at a time',
+    },
+    icon: 'assets/side/vermis.webp',
+    app: 'https://t.me/speedreadingofbooks_bot',
+    github: 'https://github.com/cybertatar/telegramspeedreader',
+  },
+  {
     id: 'sunboy-shaman',
     title: { ru: 'Санбой Шаман', en: 'Sunboy Shaman' },
     description: {

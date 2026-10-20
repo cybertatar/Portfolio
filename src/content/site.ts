@@ -174,8 +174,8 @@ export const sideQuests: SideQuest[] = [
     id: 'vermis',
     title: 'Vermis librorum',
     description: {
-      ru: 'Мини-приложение в Telegram: книги по одному слову',
-      en: 'A Telegram mini app: books one word at a time',
+      ru: 'Читалка в Telegram: книги по одному слову',
+      en: 'A Telegram reader: books one word at a time',
     },
     icon: 'assets/side/vermis.webp',
     app: 'https://t.me/speedreadingofbooks_bot',

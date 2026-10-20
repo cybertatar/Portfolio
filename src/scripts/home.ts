@@ -1,3 +1,4 @@
+import { burnPortrait } from './burn';
 import { localized, showDialog } from './dialog';
 import { isBirthday, levelOn } from './level';
 
@@ -130,11 +131,14 @@ export function initLocked(cards: HTMLElement[]) {
 
 /**
  * Poking the portrait: it flinches and says the next line, like an NPC clicked once too often.
+ * One poke after the last line it burns down and respawns a few seconds later.
  * The lines come as JSON in data-pokes (data-en-pokes takes its place in English, see lang).
  */
 export function initPoke(el: HTMLElement) {
   let i = 0;
-  el.addEventListener('click', () => {
+  let busy = false;
+  el.addEventListener('click', async () => {
+    if (busy) return;
     let lines: string[] = [];
     try {
       lines = JSON.parse(el.dataset.pokes ?? '[]');
@@ -142,9 +146,16 @@ export function initPoke(el: HTMLElement) {
       /* ignore */
     }
     if (!lines.length) return;
+    if (i >= lines.length) {
+      busy = true;
+      await burnPortrait(el, el.dataset.fallen ?? '', el.dataset.respawned ?? '');
+      // Back from the dead: the greeting was already said.
+      i = Math.min(1, lines.length - 1);
+      busy = false;
+      return;
+    }
     showDialog(lines[i]);
-    // After the achievement, start over from the second line: the greeting is said once.
-    i = i + 1 < lines.length ? i + 1 : Math.min(1, lines.length - 1);
+    i += 1;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     el.classList.remove('is-hit');
     void el.offsetWidth; // restart the animation

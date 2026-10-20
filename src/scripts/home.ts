@@ -129,10 +129,10 @@ export function initLocked(cards: HTMLElement[]) {
 }
 
 /** Side-quest card width on desktop: narrower ones turn squarish, wider ones too long (owner). */
-const SIDE_CARD = { min: 300, max: 380 };
+const SIDE_CARD = { min: 340, max: 420 };
 
 /**
- * Side quests: as many whole cards as fit the row, 300–380px each. When there are more, the
+ * Side quests: as many whole cards as fit the row, 340–420px each. When there are more, the
  * neighbours peek in at the sides, faded under the arrows; the arrows and a swipe move one card
  * at a time and always stop on whole cards.
  */

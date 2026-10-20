@@ -28,6 +28,10 @@ import { levelOn } from '../scripts/level';
             data-en-label={ui.poke.en}
             data-pokes={JSON.stringify(pokes.map((p) => p.ru))}
             data-en-pokes={JSON.stringify(pokes.map((p) => p.en))}
+            data-fallen={ui.fallen.ru}
+            data-en-fallen={ui.fallen.en}
+            data-respawned={ui.respawned.ru}
+            data-en-respawned={ui.respawned.en}
             data-poke
           >
             <Media src={profile.portrait} label={ui.portrait} />
@@ -189,6 +193,17 @@ import { levelOn } from '../scripts/level';
   /* px-clip cuts an outer ring off, so the focus ring sits inside */
   .portrait-media:focus-visible {
     outline-offset: -2px;
+  }
+  /* Burnt down: an empty slot until the respawn */
+  .portrait-media:global(.is-down) {
+    background: var(--surface-sunken);
+  }
+  .portrait-media :global(canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
   }
   /* Poke: the portrait flinches like a hit unit, with a one-frame flash */
   .portrait-media::after {
@@ -369,7 +384,7 @@ import { levelOn } from '../scripts/level';
     aspect-ratio: auto;
   }
   /* The square crop zooms in on the face: its centre lands at ~34% / 37% of the frame. */
-  .aside:is([data-stage='2'], [data-stage='3']) .portrait-media :global(img) {
+  .aside:is([data-stage='2'], [data-stage='3']) .portrait-media :global(:is(img, canvas)) {
     transform-origin: 34% 37%;
     transform: translate(16%, 13%) scale(1.8);
   }

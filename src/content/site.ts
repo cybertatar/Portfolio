@@ -207,7 +207,7 @@ export const sideQuests: SideQuest[] = [
 
 /**
  * Lines for poking the portrait, in order, like an NPC that gets clicked too often.
- * After the last one it starts over from the second.
+ * One poke after the last line the portrait burns down and respawns (see burn.ts).
  */
 export const pokes: Localized[] = [
   {
@@ -226,6 +226,8 @@ export const pokes: Localized[] = [
     ru: 'Достижение получено: «Назойливый путник».',
     en: 'Achievement unlocked: “Persistent Traveler”.',
   },
+  { ru: 'Хватит! Осталось 1 HP.', en: 'Stop it! 1 HP left.' },
+  { ru: 'Ещё раз — и мне конец.', en: 'One more and I’m done for.' },
 ];
 
 export const ui = {
@@ -242,6 +244,11 @@ export const ui = {
   levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now level {n}.' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
   poke: { ru: 'Ткнуть в портрет', en: 'Poke the portrait' },
+  fallen: {
+    ru: 'Портрет повержен. Возрождение через 5 секунд.',
+    en: 'The portrait has fallen. Respawn in 5 seconds.',
+  },
+  respawned: { ru: 'Портрет возродился.', en: 'The portrait has respawned.' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
   bot: { ru: 'Бот', en: 'Bot' },
   prev: { ru: 'Назад', en: 'Previous' },

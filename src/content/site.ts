@@ -205,6 +205,29 @@ export const sideQuests: SideQuest[] = [
   },
 ];
 
+/**
+ * Lines for poking the portrait, in order, like an NPC that gets clicked too often.
+ * After the last one it starts over from the second.
+ */
+export const pokes: Localized[] = [
+  {
+    ru: 'Приветствую, путник! Ищешь дизайнера?',
+    en: 'Greetings, traveler! Looking for a designer?',
+  },
+  {
+    ru: 'Кейсы — в ленте. А я тут просто стою.',
+    en: 'The cases are in the feed. I just stand here.',
+  },
+  { ru: 'Да, это я. Без фильтров.', en: 'Yes, that’s me. No filters.' },
+  { ru: 'Ткнёшь ещё раз — будет урон.', en: 'Poke me once more and it will hurt.' },
+  { ru: 'Ай! −1 HP.', en: 'Ouch! −1 HP.' },
+  { ru: 'Ладно, давай лучше в Telegram.', en: 'Fine, let’s talk on Telegram instead.' },
+  {
+    ru: 'Достижение получено: «Назойливый путник».',
+    en: 'Achievement unlocked: “Persistent Traveler”.',
+  },
+];
+
 export const ui = {
   class: { ru: 'Класс', en: 'Class' },
   locked: { ru: 'Откроется позже', en: 'Unlocks later' },
@@ -218,6 +241,7 @@ export const ui = {
   },
   levelUp: { ru: 'Level up! Теперь {n} lvl.', en: 'Level up! Now level {n}.' },
   portrait: { ru: 'Портрет', en: 'Portrait' },
+  poke: { ru: 'Ткнуть в портрет', en: 'Poke the portrait' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
   bot: { ru: 'Бот', en: 'Bot' },
   prev: { ru: 'Назад', en: 'Previous' },

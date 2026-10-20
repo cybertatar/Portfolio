@@ -128,6 +128,30 @@ export function initLocked(cards: HTMLElement[]) {
   });
 }
 
+/**
+ * Poking the portrait: it flinches and says the next line, like an NPC clicked once too often.
+ * The lines come as JSON in data-pokes (data-en-pokes takes its place in English, see lang).
+ */
+export function initPoke(el: HTMLElement) {
+  let i = 0;
+  el.addEventListener('click', () => {
+    let lines: string[] = [];
+    try {
+      lines = JSON.parse(el.dataset.pokes ?? '[]');
+    } catch {
+      /* ignore */
+    }
+    if (!lines.length) return;
+    showDialog(lines[i]);
+    // After the achievement, start over from the second line: the greeting is said once.
+    i = i + 1 < lines.length ? i + 1 : Math.min(1, lines.length - 1);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    el.classList.remove('is-hit');
+    void el.offsetWidth; // restart the animation
+    el.classList.add('is-hit');
+  });
+}
+
 /** Side-quest card width on desktop: narrower ones turn squarish, wider ones too long (owner). */
 const SIDE_CARD = { min: 340, max: 420 };
 

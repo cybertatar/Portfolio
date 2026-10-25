@@ -251,6 +251,7 @@ import { levelOn } from '../scripts/level';
     height: 32px;
     padding: 0 10px;
     background: var(--surface-raised);
+    /* The level badge is a piece of game UI: it keeps the pixel face */
     font-family: var(--font-pixel);
     line-height: 32px;
     white-space: nowrap;
@@ -278,7 +279,7 @@ import { levelOn } from '../scripts/level';
   }
   h1 {
     margin: 0;
-    font-family: var(--font-pixel);
+    font-family: var(--font-serif);
     font-size: calc(var(--t-name) * 1.25);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
@@ -295,10 +296,9 @@ import { levelOn } from '../scripts/level';
     color: var(--text-secondary);
   }
   .role-label {
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-tertiary);
   }
   /* Availability, like an "online" status: a blinking pixel dot */

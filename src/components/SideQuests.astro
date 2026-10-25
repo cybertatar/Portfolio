@@ -111,8 +111,10 @@ import { withBase } from '../scripts/url';
     gap: 2px;
     min-width: 0;
   }
+  /* A list entry, not a heading of the page: the body sans */
   .name {
     margin: 0;
+    font-family: var(--font-sans);
     font-size: var(--t-button);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
@@ -136,7 +138,7 @@ import { withBase } from '../scripts/url';
   .links > :global(.button) {
     gap: 6px;
     padding: 0 12px;
-    font-size: calc(var(--t-button) * 1.15);
+    font-size: var(--t-button);
   }
   /* A little more room between targets for a finger */
   @media (pointer: coarse) {

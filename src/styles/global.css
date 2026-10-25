@@ -1,4 +1,4 @@
-/* Tyncherov Portfolio DS — global entry. Fira Sans / Fira Mono / Handjet are linked in BaseLayout. */
+/* Tyncherov Portfolio DS — global entry. Alegreya, Alegreya Sans SC, Fira Sans / Fira Mono and Handjet are linked in BaseLayout. */
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
@@ -32,6 +32,12 @@ h4,
 p,
 figure {
   margin: 0;
+}
+/* Headings in the book serif; small UI titles inside lists opt out */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif);
 }
 a {
   color: var(--text-primary);

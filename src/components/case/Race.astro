@@ -88,12 +88,25 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
           </span>
         </p>
         <p class="caption">
-          <!-- Words around the counter stay with it: spaces between tags are left to the
+          <!-- Every caption sits invisibly in the same cell, so the line count never changes
+               while the race runs and the page below does not jump -->
+          {lane.screens.map((s) => (
+            <span
+              class="ghost"
+              aria-hidden="true"
+              data-en={`Step\u00A0${lane.steps}\u00A0of\u00A0${lane.steps}\u00A0· ${s.caption.en}`}
+            >
+              {`Шаг\u00A0${lane.steps}\u00A0из\u00A0${lane.steps}\u00A0· ${s.caption.ru}`}
+            </span>
+          ))}
+          <span class="live">
+            <!-- Words around the counter stay with it: spaces between tags are left to the
                typograph only when they hold text, so these are non-breaking by hand -->
-          <span data-en="Step">Шаг</span>&nbsp;<span data-step>{lane.steps}</span>&nbsp;
-          <span data-en={`of\u00A0${lane.steps}`}>из&nbsp;{lane.steps}</span>&nbsp;·{' '}
-          <span data-caption data-en={lane.screens.at(-1)?.caption.en}>
-            {lane.screens.at(-1)?.caption.ru}
+            <span data-en="Step">Шаг</span>&nbsp;<span data-step>{lane.steps}</span>&nbsp;
+            <span data-en={`of\u00A0${lane.steps}`}>из&nbsp;{lane.steps}</span>&nbsp;·{' '}
+            <span data-caption data-en={lane.screens.at(-1)?.caption.en}>
+              {lane.screens.at(-1)?.caption.ru}
+            </span>
           </span>
         </p>
       </div>
@@ -105,7 +118,9 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
 </div>
 
 <style>
+  /* Sized by its column in the stage (beside the list of changes), not by the screen */
   .race {
+    container-type: inline-size;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -114,9 +129,9 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
   }
   .lanes {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, clamp(150px, 22vw, 300px)));
+    grid-template-columns: repeat(2, minmax(0, 300px));
     justify-content: center;
-    gap: clamp(16px, 8vw, 120px);
+    gap: clamp(16px, 10cqi, 96px);
     width: 100%;
   }
   /* The readout (bar, clock, step) keeps to the left edge of the bar; the label stays over the phone */
@@ -209,11 +224,18 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     color: var(--sky-600);
   }
   .caption {
+    display: grid;
     margin: 8px 0 0;
     font-size: var(--t-caption);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
     text-wrap: balance;
+  }
+  .caption > * {
+    grid-area: 1 / 1;
+  }
+  .ghost {
+    visibility: hidden;
   }
 
   .replay {

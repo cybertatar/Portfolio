@@ -1,0 +1,133 @@
+---
+import { en, ru, type Localized, type Text } from '../../content/site';
+
+export interface ChangeRow {
+  label: Text;
+  before: Localized;
+  after: Localized;
+  /** Where the change sits on the "after" screen, as fractions of it (x, y): a numbered mark. */
+  mark?: [number, number];
+}
+
+interface Props {
+  rows: ChangeRow[];
+}
+
+/**
+ * What changed, fact by fact, in the stage next to the phones: the review said the list under
+ * the stage was hard to match with the mockups. Each change reads top to bottom on one left
+ * edge (a table made the eye zigzag, NN/g): the subject, what it is now, and under it, quieter,
+ * what it was. With marks on the screen (the home screen) each subject carries the mark's
+ * number, and hovering either lights up the other (initMarks in case.ts). The steps and time
+ * are not repeated here, the race shows them.
+ */
+const { rows } = Astro.props;
+const numbered = rows.some((r) => r.mark);
+---
+
+<ul class="changes" aria-label="Было и стало" data-en-label="Before and after">
+  {rows.map((r, i) => (
+    <li class="change" data-mark-ref={numbered ? i + 1 : undefined}>
+      <span class="label">
+        {numbered && (
+          <span class="num px-clip" aria-hidden="true">
+            {i + 1}
+          </span>
+        )}
+        <span data-en={en(r.label)}>{ru(r.label)}</span>
+      </span>
+      <p class="after">
+        <span class="sr" data-en="After: ">
+          Стало:{' '}
+        </span>
+        <span data-en={r.after.en}>{r.after.ru}</span>
+      </p>
+      <p class="before" data-en={`Before: ${r.before.en}`}>
+        Было: {r.before.ru}
+      </p>
+    </li>
+  ))}
+</ul>
+
+<style>
+  /* One column beside the phones; inside an item the lines sit closer (about 12 with the
+     leading) than the items to each other (20 + 14) */
+  .changes {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* A quiet hairline on top ties the subject to its item (2px read too bright, owner). The
+     list sits on the stage's sunken paper, where the subtle colour of the side quests log
+     vanished, so the default one: about the same contrast against this background */
+  .change {
+    /* Holds the hidden "Стало:" */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    padding-top: 14px;
+    border-top: var(--border-width-hair) solid var(--border-default);
+    text-wrap: pretty;
+  }
+  .label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-pixel-label);
+    letter-spacing: var(--ls-caps);
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+  /* The mark's number, as on the screen (Compare.astro) */
+  .num {
+    --px-step: 2px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    background: var(--sky-500);
+    color: var(--text-inverse);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0;
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .change.is-lit .num {
+    background: var(--ink-1);
+  }
+  .change.is-lit .label {
+    color: var(--text-primary);
+  }
+  .after,
+  .before {
+    margin: 0;
+  }
+  /* Often two lines: body leading, not the snug one of a single-line title */
+  .after {
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-normal);
+    color: var(--text-primary);
+  }
+  .before {
+    font-size: var(--t-body-sm);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+  }
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+</style>

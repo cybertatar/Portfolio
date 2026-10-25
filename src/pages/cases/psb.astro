@@ -7,7 +7,8 @@ import Compare from '../../components/case/Compare.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Race, { type RaceLane } from '../../components/case/Race.astro';
-import Versus, { type VersusRow, type VersusStat } from '../../components/case/Versus.astro';
+import Changes, { type ChangeRow } from '../../components/case/Changes.astro';
+import TestResult, { type ResultStat } from '../../components/case/TestResult.astro';
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
@@ -216,7 +217,7 @@ interface Direction {
   lead: Localized;
   compare?: { before: string; after: string };
   race?: RaceLane[];
-  versus: { rows: VersusRow[]; stats: VersusStat[] };
+  versus: { rows: ChangeRow[]; stats: ResultStat[] };
 }
 
 const before = { ru: 'Было', en: 'Before' };
@@ -238,11 +239,13 @@ const directions: Direction[] = [
       en: 'Everyday tasks and bank offers should be visible at the same time without competing with each other.',
     },
     compare: { before: 'assets/cases/psb/main-before.webp', after: 'assets/cases/psb/main.webp' },
-    // Facts row by row under the before/after slider, then the result
+    // Changes beside the before/after slider, marked on the new screen; then the result
     versus: {
       rows: [
         {
           label: { ru: 'Баланс', en: 'Balance' },
+          // Its place on the new screen (main.webp), a numbered mark
+          mark: [0.37, 0.307],
           before: {
             ru: '«Всего доступно средств» в отдельной карточке',
             en: '“Total available funds” in a separate card',
@@ -254,11 +257,15 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'Карты и счета', en: 'Cards and accounts' },
+          // Its place on the new screen (main.webp), a numbered mark
+          mark: [0.27, 0.4],
           before: { ru: 'Два отдельных списка', en: 'Two separate lists' },
           after: { ru: 'Карты внутри своих счетов', en: 'Cards inside their accounts' },
         },
         {
           label: { ru: 'Частые действия', en: 'Frequent actions' },
+          // Its place on the new screen (main.webp), a numbered mark
+          mark: [0.465, 0.595],
           before: { ru: 'Нет на главной', en: 'Not on the home screen' },
           after: {
             ru: 'QR, перевод, по номеру и пополнение под счетами',
@@ -267,6 +274,8 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'История', en: 'History' },
+          // Its place on the new screen (main.webp), a numbered mark
+          mark: [0.36, 0.758],
           before: {
             ru: 'Отдельная вкладка, у каждой карты своя',
             en: 'A separate tab, split by card',
@@ -278,6 +287,8 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'Предложения банка', en: 'Bank offers' },
+          // Its place on the new screen (main.webp), a numbered mark
+          mark: [0.45, 0.168],
           before: {
             ru: 'Вес как у продуктов, среди счетов и карт',
             en: 'As prominent as products, mixed in with the accounts and cards',
@@ -289,6 +300,8 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'Кешбэк', en: 'Cashback' },
+          // Its place on the new screen (main.webp), a numbered mark
+          mark: [0.67, 0.335],
           before: {
             ru: '«Бонусный счёт» в конце главной',
             en: '“Bonus account” at the very bottom of the home screen',
@@ -1195,10 +1208,10 @@ const home = withBase('/');
             <p class="lead" data-en={d.lead.en}>
               {d.lead.ru}
             </p>
+            <!-- The changes sit in the stage beside the phones: under it they were hard to match
+                 with the mockups (review). The test result stays under the stage -->
             <div class:list={['stage', 'px-clip', { 'race-stage': d.race }]}>
-              {d.race ? (
-                <Race lanes={d.race} />
-              ) : d.compare ? (
+              {d.compare && (
                 <>
                   <span class="stage-tag left px-clip" data-en="Before">
                     До
@@ -1206,14 +1219,33 @@ const home = withBase('/');
                   <span class="stage-tag right px-clip" data-en="After">
                     После
                   </span>
-                  <div class="stage-phone">
-                    <Compare before={d.compare.before} after={d.compare.after} label={d.title} />
-                  </div>
                 </>
-              ) : null}
+              )}
+              <div class="split">
+                <div class="split-grid">
+                  <div class:list={['split-media', { race: d.race }]}>
+                    {d.race ? (
+                      <Race lanes={d.race} />
+                    ) : d.compare ? (
+                      <div class="stage-phone">
+                        <Compare
+                          before={d.compare.before}
+                          after={d.compare.after}
+                          label={d.title}
+                          marks={d.versus.rows.map((r) => r.mark)}
+                          start={25}
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                  <div class="split-list">
+                    <Changes rows={d.versus.rows} />
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="versus-wrap">
-              <Versus rows={d.versus.rows} stats={d.versus.stats} />
+              <TestResult stats={d.versus.stats} />
             </div>
           </section>
         ))}
@@ -1346,6 +1378,7 @@ const home = withBase('/');
   import {
     initCaseMenu,
     initCompare,
+    initMarks,
     initChapters,
     initHud,
     initQuestDeck,
@@ -1360,6 +1393,7 @@ const home = withBase('/');
   const bar = document.querySelector<HTMLElement>('[data-case-bar]');
   if (bar) initCaseMenu(bar);
   document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
+  document.querySelectorAll<HTMLElement>('.sheet').forEach(initMarks);
   document.querySelectorAll<HTMLElement>('[data-chapters]').forEach(initChapters);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
@@ -1766,14 +1800,11 @@ const home = withBase('/');
     transform-origin: 50% 0;
     will-change: transform;
   }
-  /* The card on top casts a soft shadow upward, or its edge is lost on the one below
-     (the panel is clipped to pixel corners, so the shadow sits on a layer behind it) */
-  .chapters:is(.is-deck, .is-stack) .chapter::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 50%;
-    box-shadow: 0 -10px 28px rgba(41, 37, 30, 0.1);
+  /* The card on top casts a soft shadow upward, or its edge is lost on the one below. A
+     drop-shadow follows the panel's pixel corners: a box shadow on a layer behind it stayed
+     square and left the clipped corners lit by the card underneath */
+  .chapters:is(.is-deck, .is-stack) .chapter {
+    filter: drop-shadow(0 -3px 8px rgba(41, 37, 30, 0.06));
   }
   .chapters.is-stack .chapter {
     position: sticky;
@@ -1878,6 +1909,54 @@ const home = withBase('/');
      list, and further than its own rows sit from each other */
   .sheet > .versus-wrap {
     margin-top: 40px;
+  }
+  /* Phones on the left, the changes beside them; under them when the stage is narrow */
+  .split {
+    container-type: inline-size;
+    width: 100%;
+  }
+  .split-grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 40px clamp(32px, 4cqi, 72px);
+  }
+  .split-media {
+    display: flex;
+    justify-content: center;
+    min-width: 0;
+  }
+  .split-media.race {
+    width: clamp(340px, 56cqi, 640px);
+  }
+  .split-list {
+    max-width: 440px;
+  }
+  /* Under the phones once the list would get narrower than about 260px: the slider's one
+     phone leaves more room than the race's two */
+  /* One column: the media spans it, so the phone's percentage width has something to resolve
+     against (in an auto column it came to zero) */
+  @container (max-width: 560px) {
+    .split-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .split-media {
+      width: 100%;
+    }
+    .split-list {
+      max-width: none;
+    }
+  }
+  @container (max-width: 640px) {
+    .split-grid:has(.race) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .split-grid:has(.race) .split-media {
+      width: 100%;
+    }
+    .split-grid:has(.race) .split-list {
+      max-width: none;
+    }
   }
   .stage {
     position: relative;
@@ -2108,7 +2187,8 @@ const home = withBase('/');
       padding-top: 40px;
     }
     .stage-phone {
-      width: min(260px, 72%);
+      /* Of the stage, not of its auto-sized column (a percentage there resolved to zero) */
+      width: min(260px, 72cqi);
     }
     .findings li {
       grid-template-columns: 40px minmax(0, 1fr);

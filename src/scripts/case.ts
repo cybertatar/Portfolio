@@ -74,9 +74,85 @@ export function initCaseMenu(bar: HTMLElement) {
 export function initCompare(root: HTMLElement) {
   const range = root.querySelector<HTMLInputElement>('[data-compare-range]');
   if (!range) return;
-  const set = () => root.style.setProperty('--pos', `${range.value}%`);
+  const marks = [...root.querySelectorAll<HTMLElement>('[data-mark]')];
+  const set = () => {
+    root.style.setProperty('--pos', `${range.value}%`);
+    marks.forEach((m) =>
+      m.classList.toggle('is-under', Number(m.dataset.x) < Number(range.value) + 3),
+    );
+  };
   range.addEventListener('input', set);
   set();
+
+  // The whole phone drags the handle, by finger too: a native range moves on touch only from
+  // its thumb. A tap jumps there; a finger going up or down scrolls the page (touch-action:
+  // pan-y), the browser then cancels the pointer
+  const moveTo = (x: number) => {
+    const box = root.getBoundingClientRect();
+    range.value = String(Math.round(Math.min(1, Math.max(0, (x - box.left) / box.width)) * 100));
+    set();
+  };
+  let drag: { id: number; x: number; y: number; on: boolean } | null = null;
+  root.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' };
+    if (drag.on) {
+      e.preventDefault();
+      range.focus({ preventScroll: true });
+      root.setPointerCapture(e.pointerId);
+      moveTo(e.clientX);
+    }
+  });
+  root.addEventListener('pointermove', (e) => {
+    if (!drag || drag.id !== e.pointerId) return;
+    if (!drag.on) {
+      const dx = Math.abs(e.clientX - drag.x);
+      if (dx < 6 || dx < Math.abs(e.clientY - drag.y)) return;
+      drag.on = true;
+      root.setPointerCapture(e.pointerId);
+    }
+    moveTo(e.clientX);
+  });
+  root.addEventListener('pointerup', (e) => {
+    if (drag?.id === e.pointerId && !drag.on) moveTo(e.clientX);
+    drag = null;
+  });
+  root.addEventListener('pointercancel', () => (drag = null));
+}
+
+/**
+ * The home screen's marks and its list of changes (Changes.astro). The marks stay hidden so they
+ * don't cover the screen: one shows while the pointer is on its item in the list, or near its
+ * spot on the screen (which also lights the item).
+ */
+export function initMarks(sheet: HTMLElement) {
+  const items = [...sheet.querySelectorAll<HTMLElement>('[data-mark-ref]')];
+  const marks = [...sheet.querySelectorAll<HTMLElement>('[data-mark]')];
+  const screen = sheet.querySelector<HTMLElement>('[data-compare]');
+  if (!items.length || !marks.length) return;
+  const light = (n: string | undefined) => {
+    items.forEach((el) => el.classList.toggle('is-lit', el.dataset.markRef === n));
+    marks.forEach((el) => el.classList.toggle('is-lit', el.dataset.mark === n));
+  };
+  items.forEach((el) => {
+    el.addEventListener('pointerenter', () => light(el.dataset.markRef));
+    el.addEventListener('pointerleave', () => light(undefined));
+  });
+  // On the screen: the nearest uncovered mark within reach of the mouse
+  const REACH = 36;
+  screen?.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    let near: HTMLElement | undefined;
+    let best = REACH;
+    for (const m of marks) {
+      if (m.classList.contains('is-under')) continue;
+      const r = m.getBoundingClientRect();
+      const d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      if (d < best) [best, near] = [d, m];
+    }
+    light(near?.dataset.mark);
+  });
+  screen?.addEventListener('pointerleave', () => light(undefined));
 }
 
 /** Plays the results HUD once, when it comes into view (Hud.astro). */

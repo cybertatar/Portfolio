@@ -1,0 +1,103 @@
+---
+import { en, ru, type Localized, type Text } from '../../content/site';
+
+export interface ResultStat {
+  value: Text;
+  unit?: Localized;
+  note: Localized;
+}
+
+interface Props {
+  stats: ResultStat[];
+}
+
+/** The result of the test in a few numbers, under the stage with the phones and the changes. */
+const { stats } = Astro.props;
+---
+
+<!-- The result is its own card: the boundary groups the numbers (NN/g, common region) -->
+<div class="result px-clip">
+  <p class="result-title" data-en="Test result">
+    Итог теста
+  </p>
+  <ul class="stats" style={`--n: ${stats.length}`}>
+    {stats.map((s) => (
+      <li class="stat">
+        <span class="value">
+          <span data-en={en(s.value)}>{ru(s.value)}</span>
+          {s.unit && (
+            <span class="unit" data-en={s.unit.en}>
+              {s.unit.ru}
+            </span>
+          )}
+        </span>
+        <span class="note" data-en={s.note.en}>
+          {s.note.ru}
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  /* The result card, built like the quest and HUD cards: title, then the numbers; the same
+     4px corner step as the other cards on the sheet */
+  .result {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: var(--space-tile);
+    background: var(--surface-raised);
+  }
+  .result-title {
+    margin: 0;
+    font-size: var(--t-body);
+    font-weight: var(--fw-semibold);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .value {
+    font-size: var(--t-stat);
+    font-weight: var(--fw-semibold);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+  .unit {
+    margin-left: 0.25em;
+    font-size: 0.5em;
+    font-weight: var(--fw-medium);
+    letter-spacing: 0;
+    color: var(--text-secondary);
+  }
+  /* The same secondary size as "Было: …" above, one style for the quieter text in the block */
+  .note {
+    font-size: var(--t-body-sm);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+
+  @container (max-width: 560px) {
+    /* Two numbers stay side by side, a third goes under them */
+    .stats {
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+      gap: 24px;
+    }
+  }
+</style>

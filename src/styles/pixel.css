@@ -29,7 +29,8 @@
   clip-path: var(--px-clip);
 }
 
-/* Dialog box at the bottom of the screen (showDialog in scripts/dialog.ts) */
+/* Dialog box (showDialog in scripts/dialog.ts): a speech bubble next to the element that
+   speaks (data-side, left / top set by the script), or at the bottom without one */
 .px-dialog {
   --px-step: 4px;
   position: fixed;
@@ -52,6 +53,76 @@
   opacity: 1;
   transform: translate(-50%, 0);
   pointer-events: auto;
+}
+.px-dialog[data-side] {
+  bottom: auto;
+  width: min(380px, calc(100vw - 32px));
+  /* The tail sticks out of the box: the box itself is not clipped, its fill is (::before) */
+  clip-path: none;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transform: translateY(var(--rise, 6px));
+}
+.px-dialog[data-side='above'] {
+  --rise: -6px;
+}
+.px-dialog[data-side].is-open {
+  transform: none;
+}
+.px-dialog[data-side]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--surface-dialog);
+  clip-path: var(--px-clip);
+}
+/* Tail: a stepped pixel triangle toward the element */
+.px-dialog-tail {
+  display: none;
+  position: absolute;
+  left: calc(var(--tail-x, 50%) - 8px);
+  width: 16px;
+  height: 12px;
+  background: var(--surface-dialog);
+}
+.px-dialog[data-side] .px-dialog-tail {
+  display: block;
+}
+.px-dialog[data-side='below'] .px-dialog-tail {
+  bottom: 100%;
+  clip-path: polygon(
+    37.5% 0,
+    62.5% 0,
+    62.5% 33.33%,
+    75% 33.33%,
+    75% 66.66%,
+    87.5% 66.66%,
+    87.5% 100%,
+    12.5% 100%,
+    12.5% 66.66%,
+    25% 66.66%,
+    25% 33.33%,
+    37.5% 33.33%
+  );
+}
+.px-dialog[data-side='above'] .px-dialog-tail {
+  top: 100%;
+  clip-path: polygon(
+    12.5% 0,
+    87.5% 0,
+    87.5% 33.33%,
+    75% 33.33%,
+    75% 66.66%,
+    62.5% 66.66%,
+    62.5% 100%,
+    37.5% 100%,
+    37.5% 66.66%,
+    25% 66.66%,
+    25% 33.33%,
+    12.5% 33.33%
+  );
 }
 /* The full text sits invisibly under the typed one, so the box keeps its final size while typing */
 .px-dialog-text {

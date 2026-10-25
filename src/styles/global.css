@@ -19,6 +19,10 @@ body {
   font-family: var(--font-sans);
   font-size: var(--t-body);
   line-height: var(--lh-normal);
+  /* Browsers drop ligatures under letter-spacing (headings, caps); the feature setting keeps fi / fl */
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
   -webkit-font-smoothing: antialiased;
 }
 h1,

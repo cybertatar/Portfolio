@@ -162,7 +162,9 @@ const onBody = ([x, y]: [number, number]) => ({
     -webkit-appearance: none;
     appearance: none;
   }
-  /* Marks belong to the new screen: one the handle passes over fades out (initCompare) */
+  /* Marks stay hidden so they don't cover the screen: one shows while its item in the list or
+     its spot on the screen is under the pointer (initMarks in case.ts). They belong to the new
+     screen, so one under the "before" side stays hidden (initCompare) */
   .mark {
     --px-step: 2px;
     position: absolute;
@@ -170,23 +172,21 @@ const onBody = ([x, y]: [number, number]) => ({
     place-items: center;
     width: 24px;
     height: 24px;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(0.6);
     background: var(--sky-400);
     color: var(--ink-1);
     font-size: 13px;
     font-weight: var(--fw-semibold);
     line-height: 1;
+    opacity: 0;
     pointer-events: none;
     transition:
       opacity var(--dur-fast) var(--ease-standard),
       transform var(--dur-fast) var(--ease-standard);
   }
-  .mark.is-under {
-    opacity: 0;
-  }
-  .mark.is-lit {
-    background: var(--surface-card);
-    transform: translate(-50%, -50%) scale(1.2);
+  .mark.is-lit:not(.is-under) {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
   .compare:has(.range:focus-visible) .handle {
     outline: 2px solid var(--focus-ring);

@@ -121,12 +121,14 @@ export function initCompare(root: HTMLElement) {
 }
 
 /**
- * The home screen's marks and its list of changes (Changes.astro): hovering an item lights its
- * mark on the screen.
+ * The home screen's marks and its list of changes (Changes.astro). The marks stay hidden so they
+ * don't cover the screen: one shows while the pointer is on its item in the list, or near its
+ * spot on the screen (which also lights the item).
  */
 export function initMarks(sheet: HTMLElement) {
   const items = [...sheet.querySelectorAll<HTMLElement>('[data-mark-ref]')];
   const marks = [...sheet.querySelectorAll<HTMLElement>('[data-mark]')];
+  const screen = sheet.querySelector<HTMLElement>('[data-compare]');
   if (!items.length || !marks.length) return;
   const light = (n: string | undefined) => {
     items.forEach((el) => el.classList.toggle('is-lit', el.dataset.markRef === n));
@@ -136,6 +138,21 @@ export function initMarks(sheet: HTMLElement) {
     el.addEventListener('pointerenter', () => light(el.dataset.markRef));
     el.addEventListener('pointerleave', () => light(undefined));
   });
+  // On the screen: the nearest uncovered mark within reach of the mouse
+  const REACH = 36;
+  screen?.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') return;
+    let near: HTMLElement | undefined;
+    let best = REACH;
+    for (const m of marks) {
+      if (m.classList.contains('is-under')) continue;
+      const r = m.getBoundingClientRect();
+      const d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      if (d < best) [best, near] = [d, m];
+    }
+    light(near?.dataset.mark);
+  });
+  screen?.addEventListener('pointerleave', () => light(undefined));
 }
 
 /** Plays the results HUD once, when it comes into view (Hud.astro). */

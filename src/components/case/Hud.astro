@@ -17,21 +17,24 @@ export type HudGauge =
   | { kind: 'hearts'; value: number; max: number };
 
 export interface HudStat {
-  label: Text;
+  /** Over the number; the test result goes without (its card names the whole row) */
+  label?: Text;
   /** The big number, and a smaller unit after it */
   value: Text;
   unit?: Localized;
   /** Context lines under the number */
   notes: Localized[];
-  gauge: HudGauge;
+  gauge?: HudGauge;
 }
 
 interface Props {
   stats: HudStat[];
   note?: Localized;
+  /** Stats in a row on a wide container (two on a narrow one) */
+  columns?: number;
 }
 
-const { stats, note } = Astro.props;
+const { stats, note, columns = 4 } = Astro.props;
 let uid = 0;
 
 // Whole pixels of the 9-pixel heart, like Zelda's partial hearts
@@ -39,12 +42,14 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
 ---
 
 <div class="hud-wrap">
-  <ul class="hud" data-hud>
+  <ul class="hud" data-hud style={`--cols: ${columns}`}>
     {stats.map((s) => (
       <li class="stat">
-        <span class="label" data-en={en(s.label)}>
-          {ru(s.label)}
-        </span>
+        {s.label && (
+          <span class="label" data-en={en(s.label)}>
+            {ru(s.label)}
+          </span>
+        )}
         <span class="value">
           <span data-en={en(s.value)}>{ru(s.value)}</span>
           {s.unit && (
@@ -55,20 +60,20 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
         </span>
 
         <span class="gauge" aria-hidden="true">
-          {s.gauge.kind === 'time' && (
+          {s.gauge?.kind === 'time' && (
             <span class="track px-clip">
               <span class="fill time" style={`--to: ${(s.gauge.to / s.gauge.from) * 100}%`} />
             </span>
           )}
-          {s.gauge.kind === 'mana' && (
+          {s.gauge?.kind === 'mana' && (
             <span class="track px-clip">
               <span class="fill mana" style={`--to: ${s.gauge.value}%`} />
             </span>
           )}
-          {s.gauge.kind === 'hearts' && (
+          {s.gauge?.kind === 'hearts' && (
             <span class="hearts">
               {Array.from({ length: s.gauge.max }, (_, i) => {
-                const px = heartFill(s.gauge.kind === 'hearts' ? s.gauge.value : 0, i);
+                const px = heartFill(s.gauge?.kind === 'hearts' ? s.gauge.value : 0, i);
                 const id = `hud-heart-${uid++}`;
                 return (
                   <svg
@@ -123,7 +128,7 @@ const heartFill = (value: number, i: number) => Math.round(Math.max(0, Math.min(
   /* One row of four on the sheet itself, no panels: like Zelda's HUD over the world */
   .hud {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
     /* Columns well apart from each other, more than any gap inside a stat */
     gap: 40px;
     margin: 0;

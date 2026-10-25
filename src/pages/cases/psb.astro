@@ -1222,19 +1222,16 @@ const home = withBase('/');
               {d.lead.ru}
             </p>
             <!-- The home screen: callouts around the phone, a switch flips them to the old screen.
-                 The races: phones and the changes as one group, the test result closes the list
-                 (review: a list under the stage was hard to match with the mockups) -->
+                 The races: phones and the changes as one group (review: a list under the stage was
+                 hard to match with the mockups). The test result is a card of its own under both -->
             {d.annotated ? (
-              <div class="stage px-clip ann-stage">
+              <div class="stage px-clip">
                 <Annotated
                   before={d.annotated.before}
                   after={d.annotated.after}
                   label={d.title}
                   rows={d.versus.rows as MarkedRow[]}
                 />
-                <div class="ann-result">
-                  <TestResult stats={d.versus.stats} />
-                </div>
               </div>
             ) : (
               <div class="stage px-clip">
@@ -1245,12 +1242,12 @@ const home = withBase('/');
                     </div>
                     <div class="split-list">
                       <Changes rows={d.versus.rows} />
-                      <TestResult stats={d.versus.stats} />
                     </div>
                   </div>
                 </div>
               </div>
             )}
+            <TestResult stats={d.versus.stats} />
           </section>
         ))}
 
@@ -1940,16 +1937,6 @@ const home = withBase('/');
     justify-content: center;
     padding: clamp(40px, 4vw, 72px) var(--pad);
     background: var(--surface-sunken);
-  }
-  /* The home screen's callouts, the test result under them: a column, not as wide as the
-     stage (spread over it, its two numbers drifted apart) */
-  .stage.ann-stage {
-    flex-direction: column;
-    align-items: center;
-  }
-  .ann-result {
-    width: 100%;
-    max-width: 760px;
   }
   /* The fan of prototypes spills its decor to the edges, so the stage keeps a narrower inset */
   .stage.deck-stage {

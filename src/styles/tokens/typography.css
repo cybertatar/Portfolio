@@ -30,8 +30,8 @@
   --t-small: clamp(14px, 0.84vw, 16px); /* labels, captions, tags, notes, nav, badges */
   --t-body: clamp(16px, 1vw, 18px); /* text, buttons, card lines */
   --t-lead: clamp(18px, 1.2vw, 22px); /* lead, small titles, figures in a line */
-  --t-h2: clamp(30px, 2.2vw, 40px); /* section title, project card title, name; big figures */
-  --t-display: clamp(40px, 3vw, 54px); /* the case title */
+  --t-h2: clamp(34px, 2.6vw, 48px); /* section title, project card title, name; big figures */
+  --t-display: clamp(44px, 3.4vw, 64px); /* the case title */
   /* Role names, kept as aliases of the steps */
   --t-h3: var(--t-lead);
   --t-stat: var(--t-h2);

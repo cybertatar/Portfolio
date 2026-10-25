@@ -1,7 +1,6 @@
 ---
-import { type Localized, type Text } from '../../content/site';
+import { en, ru, type Localized, type Text } from '../../content/site';
 import PixelIcon from '../ui/PixelIcon.astro';
-import Hud, { type HudStat } from './Hud.astro';
 
 export interface ResultStat {
   value: Text;
@@ -14,22 +13,12 @@ interface Props {
 }
 
 /**
- * The result of the test for one solution: its own card under the stage, not the end of the
- * list of changes (the owner: it's a different thing, what people did, not what we changed).
- * The same build as the overview's results, a trophy and HUD stats: a percentage gets a bar,
- * an ease score out of 7 gets hearts, and they fill once on view (initHud).
+ * The result of the test for one solution: a card of its own under the stage, not the end of
+ * the list of changes (the owner: it's a different thing, what people did, not what we
+ * changed). A heading with the trophy, then the figures side by side, plain: the overview's
+ * bars and hearts didn't suit it (owner).
  */
 const { stats } = Astro.props;
-// The English spelling has the decimal point (6.7, not 6,7)
-const num = (v: Text) => parseFloat(typeof v === 'string' ? v : v.en);
-const hud: HudStat[] = stats.map((s) => ({
-  value: s.value,
-  unit: s.unit,
-  notes: [s.note],
-  gauge: s.unit
-    ? { kind: 'hearts', value: num(s.value), max: 7 }
-    : { kind: 'mana', value: num(s.value) },
-}));
 ---
 
 <section class="test px-clip">
@@ -46,7 +35,23 @@ const hud: HudStat[] = stats.map((s) => ({
       </span>
     </span>
   </div>
-  <Hud stats={hud} columns={stats.length} />
+  <ul class="stats" style={`--n: ${stats.length}`}>
+    {stats.map((st) => (
+      <li class="stat">
+        <span class="value">
+          <span data-en={en(st.value)}>{ru(st.value)}</span>
+          {st.unit && (
+            <span class="unit" data-en={st.unit.en}>
+              {st.unit.ru}
+            </span>
+          )}
+        </span>
+        <span class="note" data-en={st.note.en}>
+          {st.note.ru}
+        </span>
+      </li>
+    ))}
+  </ul>
 </section>
 
 <style>
@@ -54,6 +59,7 @@ const hud: HudStat[] = stats.map((s) => ({
      stats under it. The same raised paper and pixel corners as the overview's cards */
   .test {
     --px-step: 4px;
+    container-type: inline-size;
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -94,5 +100,47 @@ const hud: HudStat[] = stats.map((s) => ({
     font-size: var(--t-small);
     line-height: var(--lh-snug);
     color: var(--text-tertiary);
+  }
+  /* Columns well apart, more than anything inside a figure; a third goes under the first two
+     on a narrow card */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 24px 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+  .value {
+    font-size: var(--t-stat);
+    font-weight: var(--fw-semibold);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+  .unit {
+    margin-left: 0.25em;
+    font-size: var(--t-small);
+    font-weight: var(--fw-medium);
+    letter-spacing: 0;
+    color: var(--text-secondary);
+  }
+  .note {
+    font-size: var(--t-body-sm);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  @container (max-width: 560px) {
+    .stats {
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+      gap: 24px;
+    }
   }
 </style>

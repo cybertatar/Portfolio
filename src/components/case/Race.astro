@@ -245,7 +245,7 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     background: var(--surface-raised);
     color: var(--text-primary);
     font-family: var(--font-label);
-    font-size: calc(var(--t-button) * 1.3);
+    font-size: var(--t-body);
     font-weight: var(--fw-semibold);
     letter-spacing: var(--ls-label);
     cursor: inherit;
@@ -273,7 +273,7 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     /* The bar reads with the clock under it, not the phone above (12 < 16) */
     .time {
       margin-top: 12px;
-      font-size: 28px;
+      font-size: var(--t-stat);
     }
     .end {
       font-size: var(--t-caption);

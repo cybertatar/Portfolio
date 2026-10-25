@@ -11,93 +11,118 @@ interface Props {
   stats: ResultStat[];
 }
 
-/** The result of the test in a few numbers, under the stage with the phones and the changes. */
+/**
+ * The result of the test for one solution, its own part under the stage, not the end of the
+ * list of changes (the owner: it's a different thing, what people did, not what we changed).
+ * The heading sits on the sheet and every figure in a plate of the stage's paper, the same
+ * rhythm as the start of the block: a title on the sheet, then the plate. One card with all
+ * figures read heavy, so did a trophy tile, bold figures and the overview's gauges (owner).
+ */
 const { stats } = Astro.props;
 ---
 
-<!-- The result is its own card: the boundary groups the numbers (NN/g, common region) -->
-<div class="result px-clip">
-  <p class="result-title" data-en="Test result">
-    Итог теста
-  </p>
+<section class="test">
+  <div class="head">
+    <h3 class="title" data-en="Test result">
+      Итог теста
+    </h3>
+    <span class="sub" data-en="Usability test with 30 of the bank’s customers">
+      Юзабилити-тест с 30 клиентами банка
+    </span>
+  </div>
   <ul class="stats" style={`--n: ${stats.length}`}>
-    {stats.map((s) => (
-      <li class="stat">
+    {stats.map((st) => (
+      <li class="stat px-clip">
         <span class="value">
-          <span data-en={en(s.value)}>{ru(s.value)}</span>
-          {s.unit && (
-            <span class="unit" data-en={s.unit.en}>
-              {s.unit.ru}
+          <span data-en={en(st.value)}>{ru(st.value)}</span>
+          {st.unit && (
+            <span class="unit" data-en={st.unit.en}>
+              {st.unit.ru}
             </span>
           )}
         </span>
-        <span class="note" data-en={s.note.en}>
-          {s.note.ru}
+        <span class="note" data-en={st.note.en}>
+          {st.note.ru}
         </span>
       </li>
     ))}
   </ul>
-</div>
+</section>
 
 <style>
-  /* The result card, built like the quest and HUD cards: title, then the numbers; the same
-     4px corner step as the other cards on the sheet */
-  .result {
+  /* Further from the stage above (40px) than the heading from its plates (16px), so the
+     heading reads as the start of its own part */
+  .test {
     container-type: inline-size;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: var(--space-tile);
-    background: var(--surface-raised);
+    margin-top: 40px;
   }
-  .result-title {
+  .head {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .title {
     margin: 0;
-    font-size: var(--t-body);
+    font-family: var(--font-sans);
+    font-size: var(--t-h3);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
+    letter-spacing: 0;
     color: var(--text-primary);
   }
+  .sub {
+    font-size: var(--t-small);
+    line-height: var(--lh-snug);
+    color: var(--text-tertiary);
+  }
+  /* A plate per figure, the stage's paper and pixel corners; one under another on a narrow
+     sheet */
   .stats {
     display: grid;
     grid-template-columns: repeat(var(--n), minmax(0, 1fr));
-    gap: 40px;
+    gap: var(--space-tile-gap);
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .stat {
+    --px-step: 4px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     min-width: 0;
+    padding: var(--space-tile);
+    background: var(--surface-sunken);
   }
   .value {
-    font-size: var(--t-stat);
-    font-weight: var(--fw-semibold);
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
     line-height: 1.05;
     letter-spacing: -0.01em;
     color: var(--text-primary);
   }
   .unit {
     margin-left: 0.25em;
-    font-size: 0.5em;
+    font-size: var(--t-small);
     font-weight: var(--fw-medium);
     letter-spacing: 0;
     color: var(--text-secondary);
   }
-  /* The same secondary size as "Было: …" above, one style for the quieter text in the block */
   .note {
     font-size: var(--t-body-sm);
     line-height: var(--lh-normal);
     color: var(--text-secondary);
     text-wrap: pretty;
   }
-
-  @container (max-width: 560px) {
-    /* Two numbers stay side by side, a third goes under them */
+  /* Narrow: one plate under another, full width. Side by side the plates got tall and thin,
+     a long note running a word or two to a line (owner) */
+  @container (max-width: 760px) {
     .stats {
-      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
-      gap: 24px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
     }
   }
 </style>

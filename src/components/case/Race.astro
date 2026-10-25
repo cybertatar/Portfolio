@@ -143,10 +143,9 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
   .lane-label {
     align-self: center;
     margin: 0 0 16px;
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-primary);
   }
   /* Where the old flow has left the app: in sky like the new flow */
@@ -245,10 +244,10 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     border: 0;
     background: var(--surface-raised);
     color: var(--text-primary);
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: calc(var(--t-button) * 1.3);
     font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
+    letter-spacing: var(--ls-label);
     cursor: inherit;
     transition: background var(--dur-fast) var(--ease-standard);
   }

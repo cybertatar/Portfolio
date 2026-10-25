@@ -1439,11 +1439,10 @@ const home = withBase('/');
     align-items: center;
     gap: 10px;
     align-self: flex-start;
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
     font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-secondary);
   }
   .back-icon {
@@ -1478,10 +1477,9 @@ const home = withBase('/');
   .toc-group {
     display: block;
     padding: 12px 12px 4px;
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-tertiary);
   }
   [data-toc] {
@@ -1573,14 +1571,14 @@ const home = withBase('/');
   }
 
   .eyebrow {
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-accent);
   }
+  /* Alegreya sets wider than Fira: 22ch broke the title into five lines */
   .title {
-    max-width: 22ch;
+    max-width: 26ch;
     font-size: var(--t-display);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
@@ -1673,10 +1671,9 @@ const home = withBase('/');
     border-top: 0;
   }
   .facts dt {
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-tertiary);
   }
   .facts dd {
@@ -1980,10 +1977,9 @@ const home = withBase('/');
     top: 16px;
     padding: 4px 10px;
     background: var(--surface-card);
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-primary);
   }
   .stage-tag.left {
@@ -2012,18 +2008,17 @@ const home = withBase('/');
   }
   thead th {
     border-top: 0;
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: var(--t-pixel-label);
     font-weight: var(--fw-semibold);
-    letter-spacing: var(--ls-caps);
-    text-transform: uppercase;
+    letter-spacing: var(--ls-label);
     color: var(--text-tertiary);
   }
   tbody th {
     font-weight: var(--fw-medium);
   }
   tbody td {
-    font-family: var(--font-pixel);
+    font-family: var(--font-label);
     font-size: calc(var(--t-body) * 1.35);
     font-weight: var(--fw-semibold);
     color: var(--text-accent);
@@ -2105,11 +2100,10 @@ const home = withBase('/');
       min-width: 0;
     }
     .toggle-label {
-      font-family: var(--font-pixel);
+      font-family: var(--font-label);
       font-size: 14px;
       line-height: 1;
-      letter-spacing: var(--ls-caps);
-      text-transform: uppercase;
+      letter-spacing: var(--ls-label);
       color: var(--text-tertiary);
     }
     .toggle-current {

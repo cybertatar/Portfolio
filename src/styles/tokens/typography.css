@@ -1,7 +1,12 @@
 :root {
   --font-sans: 'Fira Sans', system-ui, sans-serif;
   --font-mono: 'Fira Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-pixel: 'Handjet', var(--font-mono); /* game-UI labels, level, name plate */
+  /* Book pair for the parchment world: a serif with calligraphic roots for headings, its small
+     caps for labels (the pixel Handjet blurred at small sizes, review). Handjet stays for the
+     game itself: scene UI, prototype hints, the level badge */
+  --font-serif: 'Alegreya', Georgia, serif;
+  --font-label: 'Alegreya Sans SC', var(--font-sans);
+  --font-pixel: 'Handjet', var(--font-mono); /* game UI inside scenes, level */
 
   --fw-regular: 400; /* @kind font */
   --fw-medium: 500; /* @kind font */
@@ -11,9 +16,10 @@
   --lh-tight: 1.05; /* @kind font */
   --lh-snug: 1.2; /* @kind font */
   --lh-normal: 1.45; /* @kind font */
-  --ls-tighter: -0.03em; /* @kind font */
-  --ls-tight: -0.015em; /* @kind font */
+  --ls-tighter: -0.01em; /* @kind font */
+  --ls-tight: -0.005em; /* @kind font */
   --ls-caps: 0.09em; /* @kind font */
+  --ls-label: 0.04em; /* @kind font */
 
   /* Fluid size roles — min at ~1100px, max at ~2400px viewport */
   --t-display: clamp(34px, 2.9vw, 68px); /* case hero title */
@@ -37,7 +43,7 @@
     15px,
     0.8vw,
     19px
-  ); /* pixel caps labels: Handjet is narrow, so it runs larger */
+  ); /* small-caps labels (--font-label): sentence case, the capitals stand out of the small caps */
 
   --measure-title: 20ch;
   --measure-lead: 56ch;

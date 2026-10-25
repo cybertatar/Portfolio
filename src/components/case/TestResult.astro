@@ -78,8 +78,8 @@ const { stats } = Astro.props;
     line-height: var(--lh-snug);
     color: var(--text-tertiary);
   }
-  /* A plate per figure, the stage's paper and pixel corners; a third goes under the first two
-     on a narrow sheet */
+  /* A plate per figure, the stage's paper and pixel corners; one under another on a narrow
+     sheet */
   .stats {
     display: grid;
     grid-template-columns: repeat(var(--n), minmax(0, 1fr));
@@ -117,9 +117,11 @@ const { stats } = Astro.props;
     color: var(--text-secondary);
     text-wrap: pretty;
   }
-  @container (max-width: 560px) {
+  /* Narrow: one plate under another, full width. Side by side the plates got tall and thin,
+     a long note running a word or two to a line (owner) */
+  @container (max-width: 760px) {
     .stats {
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      grid-template-columns: minmax(0, 1fr);
       gap: 16px;
     }
   }

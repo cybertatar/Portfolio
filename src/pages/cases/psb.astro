@@ -1208,19 +1208,10 @@ const home = withBase('/');
             <p class="lead" data-en={d.lead.en}>
               {d.lead.ru}
             </p>
-            <!-- The changes sit in the stage beside the phones: under it they were hard to match
-                 with the mockups (review). The test result stays under the stage -->
+            <!-- The phones and the changes are one group in the middle of the stage; the test result
+                 closes the list, in its column (review: a list under the stage was hard to match with
+                 the mockups; on a wide stage the group drifted left and the tags ran to the corners) -->
             <div class:list={['stage', 'px-clip', { 'race-stage': d.race }]}>
-              {d.compare && (
-                <>
-                  <span class="stage-tag left px-clip" data-en="Before">
-                    До
-                  </span>
-                  <span class="stage-tag right px-clip" data-en="After">
-                    После
-                  </span>
-                </>
-              )}
               <div class="split">
                 <div class="split-grid">
                   <div class:list={['split-media', { race: d.race }]}>
@@ -1228,6 +1219,12 @@ const home = withBase('/');
                       <Race lanes={d.race} />
                     ) : d.compare ? (
                       <div class="stage-phone">
+                        <span class="stage-tag left" data-en="Before">
+                          До
+                        </span>
+                        <span class="stage-tag right" data-en="After">
+                          После
+                        </span>
                         <Compare
                           before={d.compare.before}
                           after={d.compare.after}
@@ -1240,12 +1237,10 @@ const home = withBase('/');
                   </div>
                   <div class="split-list">
                     <Changes rows={d.versus.rows} />
+                    <TestResult stats={d.versus.stats} />
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="versus-wrap">
-              <TestResult stats={d.versus.stats} />
             </div>
           </section>
         ))}
@@ -1576,20 +1571,18 @@ const home = withBase('/');
     letter-spacing: var(--ls-label);
     color: var(--text-accent);
   }
-  /* Alegreya sets wider than Fira: 22ch broke the title into five lines */
+  /* Pixel titles: Handjet is narrow, so the measure is wider and the lines sit tight */
   .title {
-    max-width: 26ch;
+    max-width: 30ch;
     font-size: var(--t-display);
     font-weight: var(--fw-bold);
-    line-height: var(--lh-tight);
-    letter-spacing: var(--ls-tighter);
+    line-height: 1;
     text-wrap: balance;
   }
   .h2 {
     font-size: var(--t-h2);
     font-weight: var(--fw-bold);
-    line-height: var(--lh-tight);
-    letter-spacing: var(--ls-tighter);
+    line-height: 1;
   }
   .h3 {
     font-size: var(--t-h3);
@@ -1720,7 +1713,9 @@ const home = withBase('/');
     /* Heading closer to its content than the cards are to each other (24px) */
     gap: 16px;
   }
+  /* A small title inside the overview: grotesk, the pixel face is for large headings */
   .results-title {
+    font-family: var(--font-sans);
     display: flex;
     align-items: center;
     gap: 14px;
@@ -1839,9 +1834,9 @@ const home = withBase('/');
     }
   }
 
-  /* Finding numbers: the book serif, not pixel (Handjet is kept to the game) */
+  /* Finding numbers: pixel, like the titles */
   .step-num {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-size: var(--t-lead);
     font-weight: var(--fw-bold);
     line-height: 1;
@@ -1903,21 +1898,18 @@ const home = withBase('/');
   }
 
   /* Directions */
-  /* The list under the race (or slider) sits as far from it as the result card sits from the
-     list, and further than its own rows sit from each other */
-  .sheet > .versus-wrap {
-    margin-top: 40px;
-  }
-  /* Phones on the left, the changes beside them; under them when the stage is narrow */
+  /* Phones and changes as one group centred in the stage; the list under them when narrow. The
+     phone keeps to the top: the list with the result runs taller */
   .split {
     container-type: inline-size;
     width: 100%;
   }
   .split-grid {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 40px clamp(32px, 4cqi, 72px);
+    grid-template-columns: auto minmax(0, 460px);
+    justify-content: center;
+    align-items: start;
+    gap: 40px clamp(48px, 5cqi, 96px);
   }
   .split-media {
     display: flex;
@@ -1926,9 +1918,6 @@ const home = withBase('/');
   }
   .split-media.race {
     width: clamp(340px, 56cqi, 640px);
-  }
-  .split-list {
-    max-width: 440px;
   }
   /* Under the phones once the list would get narrower than about 260px: the slider's one
      phone leaves more room than the race's two */
@@ -1941,9 +1930,6 @@ const home = withBase('/');
     .split-media {
       width: 100%;
     }
-    .split-list {
-      max-width: none;
-    }
   }
   @container (max-width: 640px) {
     .split-grid:has(.race) {
@@ -1951,9 +1937,6 @@ const home = withBase('/');
     }
     .split-grid:has(.race) .split-media {
       width: 100%;
-    }
-    .split-grid:has(.race) .split-list {
-      max-width: none;
     }
   }
   .stage {
@@ -1972,22 +1955,22 @@ const home = withBase('/');
     padding: 24px 0 32px;
     overflow: hidden;
   }
+  /* "До / После" over the phone itself, at its two sides, quiet like the race's labels */
+  .stage-phone {
+    position: relative;
+  }
   .stage-tag {
-    --px-step: 2px;
     position: absolute;
-    top: 16px;
-    padding: 4px 10px;
-    background: var(--surface-card);
-    font-family: var(--font-label);
-    font-size: var(--t-pixel-label);
-    letter-spacing: var(--ls-label);
-    color: var(--text-primary);
+    bottom: calc(100% + 12px);
+    font-size: var(--t-small);
+    font-weight: var(--fw-medium);
+    color: var(--text-tertiary);
   }
   .stage-tag.left {
-    left: 16px;
+    left: 6%;
   }
   .stage-tag.right {
-    right: 16px;
+    right: 6%;
   }
 
   /* Testing */

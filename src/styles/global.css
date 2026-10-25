@@ -1,4 +1,4 @@
-/* Tyncherov Portfolio DS — global entry. Alegreya, Alegreya Sans, Alegreya Sans SC, Fira Mono and Handjet are linked in BaseLayout. */
+/* Tyncherov Portfolio DS — global entry. Golos Text, Handjet and Fira Mono are linked in BaseLayout. */
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
@@ -19,8 +19,6 @@ body {
   font-family: var(--font-sans);
   font-size: var(--t-body);
   line-height: var(--lh-normal);
-  /* Lining figures: Alegreya's own are old-style, the numbers here are data */
-  font-variant-numeric: lining-nums;
   /* Browsers drop ligatures under letter-spacing (headings, caps); the feature setting keeps fi / fl */
   font-feature-settings:
     'liga' 1,
@@ -35,11 +33,11 @@ p,
 figure {
   margin: 0;
 }
-/* Headings in the book serif; small UI titles inside lists opt out */
+/* Large headings in the pixel face, tight and untracked; h3 and below stay grotesk */
 h1,
-h2,
-h3 {
-  font-family: var(--font-serif);
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: 0;
 }
 a {
   color: var(--text-primary);
@@ -68,12 +66,13 @@ textarea {
 /* Mobile / tablet portrait: the same six steps, fixed */
 @media (max-width: 960px) {
   :root {
-    --t-small: 15px;
-    --t-body: 18px;
-    --t-lead: 20px;
-    --t-h3: 22px;
-    --t-h2: 26px;
-    --t-display: 30px;
+    --t-small: 14px;
+    --t-body: 16px;
+    --t-lead: 18px;
+    --t-h3: 20px;
+    --t-stat: 26px;
+    --t-h2: 32px;
+    --t-display: 40px;
   }
 }
 

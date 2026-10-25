@@ -11,12 +11,13 @@ interface Props {
   stats: ResultStat[];
 }
 
-/** The result of the test in a few numbers, under the stage with the phones and the changes. */
+/** The result of the test in a few numbers, under the list of changes. */
 const { stats } = Astro.props;
 ---
 
-<!-- The result is its own card: the boundary groups the numbers (NN/g, common region) -->
-<div class="result px-clip">
+<!-- Closes the list of changes in its column: a keyline, a title, the figures side by side.
+     A separate card across the stage split the two figures to its far halves (owner) -->
+<div class="result">
   <p class="result-title" data-en="Test result">
     Итог теста
   </p>
@@ -40,15 +41,14 @@ const { stats } = Astro.props;
 </div>
 
 <style>
-  /* The result card, built like the quest and HUD cards: title, then the numbers; the same
-     4px corner step as the other cards on the sheet */
   .result {
     container-type: inline-size;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding: var(--space-tile);
-    background: var(--surface-raised);
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: var(--border-width-hair) solid var(--border-default);
   }
   .result-title {
     margin: 0;
@@ -60,7 +60,7 @@ const { stats } = Astro.props;
   .stats {
     display: grid;
     grid-template-columns: repeat(var(--n), minmax(0, 1fr));
-    gap: 40px;
+    gap: 28px;
     margin: 0;
     padding: 0;
     list-style: none;

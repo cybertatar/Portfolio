@@ -55,7 +55,7 @@ const onBody = ([x, y]: [number, number]) => ({
       const at = onBody(m);
       return (
         <span
-          class="mark px-clip"
+          class="mark"
           style={`left: ${at.x}%; top: ${at.y}%`}
           data-mark={i + 1}
           data-x={at.x}
@@ -166,15 +166,20 @@ const onBody = ([x, y]: [number, number]) => ({
      its spot on the screen is under the pointer (initMarks in case.ts). They belong to the new
      screen, so one under the "before" side stays hidden (initCompare) */
   .mark {
-    --px-step: 2px;
     position: absolute;
     display: grid;
     place-items: center;
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     transform: translate(-50%, -50%) scale(0.6);
-    background: var(--sky-400);
-    color: var(--ink-1);
+    /* A ring, not a filled tile: on the dark app screen a solid square passed for one of the
+       bank's own badges (owner) */
+    border-radius: 50%;
+    background: rgba(14, 17, 22, 0.6);
+    box-shadow:
+      0 0 0 2px var(--sky-300),
+      0 0 0 6px rgba(156, 192, 226, 0.25);
+    color: #fff;
     font-size: var(--t-micro);
     font-weight: var(--fw-semibold);
     line-height: 1;

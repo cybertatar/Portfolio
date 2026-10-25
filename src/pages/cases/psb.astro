@@ -1839,9 +1839,10 @@ const home = withBase('/');
     }
   }
 
+  /* Finding numbers: the book serif, not pixel (Handjet is kept to the game) */
   .step-num {
-    font-family: var(--font-pixel);
-    font-size: calc(var(--t-list-num) * 1.2);
+    font-family: var(--font-serif);
+    font-size: var(--t-lead);
     font-weight: var(--fw-bold);
     line-height: 1;
     color: var(--text-accent);
@@ -2019,7 +2020,7 @@ const home = withBase('/');
   }
   tbody td {
     font-family: var(--font-label);
-    font-size: calc(var(--t-body) * 1.35);
+    font-size: var(--t-h3);
     font-weight: var(--fw-semibold);
     color: var(--text-accent);
   }
@@ -2101,14 +2102,14 @@ const home = withBase('/');
     }
     .toggle-label {
       font-family: var(--font-label);
-      font-size: 14px;
+      font-size: var(--t-small);
       line-height: 1;
       letter-spacing: var(--ls-label);
       color: var(--text-tertiary);
     }
     .toggle-current {
       overflow: hidden;
-      font-size: 16px;
+      font-size: var(--t-body);
       font-weight: var(--fw-semibold);
       line-height: var(--lh-snug);
       text-overflow: ellipsis;
@@ -2143,7 +2144,7 @@ const home = withBase('/');
     }
     [data-toc] {
       min-height: 44px;
-      font-size: 16px;
+      font-size: var(--t-body);
     }
 
     .sheets {
@@ -2165,10 +2166,10 @@ const home = withBase('/');
       margin-top: 48px;
     }
     .title {
-      font-size: 30px;
+      font-size: var(--t-display);
     }
     .h2 {
-      font-size: 26px;
+      font-size: var(--t-h2);
     }
     .trio {
       grid-template-columns: minmax(0, 1fr);

@@ -1,4 +1,4 @@
-/* Tyncherov Portfolio DS — global entry. Alegreya, Alegreya Sans SC, Fira Sans / Fira Mono and Handjet are linked in BaseLayout. */
+/* Tyncherov Portfolio DS — global entry. Alegreya, Alegreya Sans, Alegreya Sans SC, Fira Mono and Handjet are linked in BaseLayout. */
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
@@ -19,6 +19,8 @@ body {
   font-family: var(--font-sans);
   font-size: var(--t-body);
   line-height: var(--lh-normal);
+  /* Lining figures: Alegreya's own are old-style, the numbers here are data */
+  font-variant-numeric: lining-nums;
   /* Browsers drop ligatures under letter-spacing (headings, caps); the feature setting keeps fi / fl */
   font-feature-settings:
     'liga' 1,
@@ -63,12 +65,15 @@ textarea {
   outline-offset: 2px;
 }
 
-/* Mobile / tablet portrait type scale */
+/* Mobile / tablet portrait: the same six steps, fixed */
 @media (max-width: 960px) {
   :root {
-    --t-card-title: 28px;
-    --t-card-sub: 15px;
-    --t-body: 16px;
+    --t-small: 15px;
+    --t-body: 18px;
+    --t-lead: 20px;
+    --t-h3: 22px;
+    --t-h2: 26px;
+    --t-display: 30px;
   }
 }
 

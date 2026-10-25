@@ -1,6 +1,5 @@
 ---
 import { en, ru, type Localized, type Text } from '../../content/site';
-import PixelIcon from '../ui/PixelIcon.astro';
 
 export interface ResultStat {
   value: Text;
@@ -15,24 +14,19 @@ interface Props {
 /**
  * The result of the test for one solution: a card of its own under the stage, not the end of
  * the list of changes (the owner: it's a different thing, what people did, not what we
- * changed). A heading with the trophy, then the figures side by side, plain: the overview's
- * bars and hearts didn't suit it (owner).
+ * changed). Kept light (owner: heavy with the trophy tile, a big heading and bold figures, and
+ * the overview's bars and hearts didn't suit it): a quiet heading, the figures in medium weight.
  */
 const { stats } = Astro.props;
 ---
 
 <section class="test px-clip">
   <div class="head">
-    <span class="icon px-clip">
-      <PixelIcon name="trophy" />
-    </span>
-    <span class="titles">
-      <h3 class="title" data-en="Test result">
-        Итог теста
-      </h3>
-      <span class="sub" data-en="Usability test with 30 of the bank’s customers">
-        Юзабилити-тест с 30 клиентами банка
-      </span>
+    <h3 class="title" data-en="Test result">
+      Итог теста
+    </h3>
+    <span class="sub" data-en="Usability test with 30 of the bank’s customers">
+      Юзабилити-тест с 30 клиентами банка
     </span>
   </div>
   <ul class="stats" style={`--n: ${stats.length}`}>
@@ -62,35 +56,20 @@ const { stats } = Astro.props;
     container-type: inline-size;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
     margin-top: var(--space-tile-gap);
     padding: var(--space-tile);
     background: var(--surface-raised);
   }
   .head {
     display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  .icon {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 44px;
-    height: 44px;
-    background: var(--surface-card);
-    color: var(--text-accent);
-  }
-  .titles {
-    display: flex;
     flex-direction: column;
     gap: 2px;
-    min-width: 0;
   }
   .title {
     margin: 0;
     font-family: var(--font-sans);
-    font-size: var(--t-h3);
+    font-size: var(--t-body);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
     letter-spacing: 0;
@@ -114,12 +93,12 @@ const { stats } = Astro.props;
   .stat {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     min-width: 0;
   }
   .value {
-    font-size: var(--t-stat);
-    font-weight: var(--fw-semibold);
+    font-size: var(--t-h3);
+    font-weight: var(--fw-medium);
     line-height: 1.05;
     letter-spacing: -0.01em;
     color: var(--text-primary);

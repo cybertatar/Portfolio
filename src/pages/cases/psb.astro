@@ -11,6 +11,7 @@ import Versus, { type VersusRow, type VersusStat } from '../../components/case/V
 import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
+import SceneControls from '../../components/case/SceneControls.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
 import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
@@ -1106,7 +1107,7 @@ const home = withBase('/');
                         {s.text.ru}
                       </p>
                     </div>
-                    <div class="chapter-media">
+                    <div class="chapter-media" data-scene-host>
                       {s.id === 'team' ? (
                         <TeamScene />
                       ) : s.id === 'scope' ? (
@@ -1125,6 +1126,10 @@ const home = withBase('/');
                           </div>
                         </div>
                       )}
+                      <SceneControls
+                        label={s.id === 'prototype' ? s.title.ru : undefined}
+                        enLabel={s.id === 'prototype' ? s.title.en : undefined}
+                      />
                     </div>
                     <div class="chapter-dim" aria-hidden="true" data-chapter-dim></div>
                   </div>
@@ -1736,8 +1741,16 @@ const home = withBase('/');
     gap: 12px;
     padding: var(--space-tile);
   }
+  /* The scene, and under it its pause and timeline (SceneControls), inside the card's padding */
   .chapter-media {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     align-self: center;
+    padding-bottom: var(--space-tile);
+  }
+  .chapter-media :global(.scene-controls) {
+    padding-right: var(--space-tile);
   }
   .chapter-media :global(.stage) {
     background: none;
@@ -1805,6 +1818,9 @@ const home = withBase('/');
     }
     .clip {
       inset: 0 var(--space-tile) var(--space-tile);
+    }
+    .chapter-media :global(.scene-controls) {
+      padding-left: var(--space-tile);
     }
   }
 

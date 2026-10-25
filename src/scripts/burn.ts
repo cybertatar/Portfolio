@@ -33,11 +33,11 @@ export async function burnPortrait(slot: HTMLElement, fallen: string, respawned:
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     img.style.visibility = 'hidden';
     slot.classList.add('is-down');
-    showDialog(fallen);
+    showDialog(fallen, slot);
     await wait(RESPAWN_AT_MS);
     img.style.visibility = '';
     slot.classList.remove('is-down');
-    showDialog(respawned);
+    showDialog(respawned, slot);
     return;
   }
 
@@ -98,7 +98,7 @@ export async function burnPortrait(slot: HTMLElement, fallen: string, respawned:
   slot.append(canvas);
   img.style.visibility = 'hidden';
   slot.classList.add('is-down');
-  showDialog(fallen);
+  showDialog(fallen, slot);
 
   const sparks: Spark[] = [];
   const pending = [...cells].sort((a, b) => a.at - b.at);
@@ -203,5 +203,5 @@ export async function burnPortrait(slot: HTMLElement, fallen: string, respawned:
   img.style.visibility = '';
   slot.classList.remove('is-down');
   canvas.remove();
-  showDialog(respawned);
+  showDialog(respawned, slot);
 }

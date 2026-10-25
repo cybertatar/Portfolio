@@ -122,7 +122,7 @@ const inLang = (lang: 'ru' | 'en') =>
     };
     set(banks[0], 0);
     const steps: SceneStep[] = banks.flatMap((b, i) => [
-      { state: 'open', ms: 500, enter: () => set(b, i) },
+      { state: 'open', ms: 500, enter: () => set(b, i), mark: b.name },
       { state: 'rise', ms: 2000 },
       { state: 'take', ms: 600 },
       { state: 'got', ms: 600 },

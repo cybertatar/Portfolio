@@ -105,7 +105,7 @@ export function initLevel(el: HTMLElement, birthday: string, message: { ru: stri
     /* ignore */
   }
   const text = localized(message.ru, message.en).replace('{n}', String(level));
-  setTimeout(() => showDialog(text), 900);
+  setTimeout(() => showDialog(text, el), 900);
 }
 
 /** Locked cases: the lock shakes and a dialog says there's not enough mana. */
@@ -113,7 +113,9 @@ export function initLocked(cards: HTMLElement[]) {
   cards.forEach((card) => {
     const lock = card.querySelector<HTMLElement>('[data-lock]');
     const open = () => {
-      showDialog(localized(card.dataset.msg ?? '', card.dataset.msgEn));
+      // The bubble opens under "Откроется позже" (the line after the lock), or the NDA tag's lock
+      const label = lock?.nextElementSibling as HTMLElement | null | undefined;
+      showDialog(localized(card.dataset.msg ?? '', card.dataset.msgEn), label ?? lock ?? card);
       if (!lock) return;
       lock.classList.remove('is-shaking');
       void lock.offsetWidth; // restart the animation
@@ -154,7 +156,7 @@ export function initPoke(el: HTMLElement) {
       busy = false;
       return;
     }
-    showDialog(lines[i]);
+    showDialog(lines[i], el);
     i += 1;
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     el.classList.remove('is-hit');

@@ -86,20 +86,22 @@ const review = {
 </div>
 
 <script>
-  import { runScene, typeOut } from '../../../scripts/scenes';
+  import { runScene, SceneClock, typeOut } from '../../../scripts/scenes';
 
   document.querySelectorAll<HTMLElement>('[data-scene="team"]').forEach((root) => {
     const line = root.querySelector<HTMLElement>('[data-type]');
+    const clock = new SceneClock();
     runScene(
       root,
       [
-        { state: 'fight', ms: 2600 },
-        { state: 'show', ms: 1400 },
-        { state: 'review', ms: 3600, enter: () => typeOut(line, 38) },
-        { state: 'sad', ms: 2200 },
+        { state: 'fight', ms: 2600, mark: { ru: 'Спорим', en: 'Arguing' } },
+        { state: 'show', ms: 1400, mark: { ru: 'Ревью сеньора', en: 'Senior review' } },
+        { state: 'review', ms: 3600, enter: () => typeOut(line, 38, clock) },
+        { state: 'sad', ms: 2200, mark: { ru: 'Дорабатываем', en: 'Reworking' } },
         { state: 'leave', ms: 900 },
       ],
       'sad',
+      clock,
     );
   });
 </script>

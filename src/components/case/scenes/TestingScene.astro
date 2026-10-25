@@ -187,7 +187,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
 </div>
 
 <script>
-  import { runScene, typeOut } from '../../../scripts/scenes';
+  import { runScene, SceneClock, typeOut } from '../../../scripts/scenes';
 
   /**
    * Taps on the phone, as fractions of the 804×1748 screen exports (measured on the orange
@@ -214,12 +214,12 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     const rows = [...root.querySelectorAll<HTMLElement>('[data-row]')];
     const q = (sel: string) => root.querySelector<HTMLElement>(sel);
 
-    let timers: ReturnType<typeof setTimeout>[] = [];
+    // Scene time: the timers stop with the pause button (SceneControls)
+    const clock = new SceneClock();
     let tick: ReturnType<typeof setInterval> | undefined;
-    const at = (ms: number, fn: () => void) => timers.push(setTimeout(fn, ms));
+    const at = (ms: number, fn: () => void) => clock.at(ms, fn);
     const reset = () => {
-      timers.forEach(clearTimeout);
-      timers = [];
+      clock.clear();
       clearInterval(tick);
     };
 
@@ -263,7 +263,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       rest();
       at(150, () => toElement(q('[data-target="field"]')));
       at(550, press);
-      at(650, () => typeOut(name, 60));
+      at(650, () => typeOut(name, 60, clock));
       at(1500, () => toElement(q('[data-target="start"]')));
       at(2000, press);
     };
@@ -278,9 +278,9 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       show(0);
       rows.forEach((r) => r.classList.remove('on'));
       logRow(0);
-      const t0 = performance.now();
+      const t0 = clock.now();
       tick = setInterval(() => {
-        const sec = Math.min(18.3, ((performance.now() - t0) / 1000) * SPEED);
+        const sec = Math.min(18.3, ((clock.now() - t0) / 1000) * SPEED);
         if (timer) timer.textContent = `+00:${sec.toFixed(1).padStart(4, '0')}`;
       }, 50);
       at(300, () => toScreen(TAPS.want));
@@ -308,9 +308,9 @@ const screens = ['cb-off', 'cb-connect', 'success'];
       rest();
       root.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
         const to = Number(el.dataset.count);
-        const t0 = performance.now();
+        const t0 = clock.now();
         const step = () => {
-          const p = Math.min(1, (performance.now() - t0) / 900);
+          const p = Math.min(1, (clock.now() - t0) / 900);
           el.textContent = String(Math.round(to * p));
           if (p < 1) requestAnimationFrame(step);
         };
@@ -332,14 +332,15 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     runScene(
       root,
       [
-        { state: 'start', ms: 2500, enter: start },
+        { state: 'start', ms: 2500, enter: start, mark: { ru: 'Старт', en: 'Start' } },
         { state: 'task', ms: 1500, enter: task },
-        { state: 'session', ms: 4900, enter: session },
-        { state: 'seq', ms: 1800, enter: seq },
-        { state: 'summary', ms: 2800, enter: count },
+        { state: 'session', ms: 4900, enter: session, mark: { ru: 'Сессия', en: 'Session' } },
+        { state: 'seq', ms: 1800, enter: seq, mark: 'SEQ' },
+        { state: 'summary', ms: 2800, enter: count, mark: { ru: 'Итоги', en: 'Summary' } },
         { state: 'done', ms: 1600, enter: reset },
       ],
       'summary',
+      clock,
     );
   });
 </script>

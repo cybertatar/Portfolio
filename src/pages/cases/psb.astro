@@ -1568,6 +1568,16 @@ const home = withBase('/');
   .sheet > .h2 + .prose {
     margin-top: 16px;
   }
+  /* The cover goes with the title above it; the intro starts further down, so the three don't
+     read as one evenly spaced run (proximity) */
+  .sheet > .hero + .intro {
+    margin-top: var(--space-split);
+  }
+  /* A line that belongs to the block above: closer to it than the lead is to that block */
+  .sheet > .deck-stage + .kit-note,
+  .sheet > .table-wrap + .note {
+    margin-top: 16px;
+  }
 
   .eyebrow {
     font-family: var(--font-label);

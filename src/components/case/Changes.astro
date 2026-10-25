@@ -60,7 +60,7 @@ const numbered = rows.some((r) => r.mark);
     padding: 0;
     list-style: none;
   }
-  /* The keyline on top ties the subject to its item */
+  /* A quiet hairline on top ties the subject to its item (2px read too bright, owner) */
   .change {
     /* Holds the hidden "Стало:" */
     position: relative;
@@ -69,7 +69,7 @@ const numbered = rows.some((r) => r.mark);
     gap: 6px;
     min-width: 0;
     padding-top: 14px;
-    border-top: var(--border-width-keyline) solid var(--border-default);
+    border-top: var(--border-width-hair) solid var(--border-subtle);
     text-wrap: pretty;
   }
   .label {

@@ -1,0 +1,414 @@
+---
+import { en, ru, type Localized } from '../../content/site';
+import { withBase } from '../../scripts/url';
+import type { ChangeRow } from './Changes.astro';
+
+export interface MarkedRow extends ChangeRow {
+  /** Where the change sits on the new screen, as fractions of it (x, y). */
+  now: [number, number];
+  /** Where it sat on the old screen; none when the old screen didn't have it on view. */
+  was?: [number, number];
+  /** Said instead of "Стало: …" in the old state when there's nothing to point at. */
+  wasNote?: Localized;
+  /** The callout's side of the phone; its place down that side follows the "now" mark. */
+  side: 'left' | 'right';
+}
+
+interface Props {
+  before: string;
+  after: string;
+  /** What the screens show, for alt text. */
+  label: Localized;
+  rows: MarkedRow[];
+}
+
+/**
+ * The home screen with its changes called out on both sides, and a "Стало / Было" switch in
+ * place of a before/after slider (callouts on both sides fought the slider: half of them pointed
+ * at the screen under the handle). Each callout keeps its place, only its text and its leader
+ * change, so the eye follows a line to where the thing used to be. Numbers run down the left
+ * side, then the right. On a narrow stage the callouts go under the phone as a numbered list;
+ * the marks stay on the screen. Leaders are drawn by initAnnotated in case.ts.
+ */
+const { before, after, label, rows } = Astro.props;
+// A mark's place on the whole body: the screen sits 24/450 in and 23/920 down
+const onBody = ([x, y]: [number, number]) =>
+  `left: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
+const sides = (['left', 'right'] as const).map((side) =>
+  rows.map((r, i) => ({ ...r, n: i + 1 })).filter((r) => r.side === side),
+);
+---
+
+<div class="ann" data-ann data-state="now">
+  <div class="seg px-clip" role="group" aria-label="Экран" data-en-label="Screen">
+    <button type="button" aria-pressed="false" data-ann-to="was" data-en="Before">
+      Было
+    </button>
+    <button type="button" aria-pressed="true" data-ann-to="now" data-en="After">
+      Стало
+    </button>
+  </div>
+
+  <div class="field" data-ann-field>
+    <svg class="leaders" aria-hidden="true" data-ann-leaders></svg>
+    {sides.map((items, s) => (
+      <ol class:list={['side', s ? 'right' : 'left']} start={items[0]?.n}>
+        {items.map((r) => (
+          <li
+            class:list={['callout', { 'off-was': !r.was }]}
+            data-ann-item={r.n}
+            data-now-y={r.now[1]}
+          >
+            <span class="head">
+              <span class="num" aria-hidden="true">
+                {r.n}
+              </span>
+              <span data-en={en(r.label)}>{ru(r.label)}</span>
+            </span>
+            {/* Both states in one cell: the callout is as tall as its longer text and doesn't jump */}
+            <span class="texts">
+              <span class="text now">
+                <span class="main" data-en={r.after.en}>
+                  {r.after.ru}
+                </span>
+                <span class="sub" data-en={`Before: ${r.before.en}`}>
+                  Было: {r.before.ru}
+                </span>
+              </span>
+              <span class="text was">
+                <span class="main" data-en={r.before.en}>
+                  {r.before.ru}
+                </span>
+                {r.was || !r.wasNote ? (
+                  <span class="sub" data-en={`After: ${r.after.en}`}>
+                    Стало: {r.after.ru}
+                  </span>
+                ) : (
+                  <span class="sub" data-en={r.wasNote.en}>
+                    {r.wasNote.ru}
+                  </span>
+                )}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    ))}
+
+    <div class="phone" data-ann-phone>
+      <img
+        class="screen now"
+        src={withBase(after)}
+        alt={`${label.ru}: стало`}
+        data-en-alt={`${label.en}: after`}
+        loading="lazy"
+        draggable="false"
+      />
+      <img
+        class="screen was"
+        src={withBase(before)}
+        alt={`${label.ru}: было`}
+        data-en-alt={`${label.en}: before`}
+        loading="lazy"
+        draggable="false"
+      />
+      <img
+        class="body"
+        src={withBase('assets/iphone-17-pro.webp')}
+        alt=""
+        loading="lazy"
+        draggable="false"
+      />
+      {rows.map((r, i) => (
+        <>
+          <span class="ring now" style={onBody(r.now)} data-ann-ring={i + 1} aria-hidden="true">
+            {i + 1}
+          </span>
+          {r.was && (
+            <span class="ring was" style={onBody(r.was)} data-ann-ring={i + 1} aria-hidden="true">
+              {i + 1}
+            </span>
+          )}
+        </>
+      ))}
+    </div>
+  </div>
+</div>
+
+<style>
+  .ann {
+    container-type: inline-size;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+
+  /* The switch: two pixel tabs on a sunken track, the current one raised like a card */
+  .seg {
+    --px-step: 2px;
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: var(--surface-active);
+  }
+  .seg button {
+    --px-step: 2px;
+    padding: 6px 16px;
+    border: 0;
+    background: none;
+    clip-path: var(--px-clip);
+    font: inherit;
+    font-size: var(--t-small);
+    font-weight: var(--fw-medium);
+    line-height: 1.2;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition:
+      background var(--dur-fast) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard);
+  }
+  .seg button:hover {
+    color: var(--text-primary);
+  }
+  .seg button[aria-pressed='true'] {
+    background: var(--surface-card);
+    color: var(--text-primary);
+  }
+  .seg button:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
+  }
+
+  /* Wide: callouts | phone | callouts. The gaps are where the leaders run */
+  .field {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(240px, 34cqi, 340px) minmax(0, 1fr);
+    grid-template-areas: 'left phone right';
+    column-gap: clamp(40px, 6cqi, 72px);
+    width: 100%;
+  }
+  .phone {
+    grid-area: phone;
+    position: relative;
+    aspect-ratio: 450 / 920;
+    container-type: inline-size;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .side {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .side.left {
+    grid-area: left;
+    text-align: right;
+  }
+  .side.right {
+    grid-area: right;
+  }
+  /* Without the script the callouts just stack; initAnnotated sets each one's top so its
+     number sits level with its mark */
+  .ann[data-laid] .callout {
+    position: absolute;
+    inset-inline: 0;
+  }
+  .callout {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 20px;
+    text-wrap: pretty;
+  }
+  .head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--t-small);
+    line-height: 1.3;
+    color: var(--text-tertiary);
+  }
+  .left .head {
+    flex-direction: row-reverse;
+  }
+  .num {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.5px currentColor;
+    color: var(--text-accent);
+    font-size: var(--t-micro);
+    font-weight: var(--fw-semibold);
+    transition:
+      background var(--dur-fast) var(--ease-standard),
+      color var(--dur-fast) var(--ease-standard);
+  }
+  .callout.is-lit .num {
+    background: var(--text-accent);
+    color: var(--text-inverse);
+  }
+  .callout.is-lit .head {
+    color: var(--text-primary);
+  }
+  .texts {
+    display: grid;
+  }
+  .text {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    transition:
+      opacity var(--dur-slow) var(--ease-standard),
+      visibility var(--dur-slow);
+  }
+  .main {
+    font-size: var(--t-body);
+    font-weight: var(--fw-medium);
+    line-height: var(--lh-snug);
+    color: var(--text-primary);
+  }
+  .sub {
+    font-size: var(--t-small);
+    line-height: var(--lh-snug);
+    color: var(--text-secondary);
+  }
+  /* Nothing on the old screen to point at: the callout steps back */
+  .callout.off-was {
+    transition: opacity var(--dur-slow) var(--ease-standard);
+  }
+  .ann[data-state='was'] .callout.off-was {
+    opacity: 0.55;
+  }
+  .ann[data-state='was'] .callout.off-was .num {
+    color: var(--text-tertiary);
+  }
+
+  /* Screens, rings and leaders of one state at a time */
+  .screen {
+    position: absolute;
+    left: calc(24 / 450 * 100%);
+    top: calc(23 / 920 * 100%);
+    width: calc(402 / 450 * 100%);
+    height: calc(874 / 920 * 100%);
+    border-radius: calc(60 / 450 * 100cqi);
+    object-fit: cover;
+    object-position: top;
+    background: #0e1116;
+    transition: opacity var(--dur-slow) var(--ease-standard);
+  }
+  .body {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  /* A ring, not a filled tile: on the dark app screen a solid square passed for one of the
+     bank's own badges (owner) */
+  .ring {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: rgba(14, 17, 22, 0.6);
+    box-shadow:
+      0 0 0 2px var(--sky-300),
+      0 0 0 6px rgba(156, 192, 226, 0.25);
+    color: #fff;
+    font-size: var(--t-micro);
+    font-weight: var(--fw-semibold);
+    line-height: 1;
+    pointer-events: none;
+    transition:
+      opacity var(--dur-slow) var(--ease-standard),
+      transform var(--dur-slow) var(--ease-standard),
+      background var(--dur-fast) var(--ease-standard);
+  }
+  .ring.is-lit {
+    background: var(--sky-500);
+  }
+  /* Over the phone: the last stretch of each leader runs across the screen to its mark */
+  .leaders {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .leaders :global(path) {
+    fill: none;
+    stroke: var(--line-3);
+    stroke-width: 1.25;
+    stroke-dasharray: 4 3;
+    transition:
+      opacity var(--dur-slow) var(--ease-standard),
+      stroke var(--dur-fast) var(--ease-standard);
+  }
+  .leaders :global(path.is-lit) {
+    stroke: var(--sky-500);
+    stroke-dasharray: none;
+  }
+  .ann[data-state='now'] .was,
+  .ann[data-state='was'] .now,
+  .ann[data-state='now'] .leaders :global(path.was),
+  .ann[data-state='was'] .leaders :global(path.now) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .ann[data-state='now'] .ring.was,
+  .ann[data-state='was'] .ring.now {
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+
+  /* Narrow: the phone, then the callouts as a list under it; no leaders, the numbers match */
+  @container (max-width: 760px) {
+    .field {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: 'phone' 'left' 'right';
+      row-gap: 0;
+    }
+    .phone {
+      justify-self: center;
+      width: min(300px, 72cqi);
+      margin-bottom: 32px;
+    }
+    .side.left {
+      text-align: left;
+    }
+    .left .head {
+      flex-direction: row;
+    }
+    .leaders {
+      display: none;
+    }
+    /* The list is under the phone, so a change in its height moves nothing above; reserving
+       the longer text made the gaps uneven */
+    .ann[data-state='now'] .text.was,
+    .ann[data-state='was'] .text.now {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .text,
+    .screen,
+    .ring,
+    .callout.off-was,
+    .leaders :global(path) {
+      transition: none;
+    }
+  }
+</style>

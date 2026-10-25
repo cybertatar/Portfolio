@@ -74,7 +74,13 @@ export function initCaseMenu(bar: HTMLElement) {
 export function initCompare(root: HTMLElement) {
   const range = root.querySelector<HTMLInputElement>('[data-compare-range]');
   if (!range) return;
-  const set = () => root.style.setProperty('--pos', `${range.value}%`);
+  const marks = [...root.querySelectorAll<HTMLElement>('[data-mark]')];
+  const set = () => {
+    root.style.setProperty('--pos', `${range.value}%`);
+    marks.forEach((m) =>
+      m.classList.toggle('is-under', Number(m.dataset.x) < Number(range.value) + 3),
+    );
+  };
   range.addEventListener('input', set);
   set();
 
@@ -112,6 +118,24 @@ export function initCompare(root: HTMLElement) {
     drag = null;
   });
   root.addEventListener('pointercancel', () => (drag = null));
+}
+
+/**
+ * The home screen's marks and its list of changes (Changes.astro): hovering an item lights its
+ * mark on the screen.
+ */
+export function initMarks(sheet: HTMLElement) {
+  const items = [...sheet.querySelectorAll<HTMLElement>('[data-mark-ref]')];
+  const marks = [...sheet.querySelectorAll<HTMLElement>('[data-mark]')];
+  if (!items.length || !marks.length) return;
+  const light = (n: string | undefined) => {
+    items.forEach((el) => el.classList.toggle('is-lit', el.dataset.markRef === n));
+    marks.forEach((el) => el.classList.toggle('is-lit', el.dataset.mark === n));
+  };
+  items.forEach((el) => {
+    el.addEventListener('pointerenter', () => light(el.dataset.markRef));
+    el.addEventListener('pointerleave', () => light(undefined));
+  });
 }
 
 /** Plays the results HUD once, when it comes into view (Hud.astro). */

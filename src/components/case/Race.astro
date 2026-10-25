@@ -118,7 +118,9 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
 </div>
 
 <style>
+  /* Sized by its column in the stage (beside the list of changes), not by the screen */
   .race {
+    container-type: inline-size;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -127,9 +129,9 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
   }
   .lanes {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, clamp(150px, 22vw, 300px)));
+    grid-template-columns: repeat(2, minmax(0, 300px));
     justify-content: center;
-    gap: clamp(16px, 8vw, 120px);
+    gap: clamp(16px, 10cqi, 96px);
     width: 100%;
   }
   /* The readout (bar, clock, step) keeps to the left edge of the bar; the label stays over the phone */

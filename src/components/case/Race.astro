@@ -88,12 +88,25 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
           </span>
         </p>
         <p class="caption">
-          <!-- Words around the counter stay with it: spaces between tags are left to the
+          <!-- Every caption sits invisibly in the same cell, so the line count never changes
+               while the race runs and the page below does not jump -->
+          {lane.screens.map((s) => (
+            <span
+              class="ghost"
+              aria-hidden="true"
+              data-en={`Step\u00A0${lane.steps}\u00A0of\u00A0${lane.steps}\u00A0· ${s.caption.en}`}
+            >
+              {`Шаг\u00A0${lane.steps}\u00A0из\u00A0${lane.steps}\u00A0· ${s.caption.ru}`}
+            </span>
+          ))}
+          <span class="live">
+            <!-- Words around the counter stay with it: spaces between tags are left to the
                typograph only when they hold text, so these are non-breaking by hand -->
-          <span data-en="Step">Шаг</span>&nbsp;<span data-step>{lane.steps}</span>&nbsp;
-          <span data-en={`of\u00A0${lane.steps}`}>из&nbsp;{lane.steps}</span>&nbsp;·{' '}
-          <span data-caption data-en={lane.screens.at(-1)?.caption.en}>
-            {lane.screens.at(-1)?.caption.ru}
+            <span data-en="Step">Шаг</span>&nbsp;<span data-step>{lane.steps}</span>&nbsp;
+            <span data-en={`of\u00A0${lane.steps}`}>из&nbsp;{lane.steps}</span>&nbsp;·{' '}
+            <span data-caption data-en={lane.screens.at(-1)?.caption.en}>
+              {lane.screens.at(-1)?.caption.ru}
+            </span>
           </span>
         </p>
       </div>
@@ -209,11 +222,18 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     color: var(--sky-600);
   }
   .caption {
+    display: grid;
     margin: 8px 0 0;
     font-size: var(--t-caption);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
     text-wrap: balance;
+  }
+  .caption > * {
+    grid-area: 1 / 1;
+  }
+  .ghost {
+    visibility: hidden;
   }
 
   .replay {

@@ -1766,14 +1766,11 @@ const home = withBase('/');
     transform-origin: 50% 0;
     will-change: transform;
   }
-  /* The card on top casts a soft shadow upward, or its edge is lost on the one below
-     (the panel is clipped to pixel corners, so the shadow sits on a layer behind it) */
-  .chapters:is(.is-deck, .is-stack) .chapter::before {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto;
-    height: 50%;
-    box-shadow: 0 -10px 28px rgba(41, 37, 30, 0.1);
+  /* The card on top casts a soft shadow upward, or its edge is lost on the one below. A
+     drop-shadow follows the panel's pixel corners: a box shadow on a layer behind it stayed
+     square and left the clipped corners lit by the card underneath */
+  .chapters:is(.is-deck, .is-stack) .chapter {
+    filter: drop-shadow(0 -3px 8px rgba(41, 37, 30, 0.06));
   }
   .chapters.is-stack .chapter {
     position: sticky;

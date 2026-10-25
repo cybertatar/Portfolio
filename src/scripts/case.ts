@@ -77,6 +77,41 @@ export function initCompare(root: HTMLElement) {
   const set = () => root.style.setProperty('--pos', `${range.value}%`);
   range.addEventListener('input', set);
   set();
+
+  // The whole phone drags the handle, by finger too: a native range moves on touch only from
+  // its thumb. A tap jumps there; a finger going up or down scrolls the page (touch-action:
+  // pan-y), the browser then cancels the pointer
+  const moveTo = (x: number) => {
+    const box = root.getBoundingClientRect();
+    range.value = String(Math.round(Math.min(1, Math.max(0, (x - box.left) / box.width)) * 100));
+    set();
+  };
+  let drag: { id: number; x: number; y: number; on: boolean } | null = null;
+  root.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' };
+    if (drag.on) {
+      e.preventDefault();
+      range.focus({ preventScroll: true });
+      root.setPointerCapture(e.pointerId);
+      moveTo(e.clientX);
+    }
+  });
+  root.addEventListener('pointermove', (e) => {
+    if (!drag || drag.id !== e.pointerId) return;
+    if (!drag.on) {
+      const dx = Math.abs(e.clientX - drag.x);
+      if (dx < 6 || dx < Math.abs(e.clientY - drag.y)) return;
+      drag.on = true;
+      root.setPointerCapture(e.pointerId);
+    }
+    moveTo(e.clientX);
+  });
+  root.addEventListener('pointerup', (e) => {
+    if (drag?.id === e.pointerId && !drag.on) moveTo(e.clientX);
+    drag = null;
+  });
+  root.addEventListener('pointercancel', () => (drag = null));
 }
 
 /** Plays the results HUD once, when it comes into view (Hud.astro). */

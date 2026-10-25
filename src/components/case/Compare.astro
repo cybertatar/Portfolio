@@ -24,6 +24,7 @@ const { before, after, label } = Astro.props;
       alt={`${label.ru}: после`}
       data-en-alt={`${label.en}: after`}
       loading="lazy"
+      draggable="false"
     />
     <img
       class="screen before"
@@ -31,8 +32,15 @@ const { before, after, label } = Astro.props;
       alt={`${label.ru}: до`}
       data-en-alt={`${label.en}: before`}
       loading="lazy"
+      draggable="false"
     />
-    <img class="body" src={withBase('assets/iphone-17-pro.webp')} alt="" loading="lazy" />
+    <img
+      class="body"
+      src={withBase('assets/iphone-17-pro.webp')}
+      alt=""
+      loading="lazy"
+      draggable="false"
+    />
     <span class="line" aria-hidden="true"></span>
     <span class="handle px-clip" aria-hidden="true">
       <svg viewBox="0 0 12 12" width="18" height="18" shape-rendering="crispEdges">
@@ -60,6 +68,10 @@ const { before, after, label } = Astro.props;
     position: relative;
     width: 100%;
     touch-action: pan-y;
+    cursor: ew-resize;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   .phone {
     position: relative;
@@ -113,7 +125,8 @@ const { before, after, label } = Astro.props;
     background: var(--surface-card);
     pointer-events: none;
   }
-  /* The input covers the phone and is invisible: dragging anywhere moves the handle */
+  /* The input stays for keys and screen readers, invisible over the phone; pointers are
+     handled by initCompare, so a finger drags from anywhere, not only from the thumb */
   .range {
     position: absolute;
     inset: 0;
@@ -121,7 +134,7 @@ const { before, after, label } = Astro.props;
     height: 100%;
     margin: 0;
     opacity: 0;
-    cursor: ew-resize;
+    pointer-events: none;
     -webkit-appearance: none;
     appearance: none;
   }

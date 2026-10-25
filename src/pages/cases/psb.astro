@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Footer from '../../components/Footer.astro';
 import CaseVideo from '../../components/case/CaseVideo.astro';
 import LoopVideo from '../../components/case/LoopVideo.astro';
-import Compare from '../../components/case/Compare.astro';
+import Annotated, { type MarkedRow } from '../../components/case/Annotated.astro';
 import PrototypeDeck from '../../components/case/PrototypeDeck.astro';
 import Hud, { type HudStat } from '../../components/case/Hud.astro';
 import Race, { type RaceLane } from '../../components/case/Race.astro';
@@ -215,9 +215,10 @@ interface Direction {
   id: string;
   title: Localized;
   lead: Localized;
-  compare?: { before: string; after: string };
+  /** Screens for the callouts (Annotated.astro); its rows then carry their marks. */
+  annotated?: { before: string; after: string };
   race?: RaceLane[];
-  versus: { rows: ChangeRow[]; stats: ResultStat[] };
+  versus: { rows: ChangeRow[] | MarkedRow[]; stats: ResultStat[] };
 }
 
 const before = { ru: 'Было', en: 'Before' };
@@ -238,14 +239,19 @@ const directions: Direction[] = [
       ru: 'Повседневные задачи и предложения банка должны быть заметны одновременно, но не конкурировать между собой.',
       en: 'Everyday tasks and bank offers should be visible at the same time without competing with each other.',
     },
-    compare: { before: 'assets/cases/psb/main-before.webp', after: 'assets/cases/psb/main.webp' },
-    // Changes beside the before/after slider, marked on the new screen; then the result
+    // The old home screen (top of the cashback flow's first screen) and the new one, with the
+    // changes called out on both sides; marks are fractions of each screen
+    annotated: {
+      before: 'assets/cases/psb/before/cb-01.webp',
+      after: 'assets/cases/psb/main.webp',
+    },
     versus: {
       rows: [
         {
           label: { ru: 'Баланс', en: 'Balance' },
-          // Its place on the new screen (main.webp), a numbered mark
-          mark: [0.37, 0.307],
+          now: [0.3, 0.31],
+          was: [0.36, 0.17],
+          side: 'left',
           before: {
             ru: '«Всего доступно средств» в отдельной карточке',
             en: '“Total available funds” in a separate card',
@@ -257,15 +263,16 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'Карты и счета', en: 'Cards and accounts' },
-          // Its place on the new screen (main.webp), a numbered mark
-          mark: [0.27, 0.4],
+          now: [0.27, 0.45],
+          was: [0.2, 0.44],
+          side: 'left',
           before: { ru: 'Два отдельных списка', en: 'Two separate lists' },
           after: { ru: 'Карты внутри своих счетов', en: 'Cards inside their accounts' },
         },
         {
           label: { ru: 'Частые действия', en: 'Frequent actions' },
-          // Its place on the new screen (main.webp), a numbered mark
-          mark: [0.465, 0.595],
+          now: [0.16, 0.62],
+          side: 'left',
           before: { ru: 'Нет на главной', en: 'Not on the home screen' },
           after: {
             ru: 'QR, перевод, по номеру и пополнение под счетами',
@@ -273,22 +280,10 @@ const directions: Direction[] = [
           },
         },
         {
-          label: { ru: 'История', en: 'History' },
-          // Its place on the new screen (main.webp), a numbered mark
-          mark: [0.36, 0.758],
-          before: {
-            ru: 'Отдельная вкладка, у каждой карты своя',
-            en: 'A separate tab, split by card',
-          },
-          after: {
-            ru: 'На главной, сразу под действиями',
-            en: 'On the home screen, right under the actions',
-          },
-        },
-        {
           label: { ru: 'Предложения банка', en: 'Bank offers' },
-          // Its place on the new screen (main.webp), a numbered mark
-          mark: [0.45, 0.168],
+          now: [0.68, 0.16],
+          was: [0.85, 0.3],
+          side: 'right',
           before: {
             ru: 'Вес как у продуктов, среди счетов и карт',
             en: 'As prominent as products, mixed in with the accounts and cards',
@@ -300,8 +295,12 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'Кешбэк', en: 'Cashback' },
-          // Its place on the new screen (main.webp), a numbered mark
-          mark: [0.67, 0.335],
+          now: [0.6, 0.335],
+          side: 'right',
+          wasNote: {
+            ru: 'На первом экране не видно, надо листать вниз',
+            en: 'Not on the first screen, you have to scroll down',
+          },
           before: {
             ru: '«Бонусный счёт» в конце главной',
             en: '“Bonus account” at the very bottom of the home screen',
@@ -309,6 +308,20 @@ const directions: Direction[] = [
           after: {
             ru: 'Бейдж у баланса и вкладка «Выгода»',
             en: 'A badge next to the balance and the “Benefits” tab',
+          },
+        },
+        {
+          label: { ru: 'История', en: 'History' },
+          now: [0.8, 0.78],
+          was: [0.5, 0.94],
+          side: 'right',
+          before: {
+            ru: 'Отдельная вкладка, у каждой карты своя',
+            en: 'A separate tab, split by card',
+          },
+          after: {
+            ru: 'На главной, сразу под действиями',
+            en: 'On the home screen, right under the actions',
           },
         },
       ],
@@ -1208,40 +1221,36 @@ const home = withBase('/');
             <p class="lead" data-en={d.lead.en}>
               {d.lead.ru}
             </p>
-            <!-- The phones and the changes are one group in the middle of the stage; the test result
-                 closes the list, in its column (review: a list under the stage was hard to match with
-                 the mockups; on a wide stage the group drifted left and the tags ran to the corners) -->
-            <div class:list={['stage', 'px-clip', { 'race-stage': d.race }]}>
-              <div class="split">
-                <div class="split-grid">
-                  <div class:list={['split-media', { race: d.race }]}>
-                    {d.race ? (
-                      <Race lanes={d.race} />
-                    ) : d.compare ? (
-                      <div class="stage-phone">
-                        <span class="stage-tag left" data-en="Before">
-                          До
-                        </span>
-                        <span class="stage-tag right" data-en="After">
-                          После
-                        </span>
-                        <Compare
-                          before={d.compare.before}
-                          after={d.compare.after}
-                          label={d.title}
-                          marks={d.versus.rows.map((r) => r.mark)}
-                          start={25}
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                  <div class="split-list">
-                    <Changes rows={d.versus.rows} />
-                    <TestResult stats={d.versus.stats} />
+            <!-- The home screen: callouts around the phone, a switch flips them to the old screen.
+                 The races: phones and the changes as one group, the test result closes the list
+                 (review: a list under the stage was hard to match with the mockups) -->
+            {d.annotated ? (
+              <div class="stage px-clip ann-stage">
+                <Annotated
+                  before={d.annotated.before}
+                  after={d.annotated.after}
+                  label={d.title}
+                  rows={d.versus.rows as MarkedRow[]}
+                />
+                <div class="ann-result">
+                  <TestResult stats={d.versus.stats} />
+                </div>
+              </div>
+            ) : (
+              <div class="stage px-clip">
+                <div class="split">
+                  <div class="split-grid">
+                    <div class="split-media race">
+                      <Race lanes={d.race ?? []} />
+                    </div>
+                    <div class="split-list">
+                      <Changes rows={d.versus.rows} />
+                      <TestResult stats={d.versus.stats} />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </section>
         ))}
 
@@ -1372,8 +1381,7 @@ const home = withBase('/');
 <script>
   import {
     initCaseMenu,
-    initCompare,
-    initMarks,
+    initAnnotated,
     initChapters,
     initHud,
     initQuestDeck,
@@ -1387,8 +1395,7 @@ const home = withBase('/');
   );
   const bar = document.querySelector<HTMLElement>('[data-case-bar]');
   if (bar) initCaseMenu(bar);
-  document.querySelectorAll<HTMLElement>('[data-compare]').forEach(initCompare);
-  document.querySelectorAll<HTMLElement>('.sheet').forEach(initMarks);
+  document.querySelectorAll<HTMLElement>('[data-ann]').forEach(initAnnotated);
   document.querySelectorAll<HTMLElement>('[data-chapters]').forEach(initChapters);
   document.querySelectorAll<HTMLElement>('[data-hud]').forEach(initHud);
   document.querySelectorAll<HTMLElement>('[data-quest-deck]').forEach(initQuestDeck);
@@ -1898,8 +1905,8 @@ const home = withBase('/');
   }
 
   /* Directions */
-  /* Phones and changes as one group centred in the stage; the list under them when narrow. The
-     phone keeps to the top: the list with the result runs taller */
+  /* Races: the phones and the changes as one group centred in the stage; the list goes under
+     the phones once it would get narrower than about 260px */
   .split {
     container-type: inline-size;
     width: 100%;
@@ -1915,27 +1922,15 @@ const home = withBase('/');
     display: flex;
     justify-content: center;
     min-width: 0;
-  }
-  .split-media.race {
     width: clamp(340px, 56cqi, 640px);
   }
-  /* Under the phones once the list would get narrower than about 260px: the slider's one
-     phone leaves more room than the race's two */
-  /* One column: the media spans it, so the phone's percentage width has something to resolve
-     against (in an auto column it came to zero) */
-  @container (max-width: 560px) {
+  /* One column: the media spans it, so the phones' percentage widths have something to resolve
+     against (in an auto column they came to zero) */
+  @container (max-width: 640px) {
     .split-grid {
       grid-template-columns: minmax(0, 1fr);
     }
     .split-media {
-      width: 100%;
-    }
-  }
-  @container (max-width: 640px) {
-    .split-grid:has(.race) {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .split-grid:has(.race) .split-media {
       width: 100%;
     }
   }
@@ -1946,31 +1941,21 @@ const home = withBase('/');
     padding: clamp(40px, 4vw, 72px) var(--pad);
     background: var(--surface-sunken);
   }
-  .stage-phone {
-    width: clamp(220px, 26vw, 340px);
+  /* The home screen's callouts, the test result under them: a column, not as wide as the
+     stage (spread over it, its two numbers drifted apart) */
+  .stage.ann-stage {
+    flex-direction: column;
+    align-items: center;
+  }
+  .ann-result {
+    width: 100%;
+    max-width: 760px;
   }
   /* The fan of prototypes spills its decor to the edges, so the stage keeps a narrower inset */
   .stage.deck-stage {
     display: block;
     padding: 24px 0 32px;
     overflow: hidden;
-  }
-  /* "До / После" over the phone itself, at its two sides, quiet like the race's labels */
-  .stage-phone {
-    position: relative;
-  }
-  .stage-tag {
-    position: absolute;
-    bottom: calc(100% + 12px);
-    font-size: var(--t-small);
-    font-weight: var(--fw-medium);
-    color: var(--text-tertiary);
-  }
-  .stage-tag.left {
-    left: 6%;
-  }
-  .stage-tag.right {
-    right: 6%;
   }
 
   /* Testing */
@@ -2158,15 +2143,7 @@ const home = withBase('/');
       grid-template-columns: minmax(0, 1fr);
     }
     .stage {
-      padding: 56px 16px 40px;
-    }
-    /* The race has no "До / После" tags to make room for at the top */
-    .stage.race-stage {
-      padding-top: 40px;
-    }
-    .stage-phone {
-      /* Of the stage, not of its auto-sized column (a percentage there resolved to zero) */
-      width: min(260px, 72cqi);
+      padding: 40px 16px;
     }
     .findings li {
       grid-template-columns: 40px minmax(0, 1fr);

@@ -1,6 +1,6 @@
 /**
  * Case page behaviour: the contents highlight the section being read, the mobile bar opens
- * the contents as a list, before/after sliders follow their range inputs.
+ * the contents as a list, the home screen's callouts switch between before and after.
  */
 
 /** Marks the link of the section under the reading line (a third down the screen). */
@@ -71,88 +71,104 @@ export function initCaseMenu(bar: HTMLElement) {
   });
 }
 
-export function initCompare(root: HTMLElement) {
-  const range = root.querySelector<HTMLInputElement>('[data-compare-range]');
-  if (!range) return;
-  const marks = [...root.querySelectorAll<HTMLElement>('[data-mark]')];
-  const set = () => {
-    root.style.setProperty('--pos', `${range.value}%`);
-    marks.forEach((m) =>
-      m.classList.toggle('is-under', Number(m.dataset.x) < Number(range.value) + 3),
-    );
-  };
-  range.addEventListener('input', set);
-  set();
-
-  // The whole phone drags the handle, by finger too: a native range moves on touch only from
-  // its thumb. A tap jumps there; a finger going up or down scrolls the page (touch-action:
-  // pan-y), the browser then cancels the pointer
-  const moveTo = (x: number) => {
-    const box = root.getBoundingClientRect();
-    range.value = String(Math.round(Math.min(1, Math.max(0, (x - box.left) / box.width)) * 100));
-    set();
-  };
-  let drag: { id: number; x: number; y: number; on: boolean } | null = null;
-  root.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0) return;
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' };
-    if (drag.on) {
-      e.preventDefault();
-      range.focus({ preventScroll: true });
-      root.setPointerCapture(e.pointerId);
-      moveTo(e.clientX);
-    }
-  });
-  root.addEventListener('pointermove', (e) => {
-    if (!drag || drag.id !== e.pointerId) return;
-    if (!drag.on) {
-      const dx = Math.abs(e.clientX - drag.x);
-      if (dx < 6 || dx < Math.abs(e.clientY - drag.y)) return;
-      drag.on = true;
-      root.setPointerCapture(e.pointerId);
-    }
-    moveTo(e.clientX);
-  });
-  root.addEventListener('pointerup', (e) => {
-    if (drag?.id === e.pointerId && !drag.on) moveTo(e.clientX);
-    drag = null;
-  });
-  root.addEventListener('pointercancel', () => (drag = null));
-}
-
 /**
- * The home screen's marks and its list of changes (Changes.astro). The marks stay hidden so they
- * don't cover the screen: one shows while the pointer is on its item in the list, or near its
- * spot on the screen (which also lights the item).
+ * The home screen's callouts (Annotated.astro): the switch flips the screen, its marks and the
+ * leaders between "now" and "was"; a tap on the phone flips it too. On a wide stage each callout
+ * sits level with its "now" mark, never closer than 20px to the one above, and a dashed elbow
+ * runs from it past the phone's edge to the mark of each state. Hovering a callout lights its
+ * leader and marks.
  */
-export function initMarks(sheet: HTMLElement) {
-  const items = [...sheet.querySelectorAll<HTMLElement>('[data-mark-ref]')];
-  const marks = [...sheet.querySelectorAll<HTMLElement>('[data-mark]')];
-  const screen = sheet.querySelector<HTMLElement>('[data-compare]');
-  if (!items.length || !marks.length) return;
+export function initAnnotated(root: HTMLElement) {
+  const field = root.querySelector<HTMLElement>('[data-ann-field]');
+  const phone = root.querySelector<HTMLElement>('[data-ann-phone]');
+  const svg = root.querySelector<SVGSVGElement>('[data-ann-leaders]');
+  if (!field || !phone || !svg) return;
+  const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-ann-to]')];
+  const items = [...root.querySelectorAll<HTMLElement>('[data-ann-item]')];
+  const rings = [...root.querySelectorAll<HTMLElement>('[data-ann-ring]')];
+
+  const show = (state: string) => {
+    root.dataset.state = state;
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.annTo === state)));
+  };
+  buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.annTo ?? 'now')));
+  phone.addEventListener('click', () => show(root.dataset.state === 'now' ? 'was' : 'now'));
+
   const light = (n: string | undefined) => {
-    items.forEach((el) => el.classList.toggle('is-lit', el.dataset.markRef === n));
-    marks.forEach((el) => el.classList.toggle('is-lit', el.dataset.mark === n));
+    items.forEach((el) => el.classList.toggle('is-lit', el.dataset.annItem === n));
+    rings.forEach((el) => el.classList.toggle('is-lit', el.dataset.annRing === n));
+    svg
+      .querySelectorAll<SVGPathElement>('path')
+      .forEach((p) => p.classList.toggle('is-lit', p.dataset.n === n));
   };
   items.forEach((el) => {
-    el.addEventListener('pointerenter', () => light(el.dataset.markRef));
+    el.addEventListener('pointerenter', () => light(el.dataset.annItem));
     el.addEventListener('pointerleave', () => light(undefined));
   });
-  // On the screen: the nearest uncovered mark within reach of the mouse
-  const REACH = 36;
-  screen?.addEventListener('pointermove', (e) => {
-    if (e.pointerType !== 'mouse') return;
-    let near: HTMLElement | undefined;
-    let best = REACH;
-    for (const m of marks) {
-      if (m.classList.contains('is-under')) continue;
-      const r = m.getBoundingClientRect();
-      const d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
-      if (d < best) [best, near] = [d, m];
-    }
-    light(near?.dataset.mark);
-  });
-  screen?.addEventListener('pointerleave', () => light(undefined));
+
+  const GAP = 20;
+  const NS = 'http://www.w3.org/2000/svg';
+  const layout = () => {
+    svg.replaceChildren();
+    const wide = root.clientWidth > 760;
+    root.toggleAttribute('data-laid', wide);
+    root.querySelectorAll<HTMLElement>('.side').forEach((list) => (list.style.height = ''));
+    items.forEach((el) => (el.style.top = ''));
+    if (!wide) return;
+
+    const f = field.getBoundingClientRect();
+    const p = phone.getBoundingClientRect();
+    const screen = { top: p.top + (p.height * 23) / 920, height: (p.height * 874) / 920 };
+    root.querySelectorAll<HTMLElement>('.side').forEach((list) => {
+      const left = list.classList.contains('left');
+      const top = list.getBoundingClientRect().top;
+      let floor = -Infinity;
+      for (const el of list.querySelectorAll<HTMLElement>('[data-ann-item]')) {
+        const num = el.querySelector<HTMLElement>('.num');
+        if (!num) continue;
+        const head = num.offsetTop + num.offsetHeight / 2;
+        const want = screen.top + Number(el.dataset.nowY) * screen.height - top - head;
+        const y = Math.max(want, floor);
+        el.style.top = `${y}px`;
+        floor = y + el.offsetHeight + GAP;
+
+        // From beside the number, along to just past the phone, then to the mark
+        const n = num.getBoundingClientRect();
+        const x0 = (left ? n.right + 8 : n.left - 8) - f.left;
+        const y0 = n.top + n.height / 2 - f.top;
+        const edge = (left ? p.left - 8 : p.right + 8) - f.left;
+        rings
+          .filter((r) => r.dataset.annRing === el.dataset.annItem)
+          .forEach((r) => {
+            const b = r.getBoundingClientRect();
+            const cx = b.left + b.width / 2 - f.left;
+            const cy = b.top + b.height / 2 - f.top;
+            // Stop at the ring, not under it
+            const dx = cx - edge;
+            const dy = cy - y0;
+            const k = Math.max(0, 1 - 16 / Math.hypot(dx, dy));
+            const path = document.createElementNS(NS, 'path');
+            path.setAttribute('d', `M${x0} ${y0}H${edge}L${edge + dx * k} ${y0 + dy * k}`);
+            path.classList.add(r.classList.contains('was') ? 'was' : 'now');
+            path.dataset.n = el.dataset.annItem;
+            svg.append(path);
+          });
+      }
+      list.style.height = `${Math.max(0, floor - GAP)}px`;
+    });
+  };
+
+  let queued = false;
+  const queue = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      layout();
+    });
+  };
+  new ResizeObserver(queue).observe(root);
+  document.fonts.ready.then(queue);
 }
 
 /** Plays the results HUD once, when it comes into view (Hud.astro). */

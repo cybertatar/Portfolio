@@ -5,8 +5,6 @@ export interface ChangeRow {
   label: Text;
   before: Localized;
   after: Localized;
-  /** Where the change sits on the "after" screen, as fractions of it (x, y): a numbered mark. */
-  mark?: [number, number];
 }
 
 interface Props {
@@ -17,24 +15,17 @@ interface Props {
  * What changed, fact by fact, in the stage next to the phones: the review said the list under
  * the stage was hard to match with the mockups. Each change reads top to bottom on one left
  * edge (a table made the eye zigzag, NN/g): the subject, what it is now, and under it, quieter,
- * what it was. With marks on the screen (the home screen) each subject carries the mark's
- * number, and hovering either lights up the other (initMarks in case.ts). The steps and time
- * are not repeated here, the race shows them.
+ * what it was. The steps and time are not repeated here, the race shows them. The home screen
+ * calls its changes out around the phone instead (Annotated.astro).
  */
 const { rows } = Astro.props;
-const numbered = rows.some((r) => r.mark);
 ---
 
 <ul class="changes" aria-label="Было и стало" data-en-label="Before and after">
-  {rows.map((r, i) => (
-    <li class="change" data-mark-ref={numbered ? i + 1 : undefined}>
-      <span class="label">
-        {numbered && (
-          <span class="num" aria-hidden="true">
-            {i + 1}
-          </span>
-        )}
-        <span data-en={en(r.label)}>{ru(r.label)}</span>
+  {rows.map((r) => (
+    <li class="change">
+      <span class="label" data-en={en(r.label)}>
+        {ru(r.label)}
       </span>
       <p class="after">
         <span class="sr" data-en="After: ">
@@ -75,37 +66,10 @@ const numbered = rows.some((r) => r.mark);
     text-wrap: pretty;
   }
   .label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
     font-family: var(--font-label);
     font-size: var(--t-pixel-label);
     letter-spacing: var(--ls-label);
     color: var(--text-tertiary);
-  }
-  /* The mark's number, as on the screen (Compare.astro) */
-  /* The same ring as the mark on the screen; filled while lit */
-  .num {
-    display: grid;
-    place-items: center;
-    flex: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1.5px currentColor;
-    color: var(--text-accent);
-    font-family: var(--font-sans);
-    font-size: var(--t-micro);
-    font-weight: var(--fw-semibold);
-    letter-spacing: 0;
-    transition: background var(--dur-fast) var(--ease-standard);
-  }
-  .change.is-lit .num {
-    background: var(--text-accent);
-    color: var(--text-inverse);
-  }
-  .change.is-lit .label {
-    color: var(--text-primary);
   }
   .after,
   .before {

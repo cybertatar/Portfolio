@@ -408,7 +408,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
   }
   .card-title {
     font-size: var(--fs-l);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
     line-height: var(--lh-tight);
     letter-spacing: var(--ls-tight);
     color: var(--text-primary);
@@ -455,7 +455,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     color: var(--text-inverse);
     font-family: var(--font-pixel);
     font-size: var(--fs-m);
-    font-weight: var(--fw-semibold);
+    font-weight: var(--fw-bold);
     letter-spacing: var(--ls-caps);
   }
 
@@ -490,11 +490,11 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     padding: 3cqi;
     background: var(--surface-card);
   }
-  /* Numbers in Fira Mono: Handjet slashes its zero, 30 would read as 38 */
+  /* Numbers in the text face with even figures: Handjet slashes its zero, 30 would read as 38 */
   .timer {
-    font-family: var(--font-mono);
     font-size: var(--fs-l);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
     line-height: 1;
     color: var(--text-accent);
   }
@@ -538,7 +538,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     opacity: 1;
   }
   .log-t {
-    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
     color: var(--text-tertiary);
   }
   .log-kind {
@@ -573,9 +573,8 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     place-items: center;
     aspect-ratio: 1;
     background: var(--surface-raised);
-    font-family: var(--font-mono);
     font-size: var(--fs-m);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
     color: var(--text-secondary);
   }
   .pick.on {
@@ -615,7 +614,7 @@ const screens = ['cb-off', 'cb-connect', 'success'];
     color: var(--text-primary);
   }
   td:nth-child(n + 2) {
-    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
     font-size: var(--fs-s);
     font-weight: var(--fw-semibold);
     color: var(--text-accent);

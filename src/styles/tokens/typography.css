@@ -1,15 +1,15 @@
 :root {
-  /* Pixel and grotesk. Headings that are large (h1, h2: case and section titles, project
-     cards) are set in the pixel Handjet, where it stays crisp; everything else in the grotesk Golos
-     Text. No small caps, no tracked labels: a label is the text face, quieter in colour. The pixel
-     face blurred at caption sizes (review); a book serif and a second near-alike sans next to it
-     read as two systems at once. Handjet also runs the game itself: scenes, hints, the level */
+  /* Two faces. Large headings (h1, h2: case and section titles, project cards, the name) are set
+     in the pixel Handjet, where it stays crisp; everything else, numbers included, in the grotesk
+     Golos Text. No small caps, no tracked labels: a label is the text face, quieter in colour.
+     Handjet also runs the game itself: scenes, hints, the level badge */
   --font-sans: 'Golos Text', system-ui, sans-serif;
-  --font-mono: 'Fira Mono', ui-monospace, SFMono-Regular, monospace;
-  --font-display: 'Handjet', var(--font-mono);
+  --font-display: 'Handjet', var(--font-sans);
   --font-label: var(--font-sans);
   --font-pixel: var(--font-display); /* game UI inside scenes, level, name plate */
 
+  /* Golos runs in three weights by role: text 400, controls and figures 500, titles and emphasis
+     600. Bold 700 is the pixel face only */
   --fw-regular: 400; /* @kind font */
   --fw-medium: 500; /* @kind font */
   --fw-semibold: 600; /* @kind font */
@@ -23,21 +23,19 @@
   --ls-caps: 0.09em; /* @kind font */
   --ls-label: 0; /* @kind font */
 
-  /* Text steps about 1.2 apart, min at ~1100px, max at ~2400px viewport (Bringhurst: work from a
-     scale). The two pixel steps run large: Handjet is narrow with a small x-height, and only
-     large it reads clean */
-  --t-small: clamp(14px, 0.78vw, 17px); /* labels, captions, tags, notes, nav */
-  --t-body: clamp(16px, 0.9vw, 20px); /* text, buttons, card lines */
-  --t-lead: clamp(18px, 1.1vw, 25px); /* lead, list items, small titles */
-  --t-h3: clamp(21px, 1.45vw, 32px); /* sub-section, card in a deck (grotesk) */
-  --t-stat: clamp(28px, 2vw, 46px); /* big numbers (grotesk) */
-  --t-h2: clamp(38px, 2.7vw, 64px); /* section title (pixel) */
-  --t-display: clamp(48px, 3.9vw, 92px); /* case title, project card title (pixel) */
-  /* Outside the scale: numerals inside small badges, and the pixel name plate (game UI) */
-  --t-micro: 13px;
-  --t-name: clamp(26px, 1.35vw, 34px);
-  /* Older role names, kept as aliases of the steps */
-  --t-card-title: var(--t-display);
+  /* Five steps, about 1.25 apart at 1440px; min at ~1100px, max at ~2000px viewport (Bringhurst:
+     work from a scale). Three for reading, two pixel ones for headings. Handjet is narrow with a
+     small x-height, so the pixel steps run larger than a grotesk would. Scenes keep their own
+     container scale: they are illustrations */
+  --t-small: clamp(14px, 0.84vw, 16px); /* labels, captions, tags, notes, nav, badges */
+  --t-body: clamp(16px, 1vw, 18px); /* text, buttons, card lines */
+  --t-lead: clamp(18px, 1.2vw, 22px); /* lead, small titles, figures in a line */
+  --t-h2: clamp(30px, 2.2vw, 40px); /* section title, project card title, name; big figures */
+  --t-display: clamp(40px, 3vw, 54px); /* the case title */
+  /* Role names, kept as aliases of the steps */
+  --t-h3: var(--t-lead);
+  --t-stat: var(--t-h2);
+  --t-card-title: var(--t-h2);
   --t-list: var(--t-lead);
   --t-list-num: var(--t-lead);
   --t-card-sub: var(--t-body);

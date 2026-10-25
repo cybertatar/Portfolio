@@ -259,13 +259,13 @@ import { levelOn } from '../scripts/level';
   }
   .lvl-num {
     color: var(--text-accent);
-    font-size: 26px;
+    font-size: var(--t-h2);
     font-weight: var(--fw-bold);
   }
-  /* Fira Mono: in the pixel font a lowercase l is a bare stick */
+  /* The text face: in the pixel font a lowercase l is a bare stick */
   .lvl-label {
-    font-family: var(--font-mono);
-    font-size: var(--t-micro);
+    font-family: var(--font-sans);
+    font-size: var(--t-small);
     color: var(--text-secondary);
   }
 
@@ -282,7 +282,7 @@ import { levelOn } from '../scripts/level';
   h1 {
     margin: 0;
     font-family: var(--font-pixel);
-    font-size: calc(var(--t-name) * 1.25);
+    font-size: var(--t-h2);
     font-weight: var(--fw-bold);
     line-height: var(--lh-tight);
     color: var(--text-primary);

@@ -12,15 +12,16 @@ interface Props {
 }
 
 /**
- * The result of the test for one solution: a card of its own under the stage, not the end of
- * the list of changes (the owner: it's a different thing, what people did, not what we
- * changed). Kept light (owner: heavy with the trophy tile, a big heading and bold figures, and
- * the overview's bars and hearts didn't suit it): a quiet heading, the figures in medium weight.
+ * The result of the test for one solution, its own part under the stage, not the end of the
+ * list of changes (the owner: it's a different thing, what people did, not what we changed).
+ * The heading sits on the sheet and every figure in a plate of the stage's paper, the same
+ * rhythm as the start of the block: a title on the sheet, then the plate. One card with all
+ * figures read heavy, so did a trophy tile, bold figures and the overview's gauges (owner).
  */
 const { stats } = Astro.props;
 ---
 
-<section class="test px-clip">
+<section class="test">
   <div class="head">
     <h3 class="title" data-en="Test result">
       Итог теста
@@ -31,7 +32,7 @@ const { stats } = Astro.props;
   </div>
   <ul class="stats" style={`--n: ${stats.length}`}>
     {stats.map((st) => (
-      <li class="stat">
+      <li class="stat px-clip">
         <span class="value">
           <span data-en={en(st.value)}>{ru(st.value)}</span>
           {st.unit && (
@@ -49,17 +50,14 @@ const { stats } = Astro.props;
 </section>
 
 <style>
-  /* A card of its own on the sheet, a frame's gap under the stage: the heading on top, the
-     stats under it. The same raised paper and pixel corners as the overview's cards */
+  /* Further from the stage above (40px) than the heading from its plates (16px), so the
+     heading reads as the start of its own part */
   .test {
-    --px-step: 4px;
     container-type: inline-size;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    margin-top: var(--space-tile-gap);
-    padding: var(--space-tile);
-    background: var(--surface-raised);
+    gap: 16px;
+    margin-top: 40px;
   }
   .head {
     display: flex;
@@ -69,7 +67,7 @@ const { stats } = Astro.props;
   .title {
     margin: 0;
     font-family: var(--font-sans);
-    font-size: var(--t-body);
+    font-size: var(--t-h3);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
     letter-spacing: 0;
@@ -80,21 +78,24 @@ const { stats } = Astro.props;
     line-height: var(--lh-snug);
     color: var(--text-tertiary);
   }
-  /* Columns well apart, more than anything inside a figure; a third goes under the first two
-     on a narrow card */
+  /* A plate per figure, the stage's paper and pixel corners; a third goes under the first two
+     on a narrow sheet */
   .stats {
     display: grid;
     grid-template-columns: repeat(var(--n), minmax(0, 1fr));
-    gap: 24px 40px;
+    gap: var(--space-tile-gap);
     margin: 0;
     padding: 0;
     list-style: none;
   }
   .stat {
+    --px-step: 4px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+    padding: var(--space-tile);
+    background: var(--surface-sunken);
   }
   .value {
     font-size: var(--t-h3);
@@ -118,8 +119,8 @@ const { stats } = Astro.props;
   }
   @container (max-width: 560px) {
     .stats {
-      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
-      gap: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
     }
   }
 </style>

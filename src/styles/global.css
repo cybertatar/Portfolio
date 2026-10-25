@@ -88,10 +88,3 @@ html:not([lang='en']) [data-lang='en'],
 html[lang='en'] [data-lang='ru'] {
   display: none !important;
 }
-
-/* A scene on pause (runScene in scripts/scenes.ts): its CSS loops freeze with it */
-[data-paused] *,
-[data-paused] *::before,
-[data-paused] *::after {
-  animation-play-state: paused !important;
-}

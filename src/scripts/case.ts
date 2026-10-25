@@ -1,5 +1,3 @@
-import { wireControls } from './scenes';
-
 /**
  * Case page behaviour: the contents highlight the section being read, the mobile bar opens
  * the contents as a list, before/after sliders follow their range inputs.
@@ -162,14 +160,13 @@ export function initQuestDeck(root: HTMLElement) {
 
 /**
  * "Before / after" race (Race.astro): both flows start together when the race comes into
- * view and run at their measured times, sped up. Pauses off screen. Its controls
- * (SceneControls) pause it, jump to a key moment on the timeline and replay it at the end.
+ * view and run at their measured times, sped up. Pauses off screen; "Ещё раз" restarts.
  * With reduced motion it stays on the finish the page renders.
  */
 export function initRace(root: HTMLElement) {
-  // With reduced motion it starts on the finish and runs only when the reader asks
-  let auto = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const speed = Number(root.dataset.speed) || 7;
+  const replay = root.querySelector<HTMLButtonElement>('[data-replay]');
   const lanes = [...root.querySelectorAll<HTMLElement>('[data-lane]')].map((el) => ({
     el,
     seconds: Number(el.dataset.seconds),
@@ -230,59 +227,28 @@ export function initRace(root: HTMLElement) {
       l.el.classList.toggle('is-done', done);
     }
   };
-  // The reader's pause holds until play; the end shows the replay button
-  let held = false;
-  const box = root.querySelector<HTMLElement>('[data-scene-controls]');
-  const state = () => (elapsed >= longest ? 'done' : !held);
   const tick = (now: number) => {
     elapsed = Math.min(longest, elapsed + ((now - last) / 1000) * speed);
     last = now;
     paint();
-    ui?.paint(elapsed / longest);
-    frame = elapsed < longest && visible && !held ? requestAnimationFrame(tick) : 0;
-    if (!frame) ui?.playing(state());
+    frame = elapsed < longest && visible ? requestAnimationFrame(tick) : 0;
   };
   const run = () => {
-    ui?.playing(state());
-    if (frame || held || elapsed >= longest) return;
+    if (frame || elapsed >= longest) return;
     last = performance.now();
     frame = requestAnimationFrame(tick);
   };
-  const stop = () => {
-    cancelAnimationFrame(frame);
-    frame = 0;
-  };
-  const jump = (to: number) => {
-    elapsed = to;
-    lanes.forEach((l) => (l.shown = -1));
-    paint();
-    ui?.paint(elapsed / longest);
-  };
-  const ui = box
-    ? wireControls(box, JSON.parse(root.dataset.chapters ?? '[]'), {
-        toggle: () => {
-          auto = true;
-          if (elapsed >= longest) {
-            held = false;
-            jump(0);
-          } else held = !held;
-          if (held) stop();
-          ui?.playing(state());
-          if (visible) void preload().then(run);
-        },
-        seek: (from) => {
-          auto = true;
-          jump(from * longest);
-          if (visible && !held) void preload().then(run);
-          else ui?.playing(state());
-        },
-      })
-    : undefined;
 
-  if (!auto) elapsed = longest;
   paint();
-  ui?.paint(elapsed / longest);
-  ui?.playing(state());
+  if (replay) {
+    replay.hidden = false;
+    replay.addEventListener('click', () => {
+      elapsed = 0;
+      lanes.forEach((l) => (l.shown = -1));
+      paint();
+      run();
+    });
+  }
   // Screens load lazily; fetch them all before the race nears and start only once they're
   // decoded, or a lane flashes black on its first swap
   const shots = lanes.flatMap((l) => l.screens) as HTMLImageElement[];
@@ -306,8 +272,11 @@ export function initRace(root: HTMLElement) {
   new IntersectionObserver(
     ([entry]) => {
       visible = entry.isIntersecting;
-      if (visible && auto) void preload().then(() => visible && run());
-      else stop();
+      if (visible) void preload().then(() => visible && run());
+      else {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
     },
     { threshold: 0.5 },
   ).observe(root);

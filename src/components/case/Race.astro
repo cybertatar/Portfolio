@@ -1,7 +1,6 @@
 ---
 import type { Localized } from '../../content/site';
 import Phone from './Phone.astro';
-import SceneControls from './SceneControls.astro';
 
 export interface RaceScreen {
   src: string;
@@ -43,22 +42,6 @@ const clock = (s: number, comma = ',') => {
   const tenths = Math.round((s % 1) * 10);
   return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}${tenths ? `${comma}${tenths}` : ''}`;
 };
-// Timeline chapters: both on the way, then the faster flow at its finish (a key moment)
-const first = Math.min(...lanes.map((l) => l.seconds));
-const winner = lanes.find((l) => l.seconds === first);
-const chapters = (lang: 'ru' | 'en') =>
-  JSON.stringify(
-    winner && first < longest
-      ? [
-          { label: lang === 'ru' ? 'Старт' : 'Start', from: 0, size: first / longest },
-          {
-            label: `${winner.label[lang]}: ${winner.end[lang]}`,
-            from: first / longest,
-            size: 1 - first / longest,
-          },
-        ]
-      : [{ label: lang === 'ru' ? 'Старт' : 'Start', from: 0, size: 1 }],
-  );
 const captions = (lane: RaceLane, lang: 'ru' | 'en') =>
   JSON.stringify(lane.screens.map((s) => s.caption[lang]));
 const aways = (lane: RaceLane, lang: 'ru' | 'en') =>
@@ -67,14 +50,7 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
   `${lane.label[lang]}: ${lane.screens.map((s) => s.caption[lang]).join(' → ')}`;
 ---
 
-<div
-  class="race"
-  data-race
-  data-speed={speed}
-  data-scene-host
-  data-chapters={chapters('ru')}
-  data-en-chapters={chapters('en')}
->
+<div class="race" data-race data-speed={speed}>
   <div class="lanes">
     {lanes.map((lane) => (
       <div
@@ -136,9 +112,9 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
       </div>
     ))}
   </div>
-  <div class="controls">
-    <SceneControls />
-  </div>
+  <button class="replay px-clip" type="button" data-replay data-en="Replay" hidden>
+    Ещё раз
+  </button>
 </div>
 
 <style>
@@ -260,9 +236,25 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     visibility: hidden;
   }
 
-  /* Pause, replay and the timeline, as wide as the two lanes */
-  .controls {
-    width: min(100%, calc(2 * clamp(150px, 22vw, 300px) + clamp(16px, 8vw, 120px)));
+  .replay {
+    --px-step: 3px;
+    height: var(--control-h);
+    padding: 0 20px;
+    border: 0;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font-family: var(--font-pixel);
+    font-size: calc(var(--t-button) * 1.3);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--ls-caps);
+    cursor: inherit;
+    transition: background var(--dur-fast) var(--ease-standard);
+  }
+  .replay:hover {
+    background: var(--surface-active);
+  }
+  .replay[hidden] {
+    display: none;
   }
 
   @media (max-width: 560px) {

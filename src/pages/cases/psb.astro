@@ -13,6 +13,7 @@ import QuestDeck, { type Quest } from '../../components/case/QuestDeck.astro';
 import BenchScene from '../../components/case/scenes/BenchScene.astro';
 import TeamScene from '../../components/case/scenes/TeamScene.astro';
 import TestingScene from '../../components/case/scenes/TestingScene.astro';
+import Sprite from '../../components/case/scenes/Sprite.astro';
 import Button from '../../components/ui/Button.astro';
 import IconButton from '../../components/ui/IconButton.astro';
 import PixelIcon from '../../components/ui/PixelIcon.astro';
@@ -1200,13 +1201,29 @@ const home = withBase('/');
               </li>
             ))}
           </ol>
-          <p
-            class="quote px-clip"
-            data-en="Shortening the path alone wasn’t enough. The whole process had to make sense: where to find what you need, how to do it and how to see the result."
-          >
-            Одного сокращения пути было недостаточно. Нужно было сделать понятным весь процесс: где
-            найти нужное, как выполнить действие и увидеть результат.
-          </p>
+          <!-- The takeaway, said by the party from the scenes above (swordsman and mage: us two) -->
+          <figure class="say">
+            <div class="party" aria-hidden="true">
+              <span class="member">
+                <Sprite name="swordsman" />
+                <Sprite name="swordsman-calm" />
+              </span>
+              <span class="member">
+                <Sprite name="mage" />
+                <Sprite name="mage-calm" />
+              </span>
+            </div>
+            <blockquote class="bubble px-clip">
+              <span class="tail" aria-hidden="true"></span>
+              <span class="who" data-en="Party">
+                Отряд
+              </span>
+              <p data-en="Shortening the path alone wasn’t enough. The whole process had to make sense: where to find what you need, how to do it and how to see the result.">
+                Одного сокращения пути было недостаточно. Нужно было сделать понятным весь процесс:
+                где найти нужное, как выполнить действие и увидеть результат.
+              </p>
+            </blockquote>
+          </figure>
         </section>
 
         <!-- ---------- Directions ---------- -->
@@ -1901,14 +1918,127 @@ const home = withBase('/');
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
   }
-  .quote {
+  /* The takeaway as a line of the party: the sprites from the scenes, a light bubble with a
+     pixel tail pointing at them, the speaker in the game's pixel face */
+  .say {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+  }
+  .party {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    flex: none;
+  }
+  .member {
+    position: relative;
+    display: block;
+    width: 64px;
+  }
+  .member > :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .member > :global(svg + svg) {
+    position: absolute;
+    inset: 0;
+  }
+  .bubble {
+    --px-step: 4px;
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
     padding: var(--space-note-y) var(--space-note-x);
+    /* The tail sticks out of the box: the box is not clipped, its fill is (as .px-dialog) */
+    clip-path: none;
+  }
+  .bubble::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
     background: var(--surface-raised);
-    font-size: var(--t-h3);
-    font-weight: var(--fw-semibold);
+    clip-path: var(--px-clip);
+  }
+  /* A stepped pixel triangle toward the party, low, at their faces */
+  .tail {
+    position: absolute;
+    right: 100%;
+    bottom: 20px;
+    width: 12px;
+    height: 16px;
+    background: var(--surface-raised);
+    clip-path: polygon(
+      100% 12.5%,
+      100% 87.5%,
+      66.66% 87.5%,
+      66.66% 75%,
+      33.33% 75%,
+      33.33% 62.5%,
+      0 62.5%,
+      0 37.5%,
+      33.33% 37.5%,
+      33.33% 25%,
+      66.66% 25%,
+      66.66% 12.5%
+    );
+  }
+  .bubble p {
+    max-width: var(--measure-lead);
+    font-size: var(--t-lead);
+    font-weight: var(--fw-medium);
     line-height: var(--lh-snug);
-    letter-spacing: var(--ls-tight);
     text-wrap: pretty;
+  }
+  .bubble {
+    isolation: isolate;
+  }
+  .who {
+    display: block;
+    margin-bottom: 4px;
+    font-family: var(--font-pixel);
+    font-size: var(--t-lead);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+    color: var(--text-accent);
+  }
+  /* Narrow: the party stands over the bubble, the tail points up at them */
+  @media (max-width: 560px) {
+    .say {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .say .bubble {
+      width: 100%;
+    }
+    .member {
+      width: 52px;
+    }
+    .tail {
+      right: auto;
+      bottom: 100%;
+      left: 28px;
+      width: 16px;
+      height: 12px;
+      clip-path: polygon(
+        12.5% 100%,
+        87.5% 100%,
+        87.5% 66.66%,
+        75% 66.66%,
+        75% 33.33%,
+        62.5% 33.33%,
+        62.5% 0,
+        37.5% 0,
+        37.5% 33.33%,
+        25% 33.33%,
+        25% 66.66%,
+        12.5% 66.66%
+      );
+    }
   }
 
   /* Directions */

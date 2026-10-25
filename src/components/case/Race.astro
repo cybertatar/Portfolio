@@ -88,17 +88,6 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
           </span>
         </p>
         <p class="caption">
-          <!-- Every caption sits invisibly in the same cell, so the line count never changes
-               while the race runs and the page below does not jump -->
-          {lane.screens.map((s) => (
-            <span
-              class="ghost"
-              aria-hidden="true"
-              data-en={`Step\u00A0${lane.steps}\u00A0of\u00A0${lane.steps}\u00A0· ${s.caption.en}`}
-            >
-              {`Шаг\u00A0${lane.steps}\u00A0из\u00A0${lane.steps}\u00A0· ${s.caption.ru}`}
-            </span>
-          ))}
           <span class="live">
             <!-- Words around the counter stay with it: spaces between tags are left to the
                typograph only when they hold text, so these are non-breaking by hand -->
@@ -223,18 +212,11 @@ const flow = (lane: RaceLane, lang: 'ru' | 'en') =>
     color: var(--sky-600);
   }
   .caption {
-    display: grid;
     margin: 8px 0 0;
     font-size: var(--t-caption);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
     text-wrap: balance;
-  }
-  .caption > * {
-    grid-area: 1 / 1;
-  }
-  .ghost {
-    visibility: hidden;
   }
 
   .replay {

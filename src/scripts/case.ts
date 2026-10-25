@@ -296,6 +296,42 @@ export function initRace(root: HTMLElement) {
     frame = requestAnimationFrame(tick);
   };
 
+  // The caption and the clock change while the race runs, and a line more or less moved the
+  // page under them. Each lane tries every text it will show in the live elements themselves
+  // (invisible copies wrapped differently in Safari) and keeps the tallest as the minimum
+  const lock = () => {
+    for (const l of lanes) {
+      const time = l.clock?.parentElement;
+      const caption = l.caption?.closest<HTMLElement>('p');
+      if (!time || !caption || !l.clock || !l.step || !l.caption) continue;
+      const was = [l.clock.textContent, l.step.textContent, l.caption.textContent];
+      time.style.minHeight = caption.style.minHeight = '';
+      let timeH = 0;
+      for (const text of [clock(0), l.finish]) {
+        l.clock.textContent = text;
+        timeH = Math.max(timeH, time.getBoundingClientRect().height);
+      }
+      let captionH = 0;
+      for (let step = 1; step <= l.steps; step++) {
+        l.step.textContent = String(step);
+        for (const text of l.captions) {
+          l.caption.textContent = text;
+          captionH = Math.max(captionH, caption.getBoundingClientRect().height);
+        }
+      }
+      [l.clock.textContent, l.step.textContent, l.caption.textContent] = was;
+      time.style.minHeight = `${timeH}px`;
+      caption.style.minHeight = `${captionH}px`;
+    }
+  };
+  let width = 0;
+  new ResizeObserver(([entry]) => {
+    if (entry.contentRect.width === width) return;
+    width = entry.contentRect.width;
+    lock();
+  }).observe(root);
+  document.fonts?.ready.then(lock);
+
   paint();
   if (replay) {
     replay.hidden = false;

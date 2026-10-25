@@ -60,7 +60,9 @@ const numbered = rows.some((r) => r.mark);
     padding: 0;
     list-style: none;
   }
-  /* A quiet hairline on top ties the subject to its item (2px read too bright, owner) */
+  /* A quiet hairline on top ties the subject to its item (2px read too bright, owner). The
+     list sits on the stage's sunken paper, where the subtle colour of the side quests log
+     vanished, so the default one: about the same contrast against this background */
   .change {
     /* Holds the hidden "Стало:" */
     position: relative;
@@ -69,7 +71,7 @@ const numbered = rows.some((r) => r.mark);
     gap: 6px;
     min-width: 0;
     padding-top: 14px;
-    border-top: var(--border-width-hair) solid var(--border-subtle);
+    border-top: var(--border-width-hair) solid var(--border-default);
     text-wrap: pretty;
   }
   .label {

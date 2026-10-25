@@ -50,14 +50,15 @@ const { stats } = Astro.props;
 </section>
 
 <style>
-  /* Further from the stage above (40px) than the heading from its plates (16px), so the
-     heading reads as the start of its own part */
+  /* Further from the stage above (40px, and more than the lead above the stage on wide
+     screens) than the heading from its plates (16px), so the heading reads as the start of
+     its own part */
   .test {
     container-type: inline-size;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    margin-top: 40px;
+    margin-top: max(40px, calc(var(--space-stack) + 12px));
   }
   .head {
     display: flex;
@@ -122,7 +123,8 @@ const { stats } = Astro.props;
   @container (max-width: 760px) {
     .stats {
       grid-template-columns: minmax(0, 1fr);
-      gap: 16px;
+      /* Wider than a plate's padding (inside ≤ outside) */
+      gap: var(--space-tile-gap);
     }
   }
 </style>

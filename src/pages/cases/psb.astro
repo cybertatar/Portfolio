@@ -1440,7 +1440,7 @@ const home = withBase('/');
     align-self: flex-start;
     font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    font-weight: var(--fw-semibold);
+    font-weight: var(--fw-medium);
     letter-spacing: var(--ls-label);
     color: var(--text-secondary);
   }
@@ -1453,7 +1453,7 @@ const home = withBase('/');
   }
   .case-name {
     font-size: var(--t-lead);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
     letter-spacing: var(--ls-tight);
   }
@@ -1568,6 +1568,16 @@ const home = withBase('/');
   .sheet > .h2 + .prose {
     margin-top: 16px;
   }
+  /* The cover goes with the title above it; the intro starts further down, so the three don't
+     read as one evenly spaced run (proximity) */
+  .sheet > .hero + .intro {
+    margin-top: var(--space-split);
+  }
+  /* A line that belongs to the block above: closer to it than the lead is to that block */
+  .sheet > .deck-stage + .kit-note,
+  .sheet > .table-wrap + .note {
+    margin-top: 16px;
+  }
 
   .eyebrow {
     font-family: var(--font-label);
@@ -1590,7 +1600,7 @@ const home = withBase('/');
   }
   .h3 {
     font-size: var(--t-h3);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
     letter-spacing: var(--ls-tight);
     text-wrap: balance;
@@ -1707,7 +1717,7 @@ const home = withBase('/');
   }
   .tile-title {
     font-size: var(--t-lead);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
   }
   .quests,
@@ -1724,7 +1734,7 @@ const home = withBase('/');
     align-items: center;
     gap: 14px;
     font-size: var(--t-lead);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
   }
   .results-title .tile-icon {
     margin: 0;
@@ -1838,11 +1848,11 @@ const home = withBase('/');
     }
   }
 
-  /* Finding numbers: pixel, like the titles */
+  /* Finding numbers: the text face, in the accent; the pixel one blurs this small */
   .step-num {
-    font-family: var(--font-display);
     font-size: var(--t-lead);
-    font-weight: var(--fw-bold);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
     line-height: 1;
     color: var(--text-accent);
   }
@@ -1966,7 +1976,7 @@ const home = withBase('/');
     border-top: 0;
     font-family: var(--font-label);
     font-size: var(--t-pixel-label);
-    font-weight: var(--fw-semibold);
+    font-weight: var(--fw-medium);
     letter-spacing: var(--ls-label);
     color: var(--text-tertiary);
   }

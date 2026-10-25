@@ -1,4 +1,4 @@
-/* Tyncherov Portfolio DS — global entry. Golos Text, Handjet and Fira Mono are linked in BaseLayout. */
+/* Tyncherov Portfolio DS — global entry. Golos Text and Handjet are linked in BaseLayout. */
 @import './tokens/colors.css';
 @import './tokens/typography.css';
 @import './tokens/spacing.css';
@@ -63,16 +63,14 @@ textarea {
   outline-offset: 2px;
 }
 
-/* Mobile / tablet portrait: the same six steps, fixed */
+/* Mobile / tablet portrait: the same five steps, fixed */
 @media (max-width: 960px) {
   :root {
     --t-small: 14px;
     --t-body: 16px;
     --t-lead: 18px;
-    --t-h3: 20px;
-    --t-stat: 26px;
-    --t-h2: 32px;
-    --t-display: 40px;
+    --t-h2: 30px;
+    --t-display: 36px;
   }
 }
 

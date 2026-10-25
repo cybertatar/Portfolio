@@ -6,8 +6,8 @@ import PixelIcon from './ui/PixelIcon.astro';
 import { withBase } from '../scripts/url';
 
 /**
- * Small side projects as the last card of the feed, in the same shell as the cases: a sunken
- * panel where a case has its cover, then the title and a line under it. Inside, a quest log:
+ * Small side projects as the last card of the feed, in the same shell as the cases: where a
+ * case has its cover, a quest log right on the card, then the title and a line under it:
  * a row per project (icon, name and description, links out), keylines between them, like the
  * list of changes on the case page. A new project is one more row. Replaces a carousel strip
  * above the cases that the review found unclear (and its fades fell out of the lo-fi look).
@@ -15,7 +15,7 @@ import { withBase } from '../scripts/url';
 ---
 
 <div class="card px-clip">
-  <ul class="log px-clip">
+  <ul class="log">
     {sideQuests.map((q) => {
       const name = { ru: ru(q.title), en: en(q.title) ?? ru(q.title) };
       const label = (what: { ru: string; en: string }) => ({
@@ -81,12 +81,13 @@ import { withBase } from '../scripts/url';
     padding: 24px;
     background: var(--surface-card);
   }
+  /* Right on the card: on the sunken panel a case has for its cover, the light buttons
+     nearly matched it (#e8e1d2 on #e3dccc) and the log read muddy (owner) */
   .log {
     container-type: inline-size;
     margin: 0;
-    padding: 4px 24px;
+    padding: 0;
     list-style: none;
-    background: var(--surface-sunken);
   }
   .quest {
     display: grid;
@@ -179,9 +180,6 @@ import { withBase } from '../scripts/url';
     .card {
       gap: 16px;
       padding: 16px;
-    }
-    .log {
-      padding: 0 16px;
     }
   }
 </style>

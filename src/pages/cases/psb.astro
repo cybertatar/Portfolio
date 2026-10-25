@@ -1922,7 +1922,9 @@ const home = withBase('/');
     gap: 40px clamp(32px, 4cqi, 72px);
   }
   .split-media {
-    justify-self: center;
+    display: flex;
+    justify-content: center;
+    min-width: 0;
   }
   .split-media.race {
     width: clamp(340px, 56cqi, 640px);
@@ -1932,9 +1934,14 @@ const home = withBase('/');
   }
   /* Under the phones once the list would get narrower than about 260px: the slider's one
      phone leaves more room than the race's two */
+  /* One column: the media spans it, so the phone's percentage width has something to resolve
+     against (in an auto column it came to zero) */
   @container (max-width: 560px) {
     .split-grid {
       grid-template-columns: minmax(0, 1fr);
+    }
+    .split-media {
+      width: 100%;
     }
     .split-list {
       max-width: none;
@@ -2180,7 +2187,8 @@ const home = withBase('/');
       padding-top: 40px;
     }
     .stage-phone {
-      width: min(260px, 72%);
+      /* Of the stage, not of its auto-sized column (a percentage there resolved to zero) */
+      width: min(260px, 72cqi);
     }
     .findings li {
       grid-template-columns: 40px minmax(0, 1fr);

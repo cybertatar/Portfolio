@@ -133,7 +133,7 @@ export const cases: CaseItem[] = [
   },
 ];
 
-/** Small side projects: a repo and an Instagram post each, shown above the cases. */
+/** Small side projects: a repo and an Instagram post each, the last card of the feed. */
 export interface SideQuest {
   id: string;
   title: Text;
@@ -251,9 +251,11 @@ export const ui = {
   respawned: { ru: 'Портрет возродился.', en: 'The portrait has respawned.' },
   openCase: { ru: 'Открыть кейс', en: 'Open case' },
   bot: { ru: 'Бот', en: 'Bot' },
-  prev: { ru: 'Назад', en: 'Previous' },
-  next: { ru: 'Дальше', en: 'Next' },
   sideQuests: { ru: 'Побочные квесты', en: 'Side quests' },
+  sideQuestsLead: {
+    ru: 'Маленькие проекты для себя и дизайн-сообщества',
+    en: 'Small projects for myself and the design community',
+  },
   repo: { ru: 'Код на GitHub', en: 'Code on GitHub' },
   post: { ru: 'Пост в Instagram', en: 'Post on Instagram' },
 } satisfies Record<string, Localized>;

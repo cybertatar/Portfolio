@@ -6,15 +6,16 @@ import PixelIcon from './ui/PixelIcon.astro';
 import { withBase } from '../scripts/url';
 
 /**
- * Small side projects above the cases, like pinned repos on GitHub. No heading: their small
- * size keeps the cases the main line. The row simply scrolls away; the sticky case stack
- * below starts as before. As many whole cards as fit; when there are more, the next one
- * peeks in faded under an arrow (initSideQuests in home.ts).
+ * Small side projects as the last card of the feed, in the same shell as the cases: a sunken
+ * panel where a case has its cover, then the title and a line under it. Inside, a quest log:
+ * a row per project (icon, name and description, links out), keylines between them, like the
+ * list of changes on the case page. A new project is one more row. Replaces a carousel strip
+ * above the cases that the review found unclear (and its fades fell out of the lo-fi look).
  */
 ---
 
-<section class="side" aria-label={ui.sideQuests.ru} data-en-label={ui.sideQuests.en} data-side>
-  <ul class="row" data-side-row>
+<div class="card px-clip">
+  <ul class="log px-clip">
     {sideQuests.map((q) => {
       const name = { ru: ru(q.title), en: en(q.title) ?? ru(q.title) };
       const label = (what: { ru: string; en: string }) => ({
@@ -23,17 +24,15 @@ import { withBase } from '../scripts/url';
         'data-en-title': `${what.en}: ${name.en}`,
       });
       return (
-        <li class="quest px-clip">
-          <div class="head">
-            <img class="icon" src={withBase(q.icon)} alt="" width="48" height="48" loading="lazy" />
-            <div class="text">
-              <h2 class="title" data-en={en(q.title)}>
-                {name.ru}
-              </h2>
-              <p class="description" data-en={q.description.en}>
-                {q.description.ru}
-              </p>
-            </div>
+        <li class="quest">
+          <img class="icon" src={withBase(q.icon)} alt="" width="48" height="48" loading="lazy" />
+          <div class="text">
+            <h3 class="name" data-en={en(q.title)}>
+              {name.ru}
+            </h3>
+            <p class="about" data-en={q.description.en}>
+              {q.description.ru}
+            </p>
           </div>
           <div class="links">
             {/* The project itself comes first, when there is one to open */}
@@ -63,97 +62,44 @@ import { withBase } from '../scripts/url';
       );
     })}
   </ul>
-  <button
-    type="button"
-    class="nav prev px-clip"
-    aria-label={ui.prev.ru}
-    data-en-label={ui.prev.en}
-    data-side-prev
-    hidden
-  >
-    <PixelIcon name="arrow" />
-  </button>
-  <button
-    type="button"
-    class="nav next px-clip"
-    aria-label={ui.next.ru}
-    data-en-label={ui.next.en}
-    data-side-next
-    hidden
-  >
-    <PixelIcon name="arrow" />
-  </button>
-</section>
+  <div class="body">
+    <h2 class="title" id="side-quests-title" data-en={ui.sideQuests.en}>
+      {ui.sideQuests.ru}
+    </h2>
+    <p class="description" data-en={ui.sideQuestsLead.en}>
+      {ui.sideQuestsLead.ru}
+    </p>
+  </div>
+</div>
 
 <style>
-  .side {
-    /* Width of the faded edge where the next card peeks in */
-    --peek: 32px;
-    --gap: var(--layout-feed-gap);
-    position: relative;
-    margin-bottom: var(--layout-feed-gap);
-  }
-  .row {
-    display: flex;
-    gap: var(--gap);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-  }
-  .row::-webkit-scrollbar {
-    display: none;
-  }
-  /* More cards on a side: they fade out under the arrow instead of being cut. The fade spans
-     what the whole cards leave of the row (--fade-l / --fade-r from initSideQuests). */
-  .side[data-more-left] .row,
-  .side[data-more-right] .row {
-    --l: 0px;
-    --r: 0px;
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--l),
-      #000 calc(100% - var(--r)),
-      transparent
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent,
-      #000 var(--l),
-      #000 calc(100% - var(--r)),
-      transparent
-    );
-  }
-  .side[data-more-left] .row {
-    --l: var(--fade-l, calc(var(--peek) + var(--gap)));
-  }
-  .side[data-more-right] .row {
-    --r: var(--fade-r, calc(var(--peek) + var(--gap)));
-  }
-  .quest {
-    /* Set by the script: whole cards, 340–420px; 340px without it */
-    flex: 0 0 var(--card-w, 340px);
+  /* The case card's shell (ProjectCard.astro): padding, gap, title and line */
+  .card {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 16px;
+    gap: 20px;
+    padding: 24px;
     background: var(--surface-card);
-    scroll-snap-align: start;
   }
-  .head {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    min-width: 0;
+  .log {
+    container-type: inline-size;
+    margin: 0;
+    padding: 4px 24px;
+    list-style: none;
+    background: var(--surface-sunken);
+  }
+  .quest {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px 20px;
+    padding: 16px 0;
+  }
+  .quest + .quest {
+    border-top: var(--border-width-keyline) solid var(--border-default);
   }
   .icon {
     display: block;
-    flex: none;
     width: 48px;
     height: 48px;
   }
@@ -163,28 +109,26 @@ import { withBase } from '../scripts/url';
     gap: 2px;
     min-width: 0;
   }
-  .title {
+  .name {
     margin: 0;
     font-size: var(--t-button);
     font-weight: var(--fw-semibold);
     line-height: var(--lh-snug);
     color: var(--text-primary);
   }
-  .description {
+  .about {
     margin: 0;
     font-size: var(--t-caption);
     line-height: var(--lh-snug);
     color: var(--text-secondary);
     text-wrap: pretty;
   }
-  .links {
-    display: flex;
-    gap: 8px;
-  }
   /* Links out to the project, not controls of the page: smaller than the page's buttons,
      on phones too (32px is still above the 24px minimum target) */
   .links {
     --control-h: 32px;
+    display: flex;
+    justify-content: flex-end;
     gap: 6px;
   }
   .links > :global(.button) {
@@ -198,65 +142,46 @@ import { withBase } from '../scripts/url';
       gap: 8px;
     }
   }
-
-  /* Arrows sit on the faded edges, over the peeking card */
-  .nav {
-    position: absolute;
-    top: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--control-h);
-    height: var(--control-h);
-    padding: 0;
-    border: 0;
-    background: var(--surface-raised);
-    color: var(--text-primary);
-    cursor: pointer;
-    transform: translateY(-50%);
-    transition: background var(--dur-fast) var(--ease-standard);
-  }
-  .nav:hover {
-    background: var(--surface-active);
-  }
-  .nav[hidden] {
-    display: none;
-  }
-  .prev {
-    left: 0;
-  }
-  .prev :global(svg) {
-    transform: scaleX(-1);
-  }
-  .next {
-    right: 0;
-  }
-  /* Fingers swipe; the arrows are for the mouse */
-  @media (pointer: coarse) {
-    .nav {
-      display: none;
-    }
-  }
-
-  /* Phone: the row runs to the screen edges, so the cards slide off the edge instead of
-     fading; the next one peeks in by itself */
-  @media (max-width: 960px) {
-    .side {
-      --gap: 16px;
-      margin-bottom: 16px;
-    }
-    .row {
-      margin: 0 -16px;
-      padding: 0 16px;
-      scroll-padding-inline: 16px;
-    }
-    .side[data-more-left] .row,
-    .side[data-more-right] .row {
-      -webkit-mask-image: none;
-      mask-image: none;
-    }
+  /* Narrow: the links go under the description */
+  @container (max-width: 520px) {
     .quest {
-      flex-basis: min(300px, calc(100vw - 88px));
+      grid-template-columns: 48px minmax(0, 1fr);
+      align-items: start;
+    }
+    .links {
+      grid-column: 2;
+      justify-content: flex-start;
+    }
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 0.6vw, 14px);
+  }
+  .title {
+    margin: 0;
+    font-size: var(--t-card-title);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--ls-tighter);
+    color: var(--text-primary);
+  }
+  .description {
+    margin: 0;
+    font-size: var(--t-card-sub);
+    line-height: var(--lh-normal);
+    color: var(--text-secondary);
+  }
+
+  /* Mobile: inner padding no larger than the 16px gaps around the card */
+  @media (max-width: 960px) {
+    .card {
+      gap: 16px;
+      padding: 16px;
+    }
+    .log {
+      padding: 0 16px;
     }
   }
 </style>

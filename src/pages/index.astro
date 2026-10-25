@@ -89,14 +89,17 @@ import { levelOn } from '../scripts/level';
 
     <main class="feed" data-feed>
       <div class="inner">
-        <SideQuests />
-
         <div class="list">
           {cases.map((item) => (
             <article class="slot" data-slot>
               <ProjectCard item={item} />
             </article>
           ))}
+          <!-- Side projects close the feed, one card in the cases' shell (review: a strip of
+               them above the cases read as unclear) -->
+          <section class="slot" data-slot aria-labelledby="side-quests-title">
+            <SideQuests />
+          </section>
         </div>
 
         <Footer />
@@ -107,14 +110,7 @@ import { levelOn } from '../scripts/level';
 
 <script>
   import { profile, ui } from '../content/site';
-  import {
-    initCardStack,
-    initLevel,
-    initLocked,
-    initPoke,
-    initProfileFit,
-    initSideQuests,
-  } from '../scripts/home';
+  import { initCardStack, initLevel, initLocked, initPoke, initProfileFit } from '../scripts/home';
 
   const aside = document.querySelector<HTMLElement>('[data-profile]');
   const feed = document.querySelector<HTMLElement>('[data-feed]');
@@ -124,8 +120,6 @@ import { levelOn } from '../scripts/level';
   initLocked([...document.querySelectorAll<HTMLElement>('[data-locked]')]);
   const poke = document.querySelector<HTMLElement>('[data-poke]');
   if (poke) initPoke(poke);
-  const side = document.querySelector<HTMLElement>('[data-side]');
-  if (side) initSideQuests(side);
   if (feed) {
     initCardStack(
       feed,

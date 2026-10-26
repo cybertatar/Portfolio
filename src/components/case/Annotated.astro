@@ -155,12 +155,12 @@ const sides = (['left', 'right'] as const).map((side) =>
           {/* Narrow stage, no leaders: a small number on the thing itself */}
           {r.pins.map((at) => (
             <span class="pin now" style={onBody(at)} aria-hidden="true">
-              {i + 1}
+              <span>{i + 1}</span>
             </span>
           ))}
           {r.wasPin && (
             <span class="pin was" style={onBody(r.wasPin)} aria-hidden="true">
-              {i + 1}
+              <span>{i + 1}</span>
             </span>
           )}
         </>
@@ -442,8 +442,6 @@ const sides = (['left', 'right'] as const).map((side) =>
       place-items: center;
       width: 18px;
       height: 18px;
-      /* Golos sets its figures a little low on a line-height of 1: lift them to the middle */
-      padding-bottom: 1.5px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.2);
       -webkit-backdrop-filter: blur(6px);
@@ -454,6 +452,19 @@ const sides = (['left', 'right'] as const).map((side) =>
       line-height: 1;
       font-variant-numeric: tabular-nums;
       transition: opacity var(--dur-slow) var(--ease-standard);
+    }
+    /* The figure itself is centred, not its line: trimmed to the cap height and the
+       baseline, the box is exactly the digit, whatever the browser makes of the font's
+       ascent and descent */
+    .pin > span {
+      display: block;
+      text-box: trim-both cap alphabetic;
+    }
+    /* Older browsers: Golos sets its figures a little low on a line-height of 1 */
+    @supports not (text-box: trim-both cap alphabetic) {
+      .pin {
+        padding-bottom: 1.5px;
+      }
     }
     .pin.was {
       background: rgba(14, 17, 22, 0.1);

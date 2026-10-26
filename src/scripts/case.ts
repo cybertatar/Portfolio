@@ -134,6 +134,16 @@ export function initAnnotated(root: HTMLElement) {
     const defs = document.createElementNS(NS, 'defs');
     defs.append(clip);
     svg.append(defs);
+    // Runs of every leader, to break one where another crosses it
+    const runs: {
+      g: SVGGElement;
+      state: string;
+      x: number;
+      y0: number;
+      y1: number;
+      y: number;
+      from: number;
+    }[] = [];
     root.querySelectorAll<HTMLElement>('.side').forEach((list) => {
       const left = list.classList.contains('left');
       const top = list.getBoundingClientRect().top;
@@ -182,10 +192,55 @@ export function initAnnotated(root: HTMLElement) {
             add('path', 'in', { d, 'clip-path': `url(#${clipId})` });
             add('circle', 'dot', { cx, cy, r: 3 });
             svg.append(g);
+            const state = r.classList.contains('was') ? 'was' : 'now';
+            runs.push({
+              g,
+              state,
+              x: edge,
+              y0: Math.min(y0, lane),
+              y1: Math.max(y0, lane),
+              y: y0,
+              from: x0,
+            });
           });
       }
       list.style.height = `${Math.max(0, floor - GAP)}px`;
     });
+
+    // Where one leader's way in from its callout crosses another's vertical run (the cashback
+    // fork down to the tab bar passes the history callout), the vertical one breaks for a
+    // moment, as on a drawing, so the two read as separate lines
+    for (const v of runs) {
+      const holes = runs.filter(
+        (h) =>
+          h.g !== v.g &&
+          h.state === v.state &&
+          h.g.dataset.n !== v.g.dataset.n &&
+          h.y > v.y0 + 4 &&
+          h.y < v.y1 - 4 &&
+          v.x > Math.min(h.x, h.from) &&
+          v.x < Math.max(h.x, h.from),
+      );
+      if (!holes.length) continue;
+      const mask = document.createElementNS(NS, 'mask');
+      mask.id = `${clipId}-${runs.indexOf(v)}`;
+      mask.setAttribute('maskUnits', 'userSpaceOnUse');
+      const square = (x: number, y: number, size: number, fill: string) => {
+        const node = document.createElementNS(NS, 'rect');
+        Object.entries({
+          x: x - size / 2,
+          y: y - size / 2,
+          width: size,
+          height: size,
+          fill,
+        }).forEach(([k, val]) => node.setAttribute(k, String(val)));
+        mask.append(node);
+      };
+      square(v.x, (v.y0 + v.y1) / 2, 20000, '#fff');
+      holes.forEach((h) => square(v.x, h.y, 10, '#000'));
+      defs.append(mask);
+      v.g.setAttribute('mask', `url(#${mask.id})`);
+    }
   };
 
   let queued = false;

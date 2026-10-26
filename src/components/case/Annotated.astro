@@ -2,14 +2,27 @@
 import { en, ru, type Localized } from '../../content/site';
 import { withBase } from '../../scripts/url';
 import type { ChangeRow } from './Changes.astro';
+import { badgeDigits } from '../../content/badge-digits';
+
+/** A spot on the screen as fractions of it (x, y); an optional third number is the height the
+ *  leader runs in at before it turns to the spot, when going straight across would cross
+ *  something on the way. */
+type Spot = [number, number] | [number, number, number];
 
 export interface MarkedRow extends ChangeRow {
   /** Where the change sits on the new screen, as fractions of it (x, y). */
-  now: [number, number];
+  now: Spot;
+  /** More places on the new screen for the same change: its leader forks to each. */
+  also?: Spot[];
   /** Where it sat on the old screen; none when the old screen didn't have it on view. */
-  was?: [number, number];
+  was?: Spot;
   /** Said instead of "Стало: …" in the old state when there's nothing to point at. */
   wasNote?: Localized;
+  /** On a narrow stage, with no leaders: where the number sits on the new screen, one per
+   *  spot (at a corner of the thing or just past its end, so it covers nothing). */
+  pins: [number, number][];
+  /** The same on the old screen. */
+  wasPin?: [number, number];
   /** The callout's side of the phone; its place down that side follows the "now" mark. */
   side: 'left' | 'right';
 }
@@ -28,12 +41,17 @@ interface Props {
  * at the screen under the handle). Each callout keeps its place, only its text and its leader
  * change, so the eye follows a line to where the thing used to be. Numbers run down the left
  * side, then the right. On a narrow stage the callouts go under the phone as a numbered list;
- * the marks stay on the screen. Leaders are drawn by initAnnotated in case.ts.
+ * small numbers stay on the screen. Leaders are drawn by initAnnotated in case.ts.
  */
 const { before, after, label, rows } = Astro.props;
 // A mark's place on the whole body: the screen sits 24/450 in and 23/920 down
-const onBody = ([x, y]: [number, number]) =>
-  `left: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
+const onBody = ([x, y]: Spot | [number, number]) =>
+  `--x: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
+// A badge's figure as a path, so it is centred on its own outline, not on the font's line (as
+// text it sat a little differently from figure to figure and browser to browser). 8px per 700
+// units: the cap height of the 11px Golos it replaces
+const figure = (n: number) => badgeDigits[String(n)];
+const FIGURE_SCALE = 8 / 700;
 const sides = (['left', 'right'] as const).map((side) =>
   rows.map((r, i) => ({ ...r, n: i + 1 })).filter((r) => r.side === side),
 );
@@ -121,12 +139,46 @@ const sides = (['left', 'right'] as const).map((side) =>
       />
       {rows.map((r, i) => (
         <>
-          <span class="ring now" style={onBody(r.now)} data-ann-ring={i + 1} aria-hidden="true">
-            {i + 1}
-          </span>
+          {/* Where the leaders end; never seen */}
+          {[r.now, ...(r.also ?? [])].map((at) => (
+            <span
+              class="spot now"
+              style={onBody(at)}
+              data-ann-ring={i + 1}
+              data-lane={at[2]}
+              aria-hidden="true"
+            />
+          ))}
           {r.was && (
-            <span class="ring was" style={onBody(r.was)} data-ann-ring={i + 1} aria-hidden="true">
-              {i + 1}
+            <span
+              class="spot was"
+              style={onBody(r.was)}
+              data-ann-ring={i + 1}
+              data-lane={r.was[2]}
+              aria-hidden="true"
+            />
+          )}
+          {/* Narrow stage, no leaders: a small number on the thing itself */}
+          {r.pins.map((at) => (
+            <span class="pin now" data-ann-pin={i + 1} style={onBody(at)} aria-hidden="true">
+              <svg
+                viewBox={`0 0 ${figure(i + 1).w} ${figure(i + 1).h}`}
+                width={figure(i + 1).w * FIGURE_SCALE}
+                height={figure(i + 1).h * FIGURE_SCALE}
+              >
+                <path d={figure(i + 1).d} />
+              </svg>
+            </span>
+          ))}
+          {r.wasPin && (
+            <span class="pin was" data-ann-pin={i + 1} style={onBody(r.wasPin)} aria-hidden="true">
+              <svg
+                viewBox={`0 0 ${figure(i + 1).w} ${figure(i + 1).h}`}
+                width={figure(i + 1).w * FIGURE_SCALE}
+                height={figure(i + 1).h * FIGURE_SCALE}
+              >
+                <path d={figure(i + 1).d} />
+              </svg>
             </span>
           )}
         </>
@@ -137,7 +189,7 @@ const sides = (['left', 'right'] as const).map((side) =>
 
 <style>
   .ann {
-    container-type: inline-size;
+    container: ann / inline-size;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -195,7 +247,8 @@ const sides = (['left', 'right'] as const).map((side) =>
     position: relative;
     aspect-ratio: 450 / 920;
     container-type: inline-size;
-    cursor: pointer;
+    /* Swiped sideways to turn; the page still scrolls under a vertical finger */
+    touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -312,32 +365,19 @@ const sides = (['left', 'right'] as const).map((side) =>
     height: 100%;
     pointer-events: none;
   }
-  /* A ring, not a filled tile: on the dark app screen a solid square passed for one of the
-     bank's own badges (owner) */
-  .ring {
+  .spot,
+  .pin {
     position: absolute;
-    display: grid;
-    place-items: center;
-    width: 26px;
-    height: 26px;
+    left: var(--x);
     transform: translate(-50%, -50%);
-    border-radius: 50%;
-    background: rgba(14, 17, 22, 0.6);
-    box-shadow:
-      0 0 0 2px var(--sky-300),
-      0 0 0 6px rgba(156, 192, 226, 0.25);
-    color: #fff;
-    font-size: var(--t-small);
-    font-weight: var(--fw-semibold);
-    line-height: 1;
     pointer-events: none;
-    transition:
-      opacity var(--dur-slow) var(--ease-standard),
-      transform var(--dur-slow) var(--ease-standard),
-      background var(--dur-fast) var(--ease-standard);
   }
-  .ring.is-lit {
-    background: var(--sky-500);
+  .spot {
+    width: 1px;
+    height: 1px;
+  }
+  .pin {
+    display: none;
   }
   /* Over the phone: the last stretch of each leader runs across the screen to its mark */
   .leaders {
@@ -349,33 +389,52 @@ const sides = (['left', 'right'] as const).map((side) =>
     overflow: visible;
     pointer-events: none;
   }
-  .leaders :global(path) {
-    fill: none;
-    stroke: var(--line-3);
-    stroke-width: 1.25;
-    stroke-dasharray: 4 3;
+  .leaders :global(path),
+  .leaders :global(circle) {
     transition:
       opacity var(--dur-slow) var(--ease-standard),
-      stroke var(--dur-fast) var(--ease-standard);
+      stroke var(--dur-fast) var(--ease-standard),
+      fill var(--dur-fast) var(--ease-standard);
   }
-  .leaders :global(path.is-lit) {
+  .leaders :global(path) {
+    fill: none;
+    stroke-width: 1.25;
+    stroke-dasharray: 4 3;
+  }
+  .leaders :global(.out) {
+    stroke: var(--line-3);
+  }
+  /* On the screen the dashes turn blue: light on the dark new screen, deep on the light old one */
+  .leaders :global(.now .in) {
+    stroke: var(--sky-300);
+  }
+  .leaders :global(.was .in) {
     stroke: var(--sky-500);
+  }
+  .leaders :global(.dot) {
+    fill: var(--sky-300);
+    stroke: #0e1116;
+    stroke-width: 1;
+  }
+  .leaders :global(.was .dot) {
+    fill: var(--sky-500);
+    stroke: #fff;
+  }
+  .leaders :global(.is-lit path) {
     stroke-dasharray: none;
+  }
+  .leaders :global(.is-lit .out) {
+    stroke: var(--sky-500);
   }
   .ann[data-state='now'] .was,
   .ann[data-state='was'] .now,
-  .ann[data-state='now'] .leaders :global(path.was),
-  .ann[data-state='was'] .leaders :global(path.now) {
+  .ann[data-state='now'] .leaders :global(g.was),
+  .ann[data-state='was'] .leaders :global(g.now) {
     opacity: 0;
     visibility: hidden;
   }
-  .ann[data-state='now'] .ring.was,
-  .ann[data-state='was'] .ring.now {
-    transform: translate(-50%, -50%) scale(0.6);
-  }
-
   /* Narrow: the phone, then the callouts as a list under it; no leaders, the numbers match */
-  @container (max-width: 760px) {
+  @container ann (max-width: 760px) {
     .field {
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: 'phone' 'left' 'right';
@@ -395,6 +454,67 @@ const sides = (['left', 'right'] as const).map((side) =>
     .leaders {
       display: none;
     }
+    /* No leaders here: a small number on the thing itself, a round translucent glass badge,
+       no outline (owner: bright dots were too loud, and the site uses no outlines) */
+    .pin {
+      display: grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      color: rgba(255, 255, 255, 0.9);
+      transition:
+        opacity var(--dur-slow) var(--ease-standard),
+        background var(--dur-fast) var(--ease-standard),
+        color var(--dur-fast) var(--ease-standard);
+    }
+    .pin svg {
+      display: block;
+      fill: currentColor;
+    }
+    .pin.was {
+      background: rgba(14, 17, 22, 0.1);
+      color: rgba(14, 17, 22, 0.7);
+    }
+    /* A tapped callout lights its numbers on the screen: the same glass, only denser, with a
+       short pop when the phone comes into view */
+    .pin.is-lit {
+      background: rgba(255, 255, 255, 0.42);
+      color: #fff;
+    }
+    /* On the light old screen denser grey went muddy: there it turns to dark glass */
+    .pin.was.is-lit {
+      background: rgba(14, 17, 22, 0.7);
+      color: #fff;
+    }
+    /* A number is a link to its callout: a finger-sized target around the small badge */
+    .pin {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .pin::before {
+      content: '';
+      position: absolute;
+      inset: -9px;
+    }
+    .pin.is-pop {
+      animation: pin-pop 420ms var(--ease-standard);
+    }
+    @keyframes pin-pop {
+      40% {
+        scale: 1.35;
+      }
+    }
+    .callout {
+      cursor: pointer;
+    }
+    .callout:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 4px;
+    }
     /* The list is under the phone, so a change in its height moves nothing above; reserving
        the longer text made the gaps uneven */
     .ann[data-state='now'] .text.was,
@@ -405,10 +525,13 @@ const sides = (['left', 'right'] as const).map((side) =>
   @media (prefers-reduced-motion: reduce) {
     .text,
     .screen,
-    .ring,
+    .pin,
     .callout.off-was,
     .leaders :global(path) {
       transition: none;
+    }
+    .pin.is-pop {
+      animation: none;
     }
   }
 </style>

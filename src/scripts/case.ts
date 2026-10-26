@@ -86,27 +86,103 @@ export function initAnnotated(root: HTMLElement) {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-ann-to]')];
   const items = [...root.querySelectorAll<HTMLElement>('[data-ann-item]')];
   const rings = [...root.querySelectorAll<HTMLElement>('[data-ann-ring]')];
+  const pins = [...root.querySelectorAll<HTMLElement>('.pin')];
 
   const show = (state: string) => {
     root.dataset.state = state;
     buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.annTo === state)));
   };
   buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.annTo ?? 'now')));
-  phone.addEventListener('click', () => show(root.dataset.state === 'now' ? 'was' : 'now'));
+  // A horizontal swipe across the phone turns it, in the switch's order: to the left for
+  // "Стало", to the right for "Было". A tap does nothing (it used to turn it too, which got in
+  // the way of tapping the numbers); a vertical move scrolls the page
+  let swipe: { x: number; y: number; id: number } | undefined;
+  phone.addEventListener('pointerdown', (e) => {
+    swipe = { x: e.clientX, y: e.clientY, id: e.pointerId };
+  });
+  phone.addEventListener('pointerup', (e) => {
+    if (!swipe || swipe.id !== e.pointerId) return;
+    const dx = e.clientX - swipe.x;
+    const dy = e.clientY - swipe.y;
+    swipe = undefined;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    show(dx < 0 ? 'now' : 'was');
+  });
+  phone.addEventListener('pointercancel', () => (swipe = undefined));
 
-  const light = (n: string | undefined) => {
+  // On a narrow stage a tapped callout stays lit (a touch ends in pointerleave at once)
+  let picked: string | undefined;
+  const light = (hovered: string | undefined) => {
+    const n = hovered ?? picked;
+    pins.forEach((el) => el.classList.toggle('is-lit', el.dataset.annPin === n));
     items.forEach((el) => el.classList.toggle('is-lit', el.dataset.annItem === n));
     rings.forEach((el) => el.classList.toggle('is-lit', el.dataset.annRing === n));
     svg
-      .querySelectorAll<SVGPathElement>('path')
-      .forEach((p) => p.classList.toggle('is-lit', p.dataset.n === n));
+      .querySelectorAll<SVGGElement>('g[data-n]')
+      .forEach((g) => g.classList.toggle('is-lit', g.dataset.n === n));
   };
   items.forEach((el) => {
     el.addEventListener('pointerenter', () => light(el.dataset.annItem));
     el.addEventListener('pointerleave', () => light(undefined));
   });
 
+  // Narrow stage: the callouts are a list under the phone. Tapping one brings the phone back
+  // into view and lights its numbers on the screen (both, for the cashback); tapping it again
+  // lets go. When the old screen doesn't have the thing, the new one is shown
+  const narrow = () => !root.hasAttribute('data-laid');
+  const pick = (el: HTMLElement) => {
+    if (!narrow()) return;
+    const n = el.dataset.annItem;
+    picked = picked === n ? undefined : n;
+    light(undefined);
+    if (!picked) return;
+    if (!pins.some((p) => p.dataset.annPin === n && p.classList.contains(root.dataset.state ?? '')))
+      show('now');
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    phone.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+    if (still) return;
+    // Pop once the phone is on screen
+    const seen = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        seen.disconnect();
+        setTimeout(() => {
+          pins
+            .filter((p) => p.dataset.annPin === picked)
+            .forEach((p) => {
+              p.classList.remove('is-pop');
+              void p.offsetWidth;
+              p.classList.add('is-pop');
+            });
+        }, 250);
+      },
+      { threshold: 0.9 },
+    );
+    seen.observe(phone);
+  };
+  // And back: tapping a number on the screen goes to its callout in the list and lights it
+  pins.forEach((pin) =>
+    pin.addEventListener('click', () => {
+      const n = pin.dataset.annPin;
+      const item = items.find((el) => el.dataset.annItem === n);
+      if (!item || !narrow()) return;
+      picked = n;
+      light(undefined);
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      item.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+    }),
+  );
+  items.forEach((el) => {
+    el.addEventListener('click', () => pick(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      pick(el);
+    });
+  });
+
   const GAP = 20;
+  const clipId = `ann-screen-${Math.random().toString(36).slice(2, 8)}`;
   const NS = 'http://www.w3.org/2000/svg';
   const layout = () => {
     svg.replaceChildren();
@@ -114,16 +190,54 @@ export function initAnnotated(root: HTMLElement) {
     root.toggleAttribute('data-laid', wide);
     root.querySelectorAll<HTMLElement>('.side').forEach((list) => (list.style.height = ''));
     items.forEach((el) => (el.style.top = ''));
-    if (!wide) return;
+    items.forEach((el) => (wide ? el.removeAttribute('tabindex') : (el.tabIndex = 0)));
+    if (wide) picked = undefined;
+    if (!wide) {
+      // The small numbers sit at fractions of the screen; on a half pixel their figures snap
+      // up or down a pixel from one badge to the next. Put each centre on a whole pixel
+      pins.forEach((pin) => (pin.style.translate = ''));
+      pins.forEach((pin) => {
+        const b = pin.getBoundingClientRect();
+        const x = b.left + b.width / 2;
+        const y = b.top + b.height / 2;
+        pin.style.translate = `${Math.round(x) - x}px ${Math.round(y) - y}px`;
+      });
+      return;
+    }
 
     const f = field.getBoundingClientRect();
     const p = phone.getBoundingClientRect();
     const screen = { top: p.top + (p.height * 23) / 920, height: (p.height * 874) / 920 };
+    const clip = document.createElementNS(NS, 'clipPath');
+    clip.id = clipId;
+    const rect = document.createElementNS(NS, 'rect');
+    Object.entries({
+      x: p.left - f.left + (p.width * 24) / 450,
+      y: screen.top - f.top,
+      width: (p.width * 402) / 450,
+      height: screen.height,
+      rx: (p.width * 60) / 450,
+    }).forEach(([k, v]) => rect.setAttribute(k, String(v)));
+    clip.append(rect);
+    const defs = document.createElementNS(NS, 'defs');
+    defs.append(clip);
+    svg.append(defs);
+    // Runs of every leader, to break one where another crosses it
+    const runs: {
+      g: SVGGElement;
+      state: string;
+      x: number;
+      y0: number;
+      y1: number;
+      y: number;
+      from: number;
+    }[] = [];
     root.querySelectorAll<HTMLElement>('.side').forEach((list) => {
       const left = list.classList.contains('left');
       const top = list.getBoundingClientRect().top;
       let floor = -Infinity;
-      for (const el of list.querySelectorAll<HTMLElement>('[data-ann-item]')) {
+      const own = [...list.querySelectorAll<HTMLElement>('[data-ann-item]')];
+      for (const [i, el] of own.entries()) {
         const num = el.querySelector<HTMLElement>('.num');
         if (!num) continue;
         const head = num.offsetTop + num.offsetHeight / 2;
@@ -136,26 +250,85 @@ export function initAnnotated(root: HTMLElement) {
         const n = num.getBoundingClientRect();
         const x0 = (left ? n.right + 8 : n.left - 8) - f.left;
         const y0 = n.top + n.height / 2 - f.top;
-        const edge = (left ? p.left - 8 : p.right + 8) - f.left;
+        // Each leader turns in its own column, lower ones nearer the phone, so the vertical
+        // runs of neighbours never join up into one line
+        const off = 8 + (own.length - 1 - i) * 6;
+        const edge = (left ? p.left - off : p.right + off) - f.left;
         rings
           .filter((r) => r.dataset.annRing === el.dataset.annItem)
           .forEach((r) => {
             const b = r.getBoundingClientRect();
             const cx = b.left + b.width / 2 - f.left;
             const cy = b.top + b.height / 2 - f.top;
-            // Stop at the ring, not under it
-            const dx = cx - edge;
-            const dy = cy - y0;
-            const k = Math.max(0, 1 - 16 / Math.hypot(dx, dy));
-            const path = document.createElementNS(NS, 'path');
-            path.setAttribute('d', `M${x0} ${y0}H${edge}L${edge + dx * k} ${y0 + dy * k}`);
-            path.classList.add(r.classList.contains('was') ? 'was' : 'now');
-            path.dataset.n = el.dataset.annItem;
-            svg.append(path);
+            // Square corners only: along to just past the phone, down or up to the mark's
+            // height (or its lane), then straight in to it; a dot marks the spot
+            const g = document.createElementNS(NS, 'g');
+            g.classList.add(r.classList.contains('was') ? 'was' : 'now');
+            g.dataset.n = el.dataset.annItem;
+            const lane = r.dataset.lane
+              ? screen.top - f.top + Number(r.dataset.lane) * screen.height
+              : cy;
+            const d = `M${x0} ${y0}H${edge}V${lane}H${cx}V${cy}`;
+            const add = (tag: string, cls: string, attrs: Record<string, string | number>) => {
+              const node = document.createElementNS(NS, tag);
+              node.setAttribute('class', cls);
+              Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, String(v)));
+              g.append(node);
+            };
+            add('path', 'out', { d });
+            // The same dashes, lighter where they cross the screen
+            add('path', 'in', { d, 'clip-path': `url(#${clipId})` });
+            add('circle', 'dot', { cx, cy, r: 3 });
+            svg.append(g);
+            const state = r.classList.contains('was') ? 'was' : 'now';
+            runs.push({
+              g,
+              state,
+              x: edge,
+              y0: Math.min(y0, lane),
+              y1: Math.max(y0, lane),
+              y: y0,
+              from: x0,
+            });
           });
       }
       list.style.height = `${Math.max(0, floor - GAP)}px`;
     });
+
+    // Where one leader's way in from its callout crosses another's vertical run (the cashback
+    // fork down to the tab bar passes the history callout), the vertical one breaks for a
+    // moment, as on a drawing, so the two read as separate lines
+    for (const v of runs) {
+      const holes = runs.filter(
+        (h) =>
+          h.g !== v.g &&
+          h.state === v.state &&
+          h.g.dataset.n !== v.g.dataset.n &&
+          h.y > v.y0 + 4 &&
+          h.y < v.y1 - 4 &&
+          v.x > Math.min(h.x, h.from) &&
+          v.x < Math.max(h.x, h.from),
+      );
+      if (!holes.length) continue;
+      const mask = document.createElementNS(NS, 'mask');
+      mask.id = `${clipId}-${runs.indexOf(v)}`;
+      mask.setAttribute('maskUnits', 'userSpaceOnUse');
+      const square = (x: number, y: number, size: number, fill: string) => {
+        const node = document.createElementNS(NS, 'rect');
+        Object.entries({
+          x: x - size / 2,
+          y: y - size / 2,
+          width: size,
+          height: size,
+          fill,
+        }).forEach(([k, val]) => node.setAttribute(k, String(val)));
+        mask.append(node);
+      };
+      square(v.x, (v.y0 + v.y1) / 2, 20000, '#fff');
+      holes.forEach((h) => square(v.x, h.y, 10, '#000'));
+      defs.append(mask);
+      v.g.setAttribute('mask', `url(#${mask.id})`);
+    }
   };
 
   let queued = false;

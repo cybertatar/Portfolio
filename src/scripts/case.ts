@@ -98,8 +98,8 @@ export function initAnnotated(root: HTMLElement) {
     items.forEach((el) => el.classList.toggle('is-lit', el.dataset.annItem === n));
     rings.forEach((el) => el.classList.toggle('is-lit', el.dataset.annRing === n));
     svg
-      .querySelectorAll<SVGPathElement>('path')
-      .forEach((p) => p.classList.toggle('is-lit', p.dataset.n === n));
+      .querySelectorAll<SVGGElement>('g')
+      .forEach((g) => g.classList.toggle('is-lit', g.dataset.n === n));
   };
   items.forEach((el) => {
     el.addEventListener('pointerenter', () => light(el.dataset.annItem));
@@ -143,15 +143,34 @@ export function initAnnotated(root: HTMLElement) {
             const b = r.getBoundingClientRect();
             const cx = b.left + b.width / 2 - f.left;
             const cy = b.top + b.height / 2 - f.top;
-            // Stop at the ring, not under it
-            const dx = cx - edge;
-            const dy = cy - y0;
-            const k = Math.max(0, 1 - 16 / Math.hypot(dx, dy));
-            const path = document.createElementNS(NS, 'path');
-            path.setAttribute('d', `M${x0} ${y0}H${edge}L${edge + dx * k} ${y0 + dy * k}`);
-            path.classList.add(r.classList.contains('was') ? 'was' : 'now');
-            path.dataset.n = el.dataset.annItem;
-            svg.append(path);
+            // Dashed up to the phone, then a thin solid arrow into the screen to the mark: the
+            // leader points at the thing instead of covering it with a numbered ring
+            const sx = (left ? p.left : p.right) - f.left;
+            const t = Math.abs(cx - edge) > 1 ? (sx - edge) / (cx - edge) : 0;
+            const ex = edge + (cx - edge) * t;
+            const ey = y0 + (cy - y0) * t;
+            const ux = cx - ex;
+            const uy = cy - ey;
+            const len = Math.hypot(ux, uy) || 1;
+            const [dx, dy] = [ux / len, uy / len];
+            const HEAD = 7;
+            const bx = cx - dx * HEAD;
+            const by = cy - dy * HEAD;
+            const g = document.createElementNS(NS, 'g');
+            g.classList.add(r.classList.contains('was') ? 'was' : 'now');
+            g.dataset.n = el.dataset.annItem;
+            const add = (cls: string, d: string) => {
+              const path = document.createElementNS(NS, 'path');
+              path.setAttribute('class', cls);
+              path.setAttribute('d', d);
+              g.append(path);
+            };
+            const head = `M${cx} ${cy}L${bx - dy * 4} ${by + dx * 4}L${bx + dy * 4} ${by - dx * 4}Z`;
+            add('out', `M${x0} ${y0}H${edge}L${ex} ${ey}`);
+            add('halo', `M${ex} ${ey}L${bx} ${by}${head}`);
+            add('in', `M${ex} ${ey}L${bx} ${by}`);
+            add('tip', head);
+            svg.append(g);
           });
       }
       list.style.height = `${Math.max(0, floor - GAP)}px`;

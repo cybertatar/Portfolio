@@ -33,7 +33,7 @@ interface Props {
 const { before, after, label, rows } = Astro.props;
 // A mark's place on the whole body: the screen sits 24/450 in and 23/920 down
 const onBody = ([x, y]: [number, number]) =>
-  `left: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
+  `--x: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
 const sides = (['left', 'right'] as const).map((side) =>
   rows.map((r, i) => ({ ...r, n: i + 1 })).filter((r) => r.side === side),
 );
@@ -121,11 +121,21 @@ const sides = (['left', 'right'] as const).map((side) =>
       />
       {rows.map((r, i) => (
         <>
-          <span class="ring now" style={onBody(r.now)} data-ann-ring={i + 1} aria-hidden="true">
+          <span
+            class:list={['ring now', r.side]}
+            style={onBody(r.now)}
+            data-ann-ring={i + 1}
+            aria-hidden="true"
+          >
             {i + 1}
           </span>
           {r.was && (
-            <span class="ring was" style={onBody(r.was)} data-ann-ring={i + 1} aria-hidden="true">
+            <span
+              class:list={['ring was', r.side]}
+              style={onBody(r.was)}
+              data-ann-ring={i + 1}
+              aria-hidden="true"
+            >
               {i + 1}
             </span>
           )}
@@ -137,7 +147,7 @@ const sides = (['left', 'right'] as const).map((side) =>
 
 <style>
   .ann {
-    container-type: inline-size;
+    container: ann / inline-size;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -316,6 +326,7 @@ const sides = (['left', 'right'] as const).map((side) =>
      bank's own badges (owner) */
   .ring {
     position: absolute;
+    left: var(--x);
     display: grid;
     place-items: center;
     width: 26px;
@@ -350,23 +361,52 @@ const sides = (['left', 'right'] as const).map((side) =>
     pointer-events: none;
   }
   .leaders :global(path) {
+    transition:
+      opacity var(--dur-slow) var(--ease-standard),
+      stroke var(--dur-fast) var(--ease-standard),
+      fill var(--dur-fast) var(--ease-standard);
+  }
+  .leaders :global(.out) {
     fill: none;
     stroke: var(--line-3);
     stroke-width: 1.25;
     stroke-dasharray: 4 3;
-    transition:
-      opacity var(--dur-slow) var(--ease-standard),
-      stroke var(--dur-fast) var(--ease-standard);
   }
-  .leaders :global(path.is-lit) {
+  /* On the screen: a thin light arrow with a dark halo, legible on dark and light parts alike */
+  .leaders :global(.halo) {
+    fill: rgba(14, 17, 22, 0.55);
+    stroke: rgba(14, 17, 22, 0.55);
+    stroke-width: 3.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .leaders :global(.in) {
+    fill: none;
+    stroke: var(--sky-300);
+    stroke-width: 1.5;
+  }
+  .leaders :global(.tip) {
+    fill: var(--sky-300);
+  }
+  .leaders :global(.is-lit .out) {
     stroke: var(--sky-500);
     stroke-dasharray: none;
   }
+  .leaders :global(.is-lit .in) {
+    stroke: #fff;
+  }
+  .leaders :global(.is-lit .tip) {
+    fill: #fff;
+  }
   .ann[data-state='now'] .was,
   .ann[data-state='was'] .now,
-  .ann[data-state='now'] .leaders :global(path.was),
-  .ann[data-state='was'] .leaders :global(path.now) {
+  .ann[data-state='now'] .leaders :global(g.was),
+  .ann[data-state='was'] .leaders :global(g.now) {
     opacity: 0;
+    visibility: hidden;
+  }
+  /* Wide: the arrows point at the marks, the rings are only their anchors */
+  .ann[data-laid] .ring {
     visibility: hidden;
   }
   .ann[data-state='now'] .ring.was,
@@ -375,7 +415,7 @@ const sides = (['left', 'right'] as const).map((side) =>
   }
 
   /* Narrow: the phone, then the callouts as a list under it; no leaders, the numbers match */
-  @container (max-width: 760px) {
+  @container ann (max-width: 760px) {
     .field {
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: 'phone' 'left' 'right';
@@ -394,6 +434,20 @@ const sides = (['left', 'right'] as const).map((side) =>
     }
     .leaders {
       display: none;
+    }
+    /* No leaders here, so the marks show on the screen: small, on its edge level with the
+       thing, not over it */
+    .ring.left {
+      left: calc(24 / 450 * 100%);
+    }
+    .ring.right {
+      left: calc(426 / 450 * 100%);
+    }
+    .ring {
+      width: 20px;
+      height: 20px;
+      box-shadow: 0 0 0 1.5px var(--sky-300);
+      font-size: 12px;
     }
     /* The list is under the phone, so a change in its height moves nothing above; reserving
        the longer text made the gaps uneven */

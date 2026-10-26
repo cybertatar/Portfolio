@@ -2,6 +2,7 @@
 import { en, ru, type Localized } from '../../content/site';
 import { withBase } from '../../scripts/url';
 import type { ChangeRow } from './Changes.astro';
+import { badgeDigits } from '../../content/badge-digits';
 
 /** A spot on the screen as fractions of it (x, y); an optional third number is the height the
  *  leader runs in at before it turns to the spot, when going straight across would cross
@@ -46,6 +47,11 @@ const { before, after, label, rows } = Astro.props;
 // A mark's place on the whole body: the screen sits 24/450 in and 23/920 down
 const onBody = ([x, y]: Spot | [number, number]) =>
   `--x: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
+// A badge's figure as a path, so it is centred on its own outline, not on the font's line (as
+// text it sat a little differently from figure to figure and browser to browser). 8px per 700
+// units: the cap height of the 11px Golos it replaces
+const figure = (n: number) => badgeDigits[String(n)];
+const FIGURE_SCALE = 8 / 700;
 const sides = (['left', 'right'] as const).map((side) =>
   rows.map((r, i) => ({ ...r, n: i + 1 })).filter((r) => r.side === side),
 );
@@ -155,12 +161,24 @@ const sides = (['left', 'right'] as const).map((side) =>
           {/* Narrow stage, no leaders: a small number on the thing itself */}
           {r.pins.map((at) => (
             <span class="pin now" style={onBody(at)} aria-hidden="true">
-              <span>{i + 1}</span>
+              <svg
+                viewBox={`0 0 ${figure(i + 1).w} ${figure(i + 1).h}`}
+                width={figure(i + 1).w * FIGURE_SCALE}
+                height={figure(i + 1).h * FIGURE_SCALE}
+              >
+                <path d={figure(i + 1).d} />
+              </svg>
             </span>
           ))}
           {r.wasPin && (
             <span class="pin was" style={onBody(r.wasPin)} aria-hidden="true">
-              <span>{i + 1}</span>
+              <svg
+                viewBox={`0 0 ${figure(i + 1).w} ${figure(i + 1).h}`}
+                width={figure(i + 1).w * FIGURE_SCALE}
+                height={figure(i + 1).h * FIGURE_SCALE}
+              >
+                <path d={figure(i + 1).d} />
+              </svg>
             </span>
           )}
         </>
@@ -447,24 +465,11 @@ const sides = (['left', 'right'] as const).map((side) =>
       -webkit-backdrop-filter: blur(6px);
       backdrop-filter: blur(6px);
       color: rgba(255, 255, 255, 0.9);
-      font-size: 11px;
-      font-weight: var(--fw-semibold);
-      line-height: 1;
-      font-variant-numeric: tabular-nums;
       transition: opacity var(--dur-slow) var(--ease-standard);
     }
-    /* The figure itself is centred, not its line: trimmed to the cap height and the
-       baseline, the box is exactly the digit, whatever the browser makes of the font's
-       ascent and descent */
-    .pin > span {
+    .pin svg {
       display: block;
-      text-box: trim-both cap alphabetic;
-    }
-    /* Older browsers: Golos sets its figures a little low on a line-height of 1 */
-    @supports not (text-box: trim-both cap alphabetic) {
-      .pin {
-        padding-bottom: 1.5px;
-      }
+      fill: currentColor;
     }
     .pin.was {
       background: rgba(14, 17, 22, 0.1);

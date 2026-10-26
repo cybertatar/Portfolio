@@ -93,7 +93,22 @@ export function initAnnotated(root: HTMLElement) {
     buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.annTo === state)));
   };
   buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.annTo ?? 'now')));
-  phone.addEventListener('click', () => show(root.dataset.state === 'now' ? 'was' : 'now'));
+  // A horizontal swipe across the phone turns it, in the switch's order: to the left for
+  // "Стало", to the right for "Было". A tap does nothing (it used to turn it too, which got in
+  // the way of tapping the numbers); a vertical move scrolls the page
+  let swipe: { x: number; y: number; id: number } | undefined;
+  phone.addEventListener('pointerdown', (e) => {
+    swipe = { x: e.clientX, y: e.clientY, id: e.pointerId };
+  });
+  phone.addEventListener('pointerup', (e) => {
+    if (!swipe || swipe.id !== e.pointerId) return;
+    const dx = e.clientX - swipe.x;
+    const dy = e.clientY - swipe.y;
+    swipe = undefined;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    show(dx < 0 ? 'now' : 'was');
+  });
+  phone.addEventListener('pointercancel', () => (swipe = undefined));
 
   // On a narrow stage a tapped callout stays lit (a touch ends in pointerleave at once)
   let picked: string | undefined;
@@ -145,6 +160,18 @@ export function initAnnotated(root: HTMLElement) {
     );
     seen.observe(phone);
   };
+  // And back: tapping a number on the screen goes to its callout in the list and lights it
+  pins.forEach((pin) =>
+    pin.addEventListener('click', () => {
+      const n = pin.dataset.annPin;
+      const item = items.find((el) => el.dataset.annItem === n);
+      if (!item || !narrow()) return;
+      picked = n;
+      light(undefined);
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      item.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+    }),
+  );
   items.forEach((el) => {
     el.addEventListener('click', () => pick(el));
     el.addEventListener('keydown', (e) => {

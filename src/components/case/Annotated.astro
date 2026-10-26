@@ -247,7 +247,8 @@ const sides = (['left', 'right'] as const).map((side) =>
     position: relative;
     aspect-ratio: 450 / 920;
     container-type: inline-size;
-    cursor: pointer;
+    /* Swiped sideways to turn; the page still scrolls under a vertical finger */
+    touch-action: pan-y;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -478,15 +479,25 @@ const sides = (['left', 'right'] as const).map((side) =>
       background: rgba(14, 17, 22, 0.1);
       color: rgba(14, 17, 22, 0.7);
     }
-    /* A tapped callout: its numbers on the screen take the leaders' blue, with a short pop
-       when the phone comes into view */
+    /* A tapped callout lights its numbers on the screen: the same glass, only denser, with a
+       short pop when the phone comes into view */
     .pin.is-lit {
-      background: var(--sky-300);
-      color: #0e1116;
+      background: rgba(255, 255, 255, 0.42);
+      color: #fff;
     }
     .pin.was.is-lit {
-      background: var(--sky-500);
-      color: #fff;
+      background: rgba(14, 17, 22, 0.32);
+      color: rgba(14, 17, 22, 0.85);
+    }
+    /* A number is a link to its callout: a finger-sized target around the small badge */
+    .pin {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .pin::before {
+      content: '';
+      position: absolute;
+      inset: -9px;
     }
     .pin.is-pop {
       animation: pin-pop 420ms var(--ease-standard);

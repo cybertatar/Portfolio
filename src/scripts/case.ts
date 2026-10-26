@@ -95,7 +95,11 @@ export function initAnnotated(root: HTMLElement) {
   buttons.forEach((b) => b.addEventListener('click', () => show(b.dataset.annTo ?? 'now')));
   phone.addEventListener('click', () => show(root.dataset.state === 'now' ? 'was' : 'now'));
 
-  const light = (n: string | undefined) => {
+  // On a narrow stage a tapped callout stays lit (a touch ends in pointerleave at once)
+  let picked: string | undefined;
+  const light = (hovered: string | undefined) => {
+    const n = hovered ?? picked;
+    pins.forEach((el) => el.classList.toggle('is-lit', el.dataset.annPin === n));
     items.forEach((el) => el.classList.toggle('is-lit', el.dataset.annItem === n));
     rings.forEach((el) => el.classList.toggle('is-lit', el.dataset.annRing === n));
     svg
@@ -107,6 +111,49 @@ export function initAnnotated(root: HTMLElement) {
     el.addEventListener('pointerleave', () => light(undefined));
   });
 
+  // Narrow stage: the callouts are a list under the phone. Tapping one brings the phone back
+  // into view and lights its numbers on the screen (both, for the cashback); tapping it again
+  // lets go. When the old screen doesn't have the thing, the new one is shown
+  const narrow = () => !root.hasAttribute('data-laid');
+  const pick = (el: HTMLElement) => {
+    if (!narrow()) return;
+    const n = el.dataset.annItem;
+    picked = picked === n ? undefined : n;
+    light(undefined);
+    if (!picked) return;
+    if (!pins.some((p) => p.dataset.annPin === n && p.classList.contains(root.dataset.state ?? '')))
+      show('now');
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    phone.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+    if (still) return;
+    // Pop once the phone is on screen
+    const seen = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        seen.disconnect();
+        setTimeout(() => {
+          pins
+            .filter((p) => p.dataset.annPin === picked)
+            .forEach((p) => {
+              p.classList.remove('is-pop');
+              void p.offsetWidth;
+              p.classList.add('is-pop');
+            });
+        }, 250);
+      },
+      { threshold: 0.9 },
+    );
+    seen.observe(phone);
+  };
+  items.forEach((el) => {
+    el.addEventListener('click', () => pick(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      pick(el);
+    });
+  });
+
   const GAP = 20;
   const clipId = `ann-screen-${Math.random().toString(36).slice(2, 8)}`;
   const NS = 'http://www.w3.org/2000/svg';
@@ -116,6 +163,8 @@ export function initAnnotated(root: HTMLElement) {
     root.toggleAttribute('data-laid', wide);
     root.querySelectorAll<HTMLElement>('.side').forEach((list) => (list.style.height = ''));
     items.forEach((el) => (el.style.top = ''));
+    items.forEach((el) => (wide ? el.removeAttribute('tabindex') : (el.tabIndex = 0)));
+    if (wide) picked = undefined;
     if (!wide) {
       // The small numbers sit at fractions of the screen; on a half pixel their figures snap
       // up or down a pixel from one badge to the next. Put each centre on a whole pixel

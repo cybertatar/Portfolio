@@ -160,7 +160,7 @@ const sides = (['left', 'right'] as const).map((side) =>
           )}
           {/* Narrow stage, no leaders: a small number on the thing itself */}
           {r.pins.map((at) => (
-            <span class="pin now" style={onBody(at)} aria-hidden="true">
+            <span class="pin now" data-ann-pin={i + 1} style={onBody(at)} aria-hidden="true">
               <svg
                 viewBox={`0 0 ${figure(i + 1).w} ${figure(i + 1).h}`}
                 width={figure(i + 1).w * FIGURE_SCALE}
@@ -171,7 +171,7 @@ const sides = (['left', 'right'] as const).map((side) =>
             </span>
           ))}
           {r.wasPin && (
-            <span class="pin was" style={onBody(r.wasPin)} aria-hidden="true">
+            <span class="pin was" data-ann-pin={i + 1} style={onBody(r.wasPin)} aria-hidden="true">
               <svg
                 viewBox={`0 0 ${figure(i + 1).w} ${figure(i + 1).h}`}
                 width={figure(i + 1).w * FIGURE_SCALE}
@@ -465,7 +465,10 @@ const sides = (['left', 'right'] as const).map((side) =>
       -webkit-backdrop-filter: blur(6px);
       backdrop-filter: blur(6px);
       color: rgba(255, 255, 255, 0.9);
-      transition: opacity var(--dur-slow) var(--ease-standard);
+      transition:
+        opacity var(--dur-slow) var(--ease-standard),
+        background var(--dur-fast) var(--ease-standard),
+        color var(--dur-fast) var(--ease-standard);
     }
     .pin svg {
       display: block;
@@ -474,6 +477,31 @@ const sides = (['left', 'right'] as const).map((side) =>
     .pin.was {
       background: rgba(14, 17, 22, 0.1);
       color: rgba(14, 17, 22, 0.7);
+    }
+    /* A tapped callout: its numbers on the screen take the leaders' blue, with a short pop
+       when the phone comes into view */
+    .pin.is-lit {
+      background: var(--sky-300);
+      color: #0e1116;
+    }
+    .pin.was.is-lit {
+      background: var(--sky-500);
+      color: #fff;
+    }
+    .pin.is-pop {
+      animation: pin-pop 420ms var(--ease-standard);
+    }
+    @keyframes pin-pop {
+      40% {
+        scale: 1.35;
+      }
+    }
+    .callout {
+      cursor: pointer;
+    }
+    .callout:focus-visible {
+      outline: 2px solid var(--focus-ring);
+      outline-offset: 4px;
     }
     /* The list is under the phone, so a change in its height moves nothing above; reserving
        the longer text made the gaps uneven */
@@ -489,6 +517,9 @@ const sides = (['left', 'right'] as const).map((side) =>
     .callout.off-was,
     .leaders :global(path) {
       transition: none;
+    }
+    .pin.is-pop {
+      animation: none;
     }
   }
 </style>

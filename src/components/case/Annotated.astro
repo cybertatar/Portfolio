@@ -485,9 +485,10 @@ const sides = (['left', 'right'] as const).map((side) =>
       background: rgba(255, 255, 255, 0.42);
       color: #fff;
     }
+    /* On the light old screen denser grey went muddy: there it turns to dark glass */
     .pin.was.is-lit {
-      background: rgba(14, 17, 22, 0.32);
-      color: rgba(14, 17, 22, 0.85);
+      background: rgba(14, 17, 22, 0.7);
+      color: #fff;
     }
     /* A number is a link to its callout: a finger-sized target around the small badge */
     .pin {

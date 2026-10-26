@@ -86,6 +86,7 @@ export function initAnnotated(root: HTMLElement) {
   const buttons = [...root.querySelectorAll<HTMLButtonElement>('[data-ann-to]')];
   const items = [...root.querySelectorAll<HTMLElement>('[data-ann-item]')];
   const rings = [...root.querySelectorAll<HTMLElement>('[data-ann-ring]')];
+  const pins = [...root.querySelectorAll<HTMLElement>('.pin')];
 
   const show = (state: string) => {
     root.dataset.state = state;
@@ -115,7 +116,18 @@ export function initAnnotated(root: HTMLElement) {
     root.toggleAttribute('data-laid', wide);
     root.querySelectorAll<HTMLElement>('.side').forEach((list) => (list.style.height = ''));
     items.forEach((el) => (el.style.top = ''));
-    if (!wide) return;
+    if (!wide) {
+      // The small numbers sit at fractions of the screen; on a half pixel their figures snap
+      // up or down a pixel from one badge to the next. Put each centre on a whole pixel
+      pins.forEach((pin) => (pin.style.translate = ''));
+      pins.forEach((pin) => {
+        const b = pin.getBoundingClientRect();
+        const x = b.left + b.width / 2;
+        const y = b.top + b.height / 2;
+        pin.style.translate = `${Math.round(x) - x}px ${Math.round(y) - y}px`;
+      });
+      return;
+    }
 
     const f = field.getBoundingClientRect();
     const p = phone.getBoundingClientRect();

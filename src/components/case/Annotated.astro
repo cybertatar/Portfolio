@@ -440,15 +440,17 @@ const sides = (['left', 'right'] as const).map((side) =>
     .pin {
       display: grid;
       place-items: center;
-      width: 16px;
-      height: 16px;
+      width: 18px;
+      height: 18px;
+      /* Golos sets its figures a little low on a line-height of 1: lift them to the middle */
+      padding-bottom: 1.5px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.2);
       -webkit-backdrop-filter: blur(6px);
       backdrop-filter: blur(6px);
-      color: rgba(255, 255, 255, 0.85);
+      color: rgba(255, 255, 255, 0.9);
       font-size: 11px;
-      font-weight: var(--fw-medium);
+      font-weight: var(--fw-semibold);
       line-height: 1;
       font-variant-numeric: tabular-nums;
       transition: opacity var(--dur-slow) var(--ease-standard);

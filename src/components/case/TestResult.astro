@@ -93,16 +93,19 @@ const { stats } = Astro.props;
     --px-step: 4px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
     min-width: 0;
     padding: var(--space-tile);
     background: var(--surface-sunken);
   }
+  /* The figure is the point of the plate: the big-figure step (owner: at the lead size it
+     didn't stand out), medium weight so the plate stays light */
   .value {
-    font-size: var(--t-h3);
+    font-size: var(--t-stat);
     font-weight: var(--fw-medium);
-    line-height: 1.05;
-    letter-spacing: -0.01em;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
     color: var(--text-primary);
   }
   .unit {

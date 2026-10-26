@@ -98,7 +98,7 @@ export function initAnnotated(root: HTMLElement) {
     items.forEach((el) => el.classList.toggle('is-lit', el.dataset.annItem === n));
     rings.forEach((el) => el.classList.toggle('is-lit', el.dataset.annRing === n));
     svg
-      .querySelectorAll<SVGGElement>('g')
+      .querySelectorAll<SVGGElement>('g[data-n]')
       .forEach((g) => g.classList.toggle('is-lit', g.dataset.n === n));
   };
   items.forEach((el) => {
@@ -107,6 +107,7 @@ export function initAnnotated(root: HTMLElement) {
   });
 
   const GAP = 20;
+  const clipId = `ann-screen-${Math.random().toString(36).slice(2, 8)}`;
   const NS = 'http://www.w3.org/2000/svg';
   const layout = () => {
     svg.replaceChildren();
@@ -119,11 +120,26 @@ export function initAnnotated(root: HTMLElement) {
     const f = field.getBoundingClientRect();
     const p = phone.getBoundingClientRect();
     const screen = { top: p.top + (p.height * 23) / 920, height: (p.height * 874) / 920 };
+    const clip = document.createElementNS(NS, 'clipPath');
+    clip.id = clipId;
+    const rect = document.createElementNS(NS, 'rect');
+    Object.entries({
+      x: p.left - f.left + (p.width * 24) / 450,
+      y: screen.top - f.top,
+      width: (p.width * 402) / 450,
+      height: screen.height,
+      rx: (p.width * 60) / 450,
+    }).forEach(([k, v]) => rect.setAttribute(k, String(v)));
+    clip.append(rect);
+    const defs = document.createElementNS(NS, 'defs');
+    defs.append(clip);
+    svg.append(defs);
     root.querySelectorAll<HTMLElement>('.side').forEach((list) => {
       const left = list.classList.contains('left');
       const top = list.getBoundingClientRect().top;
       let floor = -Infinity;
-      for (const el of list.querySelectorAll<HTMLElement>('[data-ann-item]')) {
+      const own = [...list.querySelectorAll<HTMLElement>('[data-ann-item]')];
+      for (const [i, el] of own.entries()) {
         const num = el.querySelector<HTMLElement>('.num');
         if (!num) continue;
         const head = num.offsetTop + num.offsetHeight / 2;
@@ -136,40 +152,35 @@ export function initAnnotated(root: HTMLElement) {
         const n = num.getBoundingClientRect();
         const x0 = (left ? n.right + 8 : n.left - 8) - f.left;
         const y0 = n.top + n.height / 2 - f.top;
-        const edge = (left ? p.left - 8 : p.right + 8) - f.left;
+        // Each leader turns in its own column, lower ones nearer the phone, so the vertical
+        // runs of neighbours never join up into one line
+        const off = 8 + (own.length - 1 - i) * 6;
+        const edge = (left ? p.left - off : p.right + off) - f.left;
         rings
           .filter((r) => r.dataset.annRing === el.dataset.annItem)
           .forEach((r) => {
             const b = r.getBoundingClientRect();
             const cx = b.left + b.width / 2 - f.left;
             const cy = b.top + b.height / 2 - f.top;
-            // Dashed up to the phone, then a thin solid arrow into the screen to the mark: the
-            // leader points at the thing instead of covering it with a numbered ring
-            const sx = (left ? p.left : p.right) - f.left;
-            const t = Math.abs(cx - edge) > 1 ? (sx - edge) / (cx - edge) : 0;
-            const ex = edge + (cx - edge) * t;
-            const ey = y0 + (cy - y0) * t;
-            const ux = cx - ex;
-            const uy = cy - ey;
-            const len = Math.hypot(ux, uy) || 1;
-            const [dx, dy] = [ux / len, uy / len];
-            const HEAD = 7;
-            const bx = cx - dx * HEAD;
-            const by = cy - dy * HEAD;
+            // Square corners only: along to just past the phone, down or up to the mark's
+            // height (or its lane), then straight in to it; a dot marks the spot
             const g = document.createElementNS(NS, 'g');
             g.classList.add(r.classList.contains('was') ? 'was' : 'now');
             g.dataset.n = el.dataset.annItem;
-            const add = (cls: string, d: string) => {
-              const path = document.createElementNS(NS, 'path');
-              path.setAttribute('class', cls);
-              path.setAttribute('d', d);
-              g.append(path);
+            const lane = r.dataset.lane
+              ? screen.top - f.top + Number(r.dataset.lane) * screen.height
+              : cy;
+            const d = `M${x0} ${y0}H${edge}V${lane}H${cx}V${cy}`;
+            const add = (tag: string, cls: string, attrs: Record<string, string | number>) => {
+              const node = document.createElementNS(NS, tag);
+              node.setAttribute('class', cls);
+              Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, String(v)));
+              g.append(node);
             };
-            const head = `M${cx} ${cy}L${bx - dy * 4} ${by + dx * 4}L${bx + dy * 4} ${by - dx * 4}Z`;
-            add('out', `M${x0} ${y0}H${edge}L${ex} ${ey}`);
-            add('halo', `M${ex} ${ey}L${bx} ${by}${head}`);
-            add('in', `M${ex} ${ey}L${bx} ${by}`);
-            add('tip', head);
+            add('path', 'out', { d });
+            // The same dashes, lighter where they cross the screen
+            add('path', 'in', { d, 'clip-path': `url(#${clipId})` });
+            add('circle', 'dot', { cx, cy, r: 3 });
             svg.append(g);
           });
       }

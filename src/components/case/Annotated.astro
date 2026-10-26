@@ -3,11 +3,18 @@ import { en, ru, type Localized } from '../../content/site';
 import { withBase } from '../../scripts/url';
 import type { ChangeRow } from './Changes.astro';
 
+/** A spot on the screen as fractions of it (x, y); an optional third number is the height the
+ *  leader runs in at before it turns to the spot, when going straight across would cross
+ *  something on the way. */
+type Spot = [number, number] | [number, number, number];
+
 export interface MarkedRow extends ChangeRow {
   /** Where the change sits on the new screen, as fractions of it (x, y). */
-  now: [number, number];
+  now: Spot;
+  /** More places on the new screen for the same change: its leader forks to each. */
+  also?: Spot[];
   /** Where it sat on the old screen; none when the old screen didn't have it on view. */
-  was?: [number, number];
+  was?: Spot;
   /** Said instead of "Стало: …" in the old state when there's nothing to point at. */
   wasNote?: Localized;
   /** The callout's side of the phone; its place down that side follows the "now" mark. */
@@ -32,7 +39,7 @@ interface Props {
  */
 const { before, after, label, rows } = Astro.props;
 // A mark's place on the whole body: the screen sits 24/450 in and 23/920 down
-const onBody = ([x, y]: [number, number]) =>
+const onBody = ([x, y]: Spot) =>
   `--x: ${((24 + 402 * x) / 450) * 100}%; top: ${((23 + 874 * y) / 920) * 100}%`;
 const sides = (['left', 'right'] as const).map((side) =>
   rows.map((r, i) => ({ ...r, n: i + 1 })).filter((r) => r.side === side),
@@ -121,19 +128,23 @@ const sides = (['left', 'right'] as const).map((side) =>
       />
       {rows.map((r, i) => (
         <>
-          <span
-            class:list={['ring now', r.side]}
-            style={onBody(r.now)}
-            data-ann-ring={i + 1}
-            aria-hidden="true"
-          >
-            {i + 1}
-          </span>
+          {[r.now, ...(r.also ?? [])].map((at, k) => (
+            <span
+              class:list={['ring now', k ? 'extra' : r.side]}
+              style={onBody(at)}
+              data-ann-ring={i + 1}
+              data-lane={at[2]}
+              aria-hidden="true"
+            >
+              {i + 1}
+            </span>
+          ))}
           {r.was && (
             <span
               class:list={['ring was', r.side]}
               style={onBody(r.was)}
               data-ann-ring={i + 1}
+              data-lane={r.was[2]}
               aria-hidden="true"
             >
               {i + 1}
@@ -360,43 +371,42 @@ const sides = (['left', 'right'] as const).map((side) =>
     overflow: visible;
     pointer-events: none;
   }
-  .leaders :global(path) {
+  .leaders :global(path),
+  .leaders :global(circle) {
     transition:
       opacity var(--dur-slow) var(--ease-standard),
       stroke var(--dur-fast) var(--ease-standard),
       fill var(--dur-fast) var(--ease-standard);
   }
-  .leaders :global(.out) {
+  .leaders :global(path) {
     fill: none;
-    stroke: var(--line-3);
     stroke-width: 1.25;
     stroke-dasharray: 4 3;
   }
-  /* On the screen: a thin light arrow with a dark halo, legible on dark and light parts alike */
-  .leaders :global(.halo) {
-    fill: rgba(14, 17, 22, 0.55);
-    stroke: rgba(14, 17, 22, 0.55);
-    stroke-width: 3.5;
-    stroke-linejoin: round;
-    stroke-linecap: round;
+  .leaders :global(.out) {
+    stroke: var(--line-3);
   }
-  .leaders :global(.in) {
-    fill: none;
+  /* On the screen the dashes turn blue: light on the dark new screen, deep on the light old one */
+  .leaders :global(.now .in) {
     stroke: var(--sky-300);
-    stroke-width: 1.5;
   }
-  .leaders :global(.tip) {
+  .leaders :global(.was .in) {
+    stroke: var(--sky-500);
+  }
+  .leaders :global(.dot) {
     fill: var(--sky-300);
+    stroke: #0e1116;
+    stroke-width: 1;
+  }
+  .leaders :global(.was .dot) {
+    fill: var(--sky-500);
+    stroke: #fff;
+  }
+  .leaders :global(.is-lit path) {
+    stroke-dasharray: none;
   }
   .leaders :global(.is-lit .out) {
     stroke: var(--sky-500);
-    stroke-dasharray: none;
-  }
-  .leaders :global(.is-lit .in) {
-    stroke: #fff;
-  }
-  .leaders :global(.is-lit .tip) {
-    fill: #fff;
   }
   .ann[data-state='now'] .was,
   .ann[data-state='was'] .now,
@@ -442,6 +452,11 @@ const sides = (['left', 'right'] as const).map((side) =>
     }
     .ring.right {
       left: calc(426 / 450 * 100%);
+    }
+    /* The second cashback spot is under a tab label, and the screen's edge level with it is
+       the phone's rounded corner: its ring sits in the gap beside the tab's icon instead */
+    .ring.extra {
+      translate: 7.8cqi -9.3cqi;
     }
     .ring {
       width: 20px;

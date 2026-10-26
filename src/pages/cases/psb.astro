@@ -281,6 +281,20 @@ const directions: Direction[] = [
           },
         },
         {
+          label: { ru: 'История', en: 'History' },
+          now: [0.03, 0.765],
+          was: [0.5, 0.975],
+          side: 'left',
+          before: {
+            ru: 'Отдельная вкладка, у каждой карты своя',
+            en: 'A separate tab, split by card',
+          },
+          after: {
+            ru: 'На главной, сразу под действиями',
+            en: 'On the home screen, right under the actions',
+          },
+        },
+        {
           label: { ru: 'Предложения банка', en: 'Bank offers' },
           now: [0.9, 0.15],
           was: [0.92, 0.3],
@@ -296,7 +310,8 @@ const directions: Direction[] = [
         },
         {
           label: { ru: 'Кешбэк', en: 'Cashback' },
-          now: [0.64, 0.335],
+          now: [0.581, 0.315, 0.298],
+          also: [[0.4975, 0.968]],
           side: 'right',
           wasNote: {
             ru: 'На первом экране не видно, надо листать вниз',
@@ -309,20 +324,6 @@ const directions: Direction[] = [
           after: {
             ru: 'Бейдж у баланса и вкладка «Выгода»',
             en: 'A badge next to the balance and the “Benefits” tab',
-          },
-        },
-        {
-          label: { ru: 'История', en: 'History' },
-          now: [0.88, 0.8],
-          was: [0.53, 0.905],
-          side: 'right',
-          before: {
-            ru: 'Отдельная вкладка, у каждой карты своя',
-            en: 'A separate tab, split by card',
-          },
-          after: {
-            ru: 'На главной, сразу под действиями',
-            en: 'On the home screen, right under the actions',
           },
         },
       ],
